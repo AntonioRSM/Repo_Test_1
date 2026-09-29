@@ -52,6 +52,7 @@ Per rifare la rilevazione o cambiare lingua usa **Rileva hardware / cambia lingu
 2. In Pinokio premi **Verifica LM Studio**, poi **Avvia** → **Apri interfaccia**.
 3. Scheda *Chat con LM Studio*: scrivi un messaggio, la risposta viene generata dall'LLM e riprodotta con F5-TTS.
    Scheda *Testo → audio*: incolli un testo e scarichi il `.wav`.
+   Scheda *Unisci WAV*: carichi due o più file audio e ottieni un unico `.wav` (con pausa opzionale tra i file).
 
 I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema si cambiano in `app/config.json`
 (`lmstudio_url`, `lmstudio_model` (vuoto = primo modello caricato), `system_prompt`) o con la variabile d'ambiente `LMSTUDIO_URL`.
@@ -61,6 +62,7 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 1. In Pinokio premi **Config MCP per LM Studio**: stampa un blocco JSON con i percorsi corretti del tuo PC.
 2. In LM Studio: scheda **Program → Install → Edit mcp.json**, incolla il blocco dentro `mcpServers` e salva.
 3. In chat abilita lo strumento `f5-tts` e chiedi ad esempio: *"Leggi ad alta voce questo testo: …"*. L'LLM chiamerà `text_to_speech` e ti dirà dove si trova il file `.wav`.
+   Con lo strumento `merge_audio` l'LLM può anche unire più file `.wav` generati in un unico file.
 
 Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
 
@@ -85,7 +87,11 @@ cd app
 python tts_bridge.py --check                   # LM Studio è raggiungibile?
 python tts_bridge.py --say "Buongiorno a tutti"
 python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
+python tts_bridge.py --merge parte1.wav parte2.wav parte3.wav --pause 0.5 --out completo.wav
 ```
+
+`--merge` unisce i file nell'ordine indicato; se hanno frequenza di campionamento o numero di canali
+diversi vengono convertiti a quelli del primo file. Senza `--out` il risultato va in `app/output/unito_<data>.wav`.
 
 ## File
 

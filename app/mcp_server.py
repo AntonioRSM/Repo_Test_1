@@ -10,7 +10,7 @@ try:  # mcp >= 2
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as MCPServer
 
-from tts_bridge import Speaker, load_config
+from tts_bridge import Speaker, load_config, merge_wavs
 
 # Il protocollo MCP viaggia su stdout: i log di F5-TTS vanno su stderr.
 with contextlib.redirect_stdout(sys.stderr):
@@ -24,6 +24,14 @@ def text_to_speech(text: str, speed: float = 1.0) -> str:
     with contextlib.redirect_stdout(sys.stderr):
         path = speaker.speak(text, speed=speed)
     return f"Audio salvato in: {path}"
+
+
+@mcp.tool()
+def merge_audio(files: list[str], pause: float = 0.0) -> str:
+    """Unisce più file .wav (percorsi, nell'ordine dato) in un unico file e ne restituisce il percorso.
+    `pause` = secondi di silenzio tra un file e l'altro."""
+    path = merge_wavs(files, pause=pause, output_dir=speaker.cfg["output_dir"])
+    return f"Audio unito salvato in: {path}"
 
 
 if __name__ == "__main__":

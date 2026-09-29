@@ -9,6 +9,7 @@ Uso da riga di comando:
   python tts_bridge.py --check                    # verifica connessione a LM Studio
   python tts_bridge.py --say "Testo da leggere"   # solo testo -> audio
   python tts_bridge.py --ask "Domanda per l'LLM"  # LLM -> testo -> audio
+  python tts_bridge.py --merge a.wav b.wav c.wav  # unisce più WAV in un unico file
 """
 import argparse
 import json
@@ -151,14 +152,61 @@ class Speaker:
         return out_file
 
 
+# ---------------------------------------------------------------- Unione WAV
+
+def merge_wavs(paths, out_file=None, pause=0.0, output_dir=None):
+    """Unisce più file audio in un unico .wav, nell'ordine dato.
+
+    Se i file hanno frequenze di campionamento o numero di canali diversi
+    vengono convertiti a quelli del primo file. `pause` = secondi di silenzio
+    inseriti tra un file e il successivo.
+    """
+    import numpy as np
+    import soundfile as sf
+
+    paths = [p for p in paths if p]
+    if len(paths) < 2:
+        raise ValueError("Servono almeno due file audio da unire.")
+    parts, sr, channels = [], None, None
+    for p in paths:
+        data, rate = sf.read(p, dtype="float32", always_2d=True)
+        if sr is None:
+            sr, channels = rate, data.shape[1]
+        if rate != sr:
+            import librosa
+
+            data = librosa.resample(data.T, orig_sr=rate, target_sr=sr).T
+        if data.shape[1] != channels:
+            mono = data.mean(axis=1, keepdims=True)
+            data = np.repeat(mono, channels, axis=1)
+        if parts and pause > 0:
+            parts.append(np.zeros((int(sr * pause), channels), dtype="float32"))
+        parts.append(data)
+    if not out_file:
+        output_dir = output_dir or os.path.join(HERE, "output")
+        os.makedirs(output_dir, exist_ok=True)
+        out_file = os.path.join(output_dir, time.strftime("unito_%Y%m%d_%H%M%S.wav"))
+    sf.write(out_file, np.concatenate(parts), sr)
+    return out_file
+
+
 def main():
     p = argparse.ArgumentParser(description="LM Studio -> F5-TTS")
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--check", action="store_true", help="verifica la connessione a LM Studio")
     g.add_argument("--say", help="testo da trasformare in audio")
     g.add_argument("--ask", help="domanda da inviare all'LLM in LM Studio")
+    g.add_argument("--merge", nargs="+", metavar="WAV", help="file audio da unire, nell'ordine")
     p.add_argument("--out", help="file .wav di destinazione")
+    p.add_argument("--pause", type=float, default=0.0, help="secondi di silenzio tra i file uniti (con --merge)")
     args = p.parse_args()
+
+    if args.merge:
+        try:
+            print(f"Audio unito salvato in {merge_wavs(args.merge, args.out, args.pause)}")
+        except (ValueError, OSError, RuntimeError) as e:
+            raise SystemExit(f"Impossibile unire i file: {e}")
+        return
     cfg = load_config()
 
     if args.check:

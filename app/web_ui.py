@@ -4,7 +4,7 @@ import sys
 
 import gradio as gr
 
-from tts_bridge import Speaker, ask_lmstudio, list_models, load_config, save_default_voice
+from tts_bridge import Speaker, ask_lmstudio, list_models, load_config, merge_wavs, save_default_voice
 
 cfg = load_config()
 speaker = Speaker(cfg)
@@ -43,6 +43,13 @@ def say(text, ref_audio, ref_text, speed):
     return speaker.speak(text, ref_audio or None, ref_text, speed)
 
 
+def merge(files, pause):
+    paths = [f if isinstance(f, str) else f.name for f in files or []]
+    if len(paths) < 2:
+        raise gr.Error("Carica almeno due file audio.")
+    return merge_wavs(paths, pause=pause, output_dir=cfg["output_dir"])
+
+
 t, h = cfg["tts"], cfg["hardware"]
 with gr.Blocks(title="F5-TTS + LM Studio") as demo:
     gr.Markdown(f"## F5-TTS + LM Studio\nModello: **{t['name']}** su **{t['device']}** "
@@ -67,6 +74,12 @@ with gr.Blocks(title="F5-TTS + LM Studio") as demo:
         txt = gr.Textbox(label="Testo", lines=6)
         out = gr.Audio(label="Audio generato")
         gr.Button("Genera", variant="primary").click(say, [txt, ref_audio, ref_text, speed], out)
+    with gr.Tab("Unisci WAV"):
+        gr.Markdown("Carica due o più file audio: vengono uniti nell'ordine di caricamento in un unico `.wav`.")
+        files = gr.File(file_count="multiple", file_types=["audio"], label="File da unire")
+        pause = gr.Slider(0, 3, value=0.3, step=0.1, label="Pausa tra i file (secondi)")
+        merged = gr.Audio(label="Audio unito")
+        gr.Button("Unisci", variant="primary").click(merge, [files, pause], merged)
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 7861))
