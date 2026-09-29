@@ -20,6 +20,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(HERE, "config.json")
+DEFAULT_VOICE = os.path.join(HERE, "voices", "voce_riferimento.wav")
 
 
 def load_config():
@@ -32,7 +33,30 @@ def load_config():
     cfg["lmstudio_url"] = os.environ.get("LMSTUDIO_URL", cfg.get("lmstudio_url", "http://localhost:1234/v1")).rstrip("/")
     out = cfg.get("output_dir") or "output"
     cfg["output_dir"] = out if os.path.isabs(out) else os.path.join(HERE, out)
+    ref = cfg.get("ref_audio") or ""
+    if ref and not os.path.isabs(ref):
+        ref = os.path.join(HERE, ref)
+    if not ref and os.path.exists(DEFAULT_VOICE):
+        ref = DEFAULT_VOICE  # voce salvata in app/voices/ (esclusa da git)
+    cfg["ref_audio"] = ref
     return cfg
+
+
+def save_default_voice(cfg, audio_path, ref_text=""):
+    """Copia l'audio in app/voices/voce_riferimento.wav e lo imposta come voce predefinita."""
+    import shutil
+
+    os.makedirs(os.path.dirname(DEFAULT_VOICE), exist_ok=True)
+    if os.path.abspath(audio_path) != DEFAULT_VOICE:
+        shutil.copyfile(audio_path, DEFAULT_VOICE)
+    with open(CONFIG_PATH, encoding="utf-8") as f:
+        saved = json.load(f)
+    saved["ref_audio"] = "voices/voce_riferimento.wav"
+    saved["ref_text"] = ref_text
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(saved, f, indent=2, ensure_ascii=False)
+    cfg["ref_audio"], cfg["ref_text"] = DEFAULT_VOICE, ref_text
+    return DEFAULT_VOICE
 
 
 # ---------------------------------------------------------------- LM Studio

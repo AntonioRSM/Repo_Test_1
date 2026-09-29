@@ -4,7 +4,7 @@ import sys
 
 import gradio as gr
 
-from tts_bridge import Speaker, ask_lmstudio, list_models, load_config
+from tts_bridge import Speaker, ask_lmstudio, list_models, load_config, save_default_voice
 
 cfg = load_config()
 speaker = Speaker(cfg)
@@ -33,6 +33,12 @@ def chat(message, history, ref_audio, ref_text, speed):
     return history, wav, ""
 
 
+def save_voice(ref_audio, ref_text):
+    if not ref_audio:
+        return "⚠️ Carica prima un file audio."
+    return f"✅ Voce predefinita salvata in {save_default_voice(cfg, ref_audio, ref_text)}"
+
+
 def say(text, ref_audio, ref_text, speed):
     return speaker.speak(text, ref_audio or None, ref_text, speed)
 
@@ -49,6 +55,8 @@ with gr.Blocks(title="F5-TTS + LM Studio") as demo:
         ref_audio = gr.Audio(type="filepath", label="Audio di riferimento",
                              value=cfg.get("ref_audio") or None)
         ref_text = gr.Textbox(label="Trascrizione del riferimento", value=cfg.get("ref_text", ""))
+        save_status = gr.Markdown()
+        gr.Button("Salva come voce predefinita", size="sm").click(save_voice, [ref_audio, ref_text], save_status)
         speed = gr.Slider(0.5, 1.5, value=1.0, step=0.05, label="Velocità")
     with gr.Tab("Chat con LM Studio"):
         bot = gr.Chatbot(height=350)

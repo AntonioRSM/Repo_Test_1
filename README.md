@@ -34,6 +34,14 @@ Il risultato viene salvato in `app/config.json` (modificabile a mano) ed è most
 2. In Pinokio: **Discover → Download from URL** e incolla l'URL di questo repository (oppure clonalo in `pinokio/api/`).
 3. Premi **Installa**. Alla fine viene chiesta la lingua (`it`/`en`/`zh`) e viene rilevato l'hardware.
 
+### Dove si trova "Avvia"
+
+Dopo l'installazione, nella home di Pinokio clicca sulla scheda dell'app **F5-TTS + LM Studio**:
+a sinistra compare il menu dell'app con **Avvia** (icona di accensione) in cima.
+Se vedi ancora "Installa", l'installazione non è terminata o non è riuscita (controlla il terminale).
+Dopo l'avvio, quando nel terminale compare `Running on local URL: http://127.0.0.1:…`,
+la voce di menu diventa **Apri interfaccia**.
+
 Per rifare la rilevazione o cambiare lingua usa **Rileva hardware / cambia lingua**.
 
 ## Collegamento a LM Studio
@@ -62,6 +70,13 @@ F5-TTS imita una voce di riferimento. Senza voce di riferimento viene usato l'es
 per un italiano naturale carica nell'interfaccia 5–12 secondi di parlato italiano pulito con la sua trascrizione
 (oppure imposta `ref_audio` e `ref_text` in `app/config.json`, così li usa anche il server MCP).
 Se la trascrizione è vuota viene generata automaticamente con Whisper.
+
+Per rendere una voce **predefinita** (usata anche dal server MCP) hai due modi:
+- nell'interfaccia, *Voce di riferimento* → carica il file → **Salva come voce predefinita**;
+- copia un file WAV in `app/voices/voce_riferimento.wav`.
+
+La cartella `app/voices/` è esclusa da git: le registrazioni vocali non finiscono nel repository.
+Usa solo voci di persone che hanno dato il consenso.
 
 ## Riga di comando
 
