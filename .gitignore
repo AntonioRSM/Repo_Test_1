@@ -1,0 +1,4 @@
+app/env/
+app/config.json
+app/output/
+__pycache__/

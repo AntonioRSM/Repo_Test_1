@@ -1,0 +1,156 @@
+"""Ponte LM Studio -> F5-TTS.
+
+LM Studio espone un'API compatibile OpenAI (default http://localhost:1234/v1).
+Questo modulo chiede una risposta all'LLM caricato in LM Studio e la trasforma
+in un file audio .wav con F5-TTS, usando la configurazione scritta da
+detect_hardware.py (config.json).
+
+Uso da riga di comando:
+  python tts_bridge.py --check                    # verifica connessione a LM Studio
+  python tts_bridge.py --say "Testo da leggere"   # solo testo -> audio
+  python tts_bridge.py --ask "Domanda per l'LLM"  # LLM -> testo -> audio
+"""
+import argparse
+import json
+import os
+import re
+import time
+import urllib.error
+import urllib.request
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(HERE, "config.json")
+
+
+def load_config():
+    if not os.path.exists(CONFIG_PATH):
+        import detect_hardware
+
+        detect_hardware.main()
+    with open(CONFIG_PATH, encoding="utf-8") as f:
+        cfg = json.load(f)
+    cfg["lmstudio_url"] = os.environ.get("LMSTUDIO_URL", cfg.get("lmstudio_url", "http://localhost:1234/v1")).rstrip("/")
+    out = cfg.get("output_dir") or "output"
+    cfg["output_dir"] = out if os.path.isabs(out) else os.path.join(HERE, out)
+    return cfg
+
+
+# ---------------------------------------------------------------- LM Studio
+
+def _request(url, payload=None, timeout=300):
+    data = json.dumps(payload).encode() if payload is not None else None
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def list_models(cfg):
+    ids = [m["id"] for m in _request(f"{cfg['lmstudio_url']}/models", timeout=10).get("data", [])]
+    return [i for i in ids if "embed" not in i.lower()]
+
+
+def pick_model(cfg):
+    if cfg.get("lmstudio_model"):
+        return cfg["lmstudio_model"]
+    models = list_models(cfg)
+    if not models:
+        raise RuntimeError("LM Studio è attivo ma nessun modello LLM è caricato.")
+    return models[0]
+
+
+def ask_lmstudio(cfg, prompt, history=None):
+    messages = [{"role": "system", "content": cfg.get("system_prompt", "")}]
+    messages += history or []
+    messages.append({"role": "user", "content": prompt})
+    resp = _request(f"{cfg['lmstudio_url']}/chat/completions", {
+        "model": pick_model(cfg),
+        "messages": messages,
+        "temperature": 0.7,
+        "stream": False,
+    })
+    return clean_for_speech(resp["choices"][0]["message"]["content"])
+
+
+def clean_for_speech(text):
+    """Rimuove ragionamento <think>, markdown ed emoji che il TTS leggerebbe male."""
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S)
+    text = re.sub(r"```.*?```", "", text, flags=re.S)
+    text = re.sub(r"[*_#`>|]+", "", text)
+    text = re.sub(r"^\s*[-•]\s+", "", text, flags=re.M)
+    text = re.sub(r"[\U0001F000-\U0001FAFF☀-➿]", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+# ---------------------------------------------------------------- F5-TTS
+
+class Speaker:
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self._tts = None
+
+    def _load(self):
+        if self._tts is None:
+            from cached_path import cached_path
+            from f5_tts.api import F5TTS
+
+            t = self.cfg["tts"]
+            ckpt = str(cached_path(t["ckpt_file"])) if t.get("ckpt_file") else ""
+            vocab = str(cached_path(t["vocab_file"])) if t.get("vocab_file") else ""
+            self._tts = F5TTS(model=t["model"], ckpt_file=ckpt, vocab_file=vocab, device=t["device"])
+        return self._tts
+
+    def reference(self):
+        """Voce di riferimento: quella in config.json, altrimenti l'esempio incluso in F5-TTS."""
+        if self.cfg.get("ref_audio") and os.path.exists(self.cfg["ref_audio"]):
+            return self.cfg["ref_audio"], self.cfg.get("ref_text", "")
+        from importlib.resources import files
+
+        return (str(files("f5_tts").joinpath("infer/examples/basic/basic_ref_en.wav")),
+                "Some call me nature, others call me mother nature.")
+
+    def speak(self, text, ref_audio=None, ref_text=None, speed=1.0, out_file=None):
+        if not text.strip():
+            raise ValueError("Testo vuoto.")
+        if not ref_audio:
+            ref_audio, ref_text = self.reference()
+        os.makedirs(self.cfg["output_dir"], exist_ok=True)
+        out_file = out_file or os.path.join(self.cfg["output_dir"], time.strftime("tts_%Y%m%d_%H%M%S.wav"))
+        self._load().infer(
+            ref_file=ref_audio,
+            ref_text=ref_text or "",  # vuoto = trascrizione automatica con Whisper
+            gen_text=text,
+            nfe_step=self.cfg["tts"]["nfe_step"],
+            speed=speed,
+            remove_silence=True,
+            file_wave=out_file,
+        )
+        return out_file
+
+
+def main():
+    p = argparse.ArgumentParser(description="LM Studio -> F5-TTS")
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument("--check", action="store_true", help="verifica la connessione a LM Studio")
+    g.add_argument("--say", help="testo da trasformare in audio")
+    g.add_argument("--ask", help="domanda da inviare all'LLM in LM Studio")
+    p.add_argument("--out", help="file .wav di destinazione")
+    args = p.parse_args()
+    cfg = load_config()
+
+    if args.check:
+        try:
+            print(f"LM Studio raggiungibile su {cfg['lmstudio_url']}. Modelli: {', '.join(list_models(cfg)) or '(nessuno caricato)'}")
+        except (urllib.error.URLError, OSError) as e:
+            raise SystemExit(f"LM Studio non raggiungibile su {cfg['lmstudio_url']}: {e}\n"
+                             "Apri LM Studio > Developer > avvia il server (porta 1234).")
+        return
+
+    text = args.say
+    if args.ask:
+        text = ask_lmstudio(cfg, args.ask)
+        print(f"LLM: {text}")
+    print(f"Audio salvato in {Speaker(cfg).speak(text, out_file=args.out)}")
+
+
+if __name__ == "__main__":
+    main()
