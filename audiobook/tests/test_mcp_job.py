@@ -116,3 +116,28 @@ def test_tts_bridge_torchaudio_senza_torchcodec(monkeypatch):
     monkeypatch.setitem(sys.modules, "torch", types.SimpleNamespace(from_numpy=lambda x: f"tensore({x})"))
     tts_bridge.torchaudio_compatibile()
     assert ta.load("voce.wav") == ("tensore(dati)", 24000)
+
+
+def test_stato_generazione_interrotta(job):
+    os.makedirs(os.path.dirname(job.log_path), exist_ok=True)
+    with open(job.log_path, "w", encoding="utf-8") as f:
+        f.write("📖 000_0001\n   Carico F5-TTS locale\nmodel : model_159600.safetensors\n")
+    assert "si è interrotta senza finire" in job.status()
+    with open(job.log_path, "a", encoding="utf-8") as f:
+        f.write("\nCompletati 1/1 capitoli.\n")
+    assert job.status().startswith("Nessuna generazione in corso. Ultimo log disponibile:")
+
+
+def test_popen_staccato_ripiega(monkeypatch):
+    chiamate = []
+
+    def finto_popen(cmd, creationflags=0, **kw):
+        chiamate.append(creationflags)
+        if len(chiamate) == 1:
+            raise OSError("accesso negato: il job non permette il distacco")
+        return "processo"
+
+    monkeypatch.setattr(audiobook_job.subprocess, "Popen", finto_popen)
+    monkeypatch.setattr(audiobook_job, "_STACCATO", 0x01000200)
+    assert audiobook_job._popen_staccato(["python"]) == "processo"
+    assert chiamate == [0x01000200, audiobook_job._NO_WINDOW]

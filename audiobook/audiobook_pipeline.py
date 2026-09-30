@@ -987,6 +987,9 @@ def test_normalizzazione(cfg):
 
 
 def main():
+    import faulthandler
+
+    faulthandler.enable()  # crash nativi (es. driver/ROCm): stack Python nel log invece del silenzio
     p = argparse.ArgumentParser(description="Audiolibri: LM Studio + F5-TTS (Pinokio)")
     p.add_argument("--config", default=CONFIG_PATH, help="percorso di config.json")
     p.add_argument("--file", help="un solo capitolo (nome in input_dir o percorso completo)")

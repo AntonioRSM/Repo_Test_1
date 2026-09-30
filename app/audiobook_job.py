@@ -56,6 +56,21 @@ def _env():
             "HF_HUB_DISABLE_SYMLINKS_WARNING": "1", "TRANSFORMERS_VERBOSITY": "error"}
 
 
+_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+# Su Windows LM Studio può mettere il server MCP in un "job" che chiude anche i processi figli quando
+# riavvia il server: la generazione (ore) deve staccarsene, altrimenti muore senza lasciare errori.
+_STACCATO = _NO_WINDOW | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | \
+    getattr(subprocess, "CREATE_BREAKAWAY_FROM_JOB", 0)
+
+
+def _popen_staccato(cmd, **kw):
+    try:
+        return subprocess.Popen(cmd, creationflags=_STACCATO, **kw)
+    except OSError:
+        # il job non permette il distacco: si avvia comunque (con il rischio descritto sopra)
+        return subprocess.Popen(cmd, creationflags=_NO_WINDOW, **kw)
+
+
 def pipeline_python():
     """AUDIOBOOK_PYTHON, altrimenti l'ambiente GPU AMD (app/env-rocm) se installato e verificato, altrimenti questo."""
     if os.environ.get("AUDIOBOOK_PYTHON"):
@@ -132,11 +147,8 @@ class AudiobookJob:
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
         log = open(self.log_path, "w", encoding="utf-8")
         # stdin/stdout NON devono essere quelli del server: il protocollo MCP viaggia su stdio.
-        self.proc = subprocess.Popen(
-            cmd, cwd=pipeline_dir(), stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
-            env=_env(),
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
+        self.proc = _popen_staccato(cmd, cwd=pipeline_dir(), stdin=subprocess.DEVNULL, stdout=log,
+                                    stderr=subprocess.STDOUT, env=_env())
         log.close()
         with open(self.pid_path, "w") as f:
             f.write(str(self.proc.pid))
@@ -171,8 +183,13 @@ class AudiobookJob:
         if self.proc is None and self.pid_orfano():
             stato = "In corso (avviata da una sessione precedente del server MCP)."
         elif self.proc is None:
-            stato = "Nessuna generazione avviata da questa sessione."
-            if os.path.exists(self.log_path):
+            stato = "Nessuna generazione in corso."
+            ultimo = self.tail(3)
+            if ultimo and "Completati" not in ultimo and "Traceback" not in self.tail(200):
+                stato += (" ⚠️ L'ultima generazione si è interrotta senza finire e senza errori: il processo è stato "
+                          "chiuso dall'esterno (es. LM Studio ha riavviato il server MCP) o è andato in crash nel "
+                          "codice nativo della GPU. Ultimo log:")
+            elif ultimo:
                 stato += " Ultimo log disponibile:"
         elif self.proc.poll() is None:
             stato = f"In corso da {int((time.time() - self.started) // 60)} min."
