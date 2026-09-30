@@ -36,7 +36,7 @@ module.exports = {
       { default: true, icon: "fa-solid fa-power-off", text: "Avvia", href: "start.js" },
       { icon: "fa-solid fa-microchip", text: "Rileva hardware / cambia lingua", href: "detect.js" },
       { icon: "fa-solid fa-link", text: "Verifica LM Studio", href: "check.js" },
-      { icon: "fa-solid fa-plug-circle-bolt", text: "Config MCP per LM Studio", href: "mcp.js" },
+      { icon: "fa-solid fa-plug-circle-bolt", text: "Installa MCP in LM Studio", href: "mcp.js" },
       { icon: "fa-solid fa-rotate", text: "Aggiorna", href: "update.js" },
       { icon: "fa-solid fa-plug", text: "Reinstalla", href: "install.js" },
       {

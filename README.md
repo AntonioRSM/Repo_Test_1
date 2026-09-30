@@ -58,8 +58,11 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 
 ### B. Server MCP (voce dentro la chat di LM Studio)
 
-1. In Pinokio premi **Config MCP per LM Studio**: stampa un blocco JSON con i percorsi corretti del tuo PC.
-2. In LM Studio: scheda **Program → Install → Edit mcp.json**, incolla il blocco dentro `mcpServers` e salva.
+1. In Pinokio premi **Installa MCP in LM Studio**: aggiunge la voce `f5-tts` a `%USERPROFILE%\.lmstudio\mcp.json`
+   (gli altri server restano, la versione precedente è salvata in `mcp.json.bak`).
+   Se la pipeline audiolibri è fuori dal repo: `env\Scripts\python app\lmstudio_mcp_config.py --install --audiobook-dir D:\Workspace\epub_build\audiobook`.
+   In alternativa `python lmstudio_mcp_config.py` stampa il blocco da incollare a mano in **Program → Install → Edit mcp.json**.
+2. In LM Studio: scheda **Program → Integrations**, attiva `mcp/f5-tts` (se non compare, riavvia LM Studio).
 3. In chat abilita lo strumento `f5-tts` e chiedi ad esempio: *"Leggi ad alta voce questo testo: …"*. L'LLM chiamerà `text_to_speech` e ti dirà dove si trova il file `.wav`.
 
 Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
@@ -106,7 +109,7 @@ python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
 | `app/detect_hardware.py` | rilevazione hardware e scelta del modello, scrive `config.json` |
 | `app/tts_bridge.py` | client LM Studio (API compatibile OpenAI) + sintesi F5-TTS |
 | `app/web_ui.py` | interfaccia Gradio chat → voce |
-| `app/mcp_server.py`, `app/lmstudio_mcp_config.py` | server MCP per LM Studio e generatore della configurazione |
+| `app/mcp_server.py`, `app/lmstudio_mcp_config.py` | server MCP per LM Studio e installazione in `~/.lmstudio/mcp.json` |
 | `app/audiobook_job.py` | avvio in background della pipeline audiolibri per gli strumenti MCP |
 
 ## Audiolibri (LM Studio + F5-TTS + Hermes Agent)
