@@ -88,3 +88,18 @@ def test_normalizzazione_nel_comando(job):
     assert job.build_command(normalizzazione="regole")[-2:] == ["--normalizzazione", "regole"]
     with pytest.raises(ValueError):
         job.build_command(normalizzazione="altro")
+
+
+
+def test_python_env_rocm(tmp_path, monkeypatch):
+    monkeypatch.delenv("AUDIOBOOK_PYTHON", raising=False)
+    monkeypatch.setattr(audiobook_job, "HERE", str(tmp_path))
+    assert audiobook_job.pipeline_python() == sys.executable
+    exe = tmp_path / "env-rocm" / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+    exe.parent.mkdir(parents=True)
+    exe.write_text("")
+    assert audiobook_job.pipeline_python() == sys.executable  # installato ma GPU non verificata
+    (tmp_path / "env-rocm" / ".pronto").write_text("")
+    assert audiobook_job.pipeline_python() == str(exe)
+    monkeypatch.setenv("AUDIOBOOK_PYTHON", "C:/altro/python.exe")
+    assert audiobook_job.pipeline_python() == "C:/altro/python.exe"

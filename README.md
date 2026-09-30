@@ -22,6 +22,7 @@ Tutti i modelli F5 hanno la stessa dimensione (~336M parametri, ~1,3 GB), quindi
 | NVIDIA ≥ 6 GB VRAM | `cuda` | 32 | qualità piena, GPU condivisibile con LM Studio |
 | NVIDIA 3–6 GB | `cuda` | 32 | in LM Studio usa un LLM piccolo (3-4B Q4) o offload parziale |
 | NVIDIA < 3 GB / nessuna GPU | `cpu` | 16 | circa 2 volte più veloce su CPU, qualità leggermente inferiore |
+| AMD su Windows (Ryzen AI Max, Radeon RX 7000/9000) | `cpu`, poi GPU con **Accelerazione GPU AMD (ROCm)** | 32 | ambiente separato `app/env-rocm` (Python 3.12 + PyTorch ROCm di AMD) usato dalla pipeline audiolibri |
 | Apple Silicon | `mps` | 32 | |
 
 Il risultato viene salvato in `app/config.json` (modificabile a mano) ed è mostrato nella barra in cima all'interfaccia.

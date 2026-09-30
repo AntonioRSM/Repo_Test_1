@@ -6,7 +6,7 @@ e lo stato si legge con una seconda chiamata.
 
 Variabili d'ambiente opzionali:
   AUDIOBOOK_DIR     cartella con audiobook_pipeline.py (default: ../audiobook del repo)
-  AUDIOBOOK_PYTHON  interprete Python da usare (default: quello del server MCP)
+  AUDIOBOOK_PYTHON  interprete Python da usare (default: app/env-rocm se installato, altrimenti quello del server MCP)
 """
 import os
 import subprocess
@@ -56,6 +56,17 @@ def _env():
             "HF_HUB_DISABLE_SYMLINKS_WARNING": "1", "TRANSFORMERS_VERBOSITY": "error"}
 
 
+def pipeline_python():
+    """AUDIOBOOK_PYTHON, altrimenti l'ambiente GPU AMD (app/env-rocm) se installato e verificato, altrimenti questo."""
+    if os.environ.get("AUDIOBOOK_PYTHON"):
+        return os.environ["AUDIOBOOK_PYTHON"]
+    rocm = os.path.join(HERE, "env-rocm")
+    exe = os.path.join(rocm, "Scripts", "python.exe") if os.name == "nt" else os.path.join(rocm, "bin", "python")
+    if os.path.exists(os.path.join(rocm, ".pronto")) and os.path.exists(exe):
+        return exe
+    return sys.executable
+
+
 def pipeline_dir():
     return os.environ.get("AUDIOBOOK_DIR") or os.path.join(os.path.dirname(HERE), "audiobook")
 
@@ -87,7 +98,7 @@ class AudiobookJob:
             raise FileNotFoundError(f"Script non trovato: {script} (imposta AUDIOBOOK_DIR)")
         if formato not in ("mp3", "wav"):
             raise ValueError("formato deve essere 'mp3' o 'wav'")
-        cmd = [os.environ.get("AUDIOBOOK_PYTHON") or sys.executable, "-u", script, "--format", formato]
+        cmd = [pipeline_python(), "-u", script, "--format", formato]
         if file.strip():
             cmd += ["--file", file.strip()]
         if forza:

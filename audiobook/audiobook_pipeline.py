@@ -308,7 +308,12 @@ def check_services(cfg, need_tts=True):
             log(f"✅ F5-TTS (Gradio {cfg['f5_api_name']}) raggiungibile su {trovato}")
         elif backend in ("auto", "locale") and f5_locale_disponibile():
             cfg["_backend"] = "locale"
-            log("✅ F5-TTS locale: il modello viene caricato da questo script (non serve l'app F5-TTS ufficiale)")
+            device, nome = dispositivo_torch()
+            log(f"✅ F5-TTS locale su {nome} ({device}): il modello viene caricato da questo script "
+                "(non serve l'app F5-TTS ufficiale)")
+            if device == "cpu":
+                log("   ⚠️ Nessuna GPU visibile a PyTorch in questo Python: la sintesi sarà lenta.")
+            log(f"   Python: {sys.executable}")
         else:
             if backend == "locale":
                 log("❌ tts_backend è 'locale' ma f5-tts non è installato in questo Python: usa quello dell'app "
@@ -677,19 +682,68 @@ def normalizza_testo(cfg, testo):
 
 # ---------------------------------------------------------------- F5-TTS locale (senza Gradio)
 
+def dispositivo_torch():
+    """("cuda", nome GPU) se PyTorch vede una GPU (NVIDIA CUDA o AMD ROCm), altrimenti ("cpu", "CPU")."""
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda", torch.cuda.get_device_name(0)
+        if torch.backends.mps.is_available():
+            return "mps", "Apple Silicon"
+    except Exception:
+        pass
+    return "cpu", "CPU"
+
+
+def _torchaudio_compatibile():
+    """torchaudio >= 2.9 (es. le build ROCm per Windows) legge l'audio solo con torchcodec: se manca, soundfile."""
+    try:
+        import torchaudio
+        versione = tuple(int(x) for x in re.findall(r"\d+", torchaudio.__version__)[:2])
+    except Exception:
+        return
+    if versione < (2, 9):
+        return
+    try:
+        import torchcodec  # noqa: F401
+        return
+    except Exception:
+        pass
+    import soundfile as sf
+    import torch
+
+    def load(path, *a, **k):
+        data, sr = sf.read(str(path), dtype="float32", always_2d=True)
+        return torch.from_numpy(data.T.copy()), sr
+
+    torchaudio.load = load
+
+
 class LocalF5TTS:
-    """F5-TTS caricato in questo processo con il modello dell'app (app/config.json) o quello italiano."""
+    """F5-TTS caricato in questo processo con il modello dell'app (app/config.json) o quello italiano.
+
+    Il dispositivo è scelto qui (GPU se PyTorch la vede): il "device" di app/config.json può essere "cpu"
+    solo perché l'app è stata installata con PyTorch per CPU.
+    """
 
     def __init__(self, cfg):
         from cached_path import cached_path
         from f5_tts.api import F5TTS
 
         self.cfg = cfg
-        t = {**F5_LOCALE_IT, **(app_config().get("tts") or {}), **(cfg.get("f5_locale") or {})}
+        _torchaudio_compatibile()
+        t = {**F5_LOCALE_IT, **(app_config().get("tts") or {})}
+        t["device"] = ""
+        t.update(cfg.get("f5_locale") or {})
+        device, nome = (t["device"], t["device"]) if t["device"] else dispositivo_torch()
         ckpt = str(cached_path(t["ckpt_file"])) if t.get("ckpt_file") else ""
         vocab = str(cached_path(t["vocab_file"])) if t.get("vocab_file") else ""
-        log(f"   Carico F5-TTS locale: {t.get('name') or t['model']} su {t.get('device') or 'device automatico'}")
-        self.tts = F5TTS(model=t["model"], ckpt_file=ckpt, vocab_file=vocab, device=t.get("device") or None)
+        log(f"   Carico F5-TTS locale: {t.get('name') or t['model']} su {nome} ({device})")
+        if device == "cpu":
+            log("   ⚠️ Sintesi su CPU: molto lenta. Con una GPU AMD Ryzen AI / Radeon usa in Pinokio "
+                "'Accelerazione GPU AMD (ROCm)'.")
+        self.tts = F5TTS(model=t["model"], ckpt_file=ckpt, vocab_file=vocab, device=device)
 
     def synthesize(self, text, out_path):
         c = self.cfg
