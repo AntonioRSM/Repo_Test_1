@@ -130,7 +130,11 @@ dipendono dal contesto e non hanno una forma unica verificabile in automatico.
   nuovi tentativi sono scritti nel log (prima la libreria li ripeteva in silenzio fino a 45 minuti). Con
   `llm_no_think` i modelli che "ragionano" (Qwen3) rispondono senza il lungo blocco di ragionamento.
 - **F5-TTS su CPU è lento**: ogni paragrafo può richiedere minuti; il log mostra i secondi per paragrafo. Con una GPU
-  NVIDIA la sintesi è molte volte più veloce. Su CPU si può ridurre `nfe_step` (es. 16: circa il doppio più veloce,
+  la sintesi è molte volte più veloce.
+- **GPU AMD su Windows** (Ryzen AI Max 385/390/395 con Radeon 8060S, Radeon RX 7000/9000): in Pinokio
+  **Accelerazione GPU AMD (ROCm)** crea `app/env-rocm` con Python 3.12 e PyTorch ROCm 7.2.1 di AMD
+  (serve il driver AMD Software: Adrenalin Edition 26.2.2 o più recente). Se il test finale stampa *GPU pronta*,
+  gli strumenti MCP usano da soli quell'ambiente e `verifica_audiolibro` mostra `F5-TTS locale su AMD Radeon …`. Su CPU si può ridurre `nfe_step` (es. 16: circa il doppio più veloce,
   qualità un po' inferiore).
 - `ferma_audiolibro` (MCP) interrompe la generazione, anche se avviata prima di un riavvio del server MCP;
   rilanciando riparte dai paragrafi già pronti.

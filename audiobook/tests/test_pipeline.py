@@ -332,7 +332,7 @@ def test_local_f5tts(cfg, tmp_path, monkeypatch):
     tts = ap.crea_tts(cfg)
     assert isinstance(tts, ap.LocalF5TTS)
     assert chiamate["init"] == {"model": "F5TTS_Base", "ckpt_file": "/cache/model_159600.safetensors",
-                                "vocab_file": "/cache/vocab.txt", "device": None}
+                                "vocab_file": "/cache/vocab.txt", "device": "cpu"}
     out = tts.synthesize("Testo.", str(tmp_path / "001_paragrafo.wav"))
     kw = chiamate["infer"]
     assert os.path.exists(out) and kw["gen_text"] == "Testo."
@@ -378,3 +378,49 @@ def test_llm_senza_retry_nascosti_e_no_think(cfg):
     assert client.max_retries == 0 and client.timeout == 300
     ap.normalizza_testo(cfg, "Testo di prova.")
     assert FakeLMStudio.requests[-1]["messages"][0]["content"].endswith("/no_think")
+
+
+
+def test_local_f5tts_usa_la_gpu_anche_se_l_app_dice_cpu(cfg, tmp_path, monkeypatch):
+    import types
+    visti = {}
+
+    class FintoF5TTS:
+        def __init__(self, **kw):
+            visti.update(kw)
+
+    app = tmp_path / "app"
+    app.mkdir()
+    (app / "config.json").write_text(json.dumps({"tts": {"model": "F5TTS_Base", "ckpt_file": "", "vocab_file": "",
+                                                         "device": "cpu"}}))
+    monkeypatch.setattr(ap, "APP_DIR", str(app))
+    monkeypatch.setattr(ap, "dispositivo_torch", lambda: ("cuda", "AMD Radeon 8060S"))
+    monkeypatch.setitem(sys.modules, "f5_tts", types.ModuleType("f5_tts"))
+    monkeypatch.setitem(sys.modules, "f5_tts.api", types.SimpleNamespace(F5TTS=FintoF5TTS))
+    monkeypatch.setitem(sys.modules, "cached_path", types.SimpleNamespace(cached_path=str))
+    ap.LocalF5TTS(cfg)
+    assert visti["device"] == "cuda"
+    cfg["f5_locale"] = {"device": "cpu"}  # forzato dall'utente
+    ap.LocalF5TTS(cfg)
+    assert visti["device"] == "cpu"
+
+
+def test_dispositivo_torch_senza_torch(monkeypatch):
+    monkeypatch.setitem(sys.modules, "torch", None)
+    assert ap.dispositivo_torch() == ("cpu", "CPU")
+
+
+def test_torchaudio_senza_torchcodec_usa_soundfile(monkeypatch):
+    import types
+    ta = types.SimpleNamespace(__version__="2.9.1+rocm7.2.1", load=None)
+    arr = types.SimpleNamespace(T=types.SimpleNamespace(copy=lambda: "dati"))
+    monkeypatch.setitem(sys.modules, "torchaudio", ta)
+    monkeypatch.setitem(sys.modules, "torchcodec", None)  # import fallisce
+    monkeypatch.setitem(sys.modules, "soundfile", types.SimpleNamespace(read=lambda *a, **k: (arr, 24000)))
+    monkeypatch.setitem(sys.modules, "torch", types.SimpleNamespace(from_numpy=lambda x: f"tensore({x})"))
+    ap._torchaudio_compatibile()
+    assert ta.load("voce.wav") == ("tensore(dati)", 24000)
+    vecchio = types.SimpleNamespace(__version__="2.7.0", load="originale")
+    monkeypatch.setitem(sys.modules, "torchaudio", vecchio)
+    ap._torchaudio_compatibile()
+    assert vecchio.load == "originale"

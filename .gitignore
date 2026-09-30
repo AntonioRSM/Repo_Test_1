@@ -3,3 +3,4 @@ app/config.json
 app/output/
 __pycache__/
 app/voices/
+app/env-rocm/
