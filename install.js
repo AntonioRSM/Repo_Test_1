@@ -18,7 +18,7 @@ module.exports = {
         venv: "env",
         path: "app",
         message: [
-          "uv pip install f5-tts mcp hf_xet",
+          "uv pip install f5-tts mcp hf_xet openai gradio_client pydub",
           "uv pip uninstall torchcodec"
         ]
       }

@@ -1,6 +1,6 @@
 # Audiolibri: LM Studio + F5-TTS (Pinokio) + Hermes Agent
 
-Trasforma i capitoli `.txt` di `D:\Workspace\epub_build\testo_x_audio` in MP3 (192 kbps) salvati in `D:\Workspace\epub_build`.
+Trasforma i capitoli `.txt` e `.md` di `D:\Workspace\epub_build\testo_x_audio` in MP3 (192 kbps) salvati in `D:\Workspace\epub_build`.
 
 ```
 capitolo_01.txt ──► LM Studio :1234 ──► ["paragrafo 1", "paragrafo 2", ...]   (numeri, romani, date, accenti)
@@ -59,6 +59,19 @@ Poi, in chat con Hermes (o in modalità one-shot, es. `hermes chat -q "..."`; co
   (`ip route | awk '/default/ {print $3}'` da WSL). F5-TTS ascolta solo su 127.0.0.1: con questa seconda strada
   va avviato con `--host 0.0.0.0`, quindi il mirrored networking è la soluzione più semplice.
 
+## Dalla chat di LM Studio (MCP)
+
+Il server MCP del repo (`app/mcp_server.py`) ha gli strumenti `genera_audiolibro` e `stato_audiolibro`:
+configuralo come descritto nel [README principale](../README.md#b-server-mcp-voce-dentro-la-chat-di-lm-studio), poi in chat:
+
+> Genera l'audiolibro di capitolo_01.txt
+
+> A che punto è l'audiolibro?
+
+Lo strumento avvia lo script in background e risponde subito (una chiamata MCP non può durare ore);
+il log è in `app/output/audiolibro.log`. Chiudere LM Studio può interrompere la generazione:
+rilanciandola riprende dai segmenti già creati.
+
 ## Uso diretto
 
 ```bat
@@ -66,7 +79,7 @@ python audiobook_pipeline.py --check                     :: porte 1234 / 7860 e 
 python audiobook_pipeline.py --test-normalizzazione      :: verifica regole LLM, niente audio
 python audiobook_pipeline.py --file capitolo_01.txt --dry-run   :: solo testo normalizzato
 python audiobook_pipeline.py --file capitolo_01.txt      :: un capitolo
-python audiobook_pipeline.py                             :: tutti i .txt di testo_x_audio
+python audiobook_pipeline.py                             :: tutti i .txt e .md di testo_x_audio
 ```
 
 Opzioni: `--force` (rigenera capitoli già esportati), `--format wav`, `--input-dir`, `--output-dir`, `--config`.
@@ -81,7 +94,7 @@ Se il batch si interrompe, rilancialo: riusa `paragrafi.json` e i segmenti già 
 | 3 | `python audiobook_pipeline.py --test-normalizzazione` | 13/13 verifiche superate (vedi sotto) |
 | 4 | copia `test_normalizzazione.txt` in `testo_x_audio\prova.txt`, poi `python audiobook_pipeline.py --file prova.txt --dry-run` | `temp_segments\prova\paragrafi.json` contiene il testo normalizzato |
 | 5 | `python audiobook_pipeline.py --file prova.txt` | `D:\Workspace\epub_build\prova.mp3`; ascoltalo: numeri letti per esteso, pause naturali tra i paragrafi |
-| 6 | batch completo: `python audiobook_pipeline.py` | un MP3 per ogni `.txt`; riga finale `Completati N/N capitoli` |
+| 6 | batch completo: `python audiobook_pipeline.py` | un MP3 per ogni `.txt`/`.md`; riga finale `Completati N/N capitoli` |
 
 Verifiche del passo 3 sul testo di prova:
 
@@ -99,6 +112,13 @@ Gli accenti sugli omografi (*àncora/ancóra*, *sùbito*, *princìpi*) vanno con
 dipendono dal contesto e non hanno una forma unica verificabile in automatico.
 
 ## Note sui parametri
+
+- **Pre-elaborazione senza LLM** (prima di LM Studio): dai file `.md` viene tolta la sintassi Markdown
+  (titoli `#` → frase con punto, `**grassetto**`, link, immagini, note `[^1]`, codice, HTML) e i numeri romani
+  inequivocabili diventano ordinali: `XIII secolo` → *tredicesimo secolo*, `XIX sec.` → *diciannovesimo secolo*,
+  `Capitolo IV` → *Capitolo quarto*, `Parte II` → *Parte seconda* (anche Volume, Libro, Tomo, Canto, Atto, Scena, Sezione).
+  Così i modelli piccoli non sbagliano più i secoli (es. *zerosimo*). `I` resta com'è quando è l'articolo
+  (*I secoli bui*, *nel capitolo I personaggi*). Sovrani e papi (`Luigi XIV`, `Pio IX`) restano all'LLM.
 
 - **`temperature` (0,65) non esiste in F5-TTS**: è un modello *flow-matching* e l'endpoint `/basic_tts` non ha
   questo parametro. Lo script legge i parametri dichiarati dal server e lo passa solo se presente (in un fork

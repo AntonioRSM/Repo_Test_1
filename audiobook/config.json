@@ -1,5 +1,6 @@
 {
   "input_dir": "D:\\Workspace\\epub_build\\testo_x_audio",
+  "input_ext": [".txt", ".md"],
   "output_dir": "D:\\Workspace\\epub_build",
   "temp_dir": "temp_segments",
   "output_format": "mp3",

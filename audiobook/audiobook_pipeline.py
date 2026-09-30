@@ -1,4 +1,4 @@
-"""Pipeline audiolibri: capitoli .txt -> LM Studio (normalizzazione) -> F5-TTS su Pinokio -> MP3/WAV.
+"""Pipeline audiolibri: capitoli .txt/.md -> LM Studio (normalizzazione) -> F5-TTS su Pinokio -> MP3/WAV.
 
 1. LM Studio (API compatibile OpenAI) normalizza il testo italiano per la sintesi
    vocale (numeri arabi/romani, date, accenti sugli omografi) e lo divide in
@@ -10,7 +10,7 @@
 Uso:
   python audiobook_pipeline.py --check                      # LM Studio e F5-TTS raggiungibili?
   python audiobook_pipeline.py --test-normalizzazione       # verifica le regole su test_normalizzazione.txt
-  python audiobook_pipeline.py                              # tutti i .txt di input_dir
+  python audiobook_pipeline.py                              # tutti i .txt/.md di input_dir
   python audiobook_pipeline.py --file capitolo_01.txt       # un solo capitolo
   python audiobook_pipeline.py --dry-run                    # solo normalizzazione (niente audio)
 
@@ -40,6 +40,7 @@ PAUSA_PARAGRAFO_MS = 200  # 0.2 secondi come da requisiti
 
 DEFAULTS = {
     "input_dir": "capitoli_input",
+    "input_ext": [".txt", ".md"],
     "output_dir": "audiolibri_output",
     "temp_dir": "temp_segments",
     "output_format": "mp3",
@@ -209,6 +210,111 @@ def read_text(path):
     raise ValueError(f"Codifica non riconosciuta: {path}")
 
 
+def pulisci_markdown(text):
+    """Toglie la sintassi Markdown (i file .md) che il TTS leggerebbe o che confonde l'LLM."""
+    text = re.sub(r"```.*?```", "", text, flags=re.S)
+    text = re.sub(r"<!--.*?-->|<[^>\n]+>", "", text, flags=re.S)
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)  # immagini
+    text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)  # link -> testo
+    text = re.sub(r"\[\^[^\]]+\]", "", text)  # richiami di nota
+    text = re.sub(r"^[ \t]{0,3}(?:[-*_][ \t]*){3,}$", "", text, flags=re.M)  # righe orizzontali
+    # titoli: "# Capitolo IV" -> "Capitolo IV." (pausa dopo il titolo)
+    text = re.sub(r"^[ \t]{0,3}#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$",
+                  lambda m: m.group(1) if re.search(r"[.!?…:;]$", m.group(1)) else m.group(1) + ".", text, flags=re.M)
+    text = re.sub(r"^[ \t]{0,3}>[ \t]?", "", text, flags=re.M)  # citazioni
+    text = re.sub(r"^[ \t]*(?:[-*+]|\d{1,3}[.)])[ \t]+", "", text, flags=re.M)  # elenchi
+    text = re.sub(r"(\*{1,3}|_{1,3})(\S(?:.*?\S)?)\1", r"\2", text)  # corsivo/grassetto
+    text = text.replace("`", "")
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+# Numeri romani -> ordinali italiani, convertiti prima dell'LLM (i modelli piccoli sbagliano,
+# es. "XIII secolo" -> "zerosimo"). Solo dopo parole che li rendono inequivocabili.
+_ROMANO = r"M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})"
+_ROMANI = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
+_UNITA = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci",
+          "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"]
+_DECINE = ["", "", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"]
+_ORDINALI = ["", "primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"]
+
+
+def romano_a_int(r):
+    r = r.upper()
+    if not r or not re.fullmatch(_ROMANO, r):
+        raise ValueError(f"Numero romano non valido: {r}")
+    tot = 0
+    for a, b in zip(r, r[1:] + " "):
+        v = _ROMANI[a]
+        tot += -v if b != " " and _ROMANI[b] > v else v
+    return tot
+
+
+def cardinale(n):
+    """Cardinale italiano da 1 a 3999 (ventuno, ventitré, centotto, milleduecento...)."""
+    if n >= 1000:
+        m, r = divmod(n, 1000)
+        return ("mille" if m == 1 else cardinale(m) + "mila") + (cardinale(r) if r else "")
+    if n >= 100:
+        c, r = divmod(n, 100)
+        testa = "cento" if c == 1 else _UNITA[c] + "cento"
+        coda = cardinale(r) if r else ""
+        return (testa[:-1] if coda.startswith("o") else testa) + coda
+    if n < 20:
+        return _UNITA[n]
+    d, u = divmod(n, 10)
+    decina = _DECINE[d][:-1] if u in (1, 8) else _DECINE[d]
+    return decina + ("tré" if u == 3 else _UNITA[u])
+
+
+def ordinale(n, femminile=False):
+    if n <= 10:
+        w = _ORDINALI[n]
+    else:
+        c = cardinale(n)
+        if c.endswith("tré"):
+            w = c[:-1] + "eesimo"  # ventitreesimo
+        elif c.endswith("sei"):
+            w = c + "esimo"  # ventiseiesimo
+        else:
+            w = c[:-1] + "esimo"  # ventunesimo, centesimo, millesimo
+    return w[:-1] + "a" if femminile else w
+
+
+_NOMI_FEMMINILI = {"parte", "sezione"}
+
+
+def converti_romani(text):
+    """XIX secolo -> diciannovesimo secolo; Capitolo IV -> Capitolo quarto; Parte II -> Parte seconda.
+
+    "I" è anche l'articolo ("I secoli bui", "nel capitolo I personaggi"): viene convertito
+    solo davanti a "secolo" o se dopo il titolo c'è punteggiatura o fine riga.
+    """
+    def secolo(m):
+        if not m.group(1) or (m.group(1) == "I" and m.group(2) != "secolo"):
+            return m.group(0)
+        nome = m.group(2)
+        if nome == "sec.":  # il punto dell'abbreviazione può chiudere anche la frase
+            nome = "secolo." if re.match(r"\s*(?:[A-ZÀ-Ý«“\"]|$)", m.string[m.end():]) else "secolo"
+        return f"{ordinale(romano_a_int(m.group(1)))} {nome}"
+
+    def titolo(m):
+        if not m.group(2):
+            return m.group(0)
+        if m.group(2).upper() == "I" and not re.match(r"[ \t]*(?:[.,;:!?)\]»”\"—–-]|$)", m.string[m.end():], flags=re.M):
+            return m.group(0)
+        n = romano_a_int(m.group(2))
+        return f"{m.group(1)} {ordinale(n, m.group(1).lower() in _NOMI_FEMMINILI)}"
+
+    text = re.sub(rf"\b({_ROMANO})\s+(secolo|secoli|sec\.)", secolo, text)
+    return re.sub(rf"\b(capitolo|volume|libro|tomo|parte|canto|atto|scena|sezione)\s+({_ROMANO})\b(?![\w'’])",
+                  titolo, text, flags=re.I)
+
+
+def prepara_testo(text):
+    """Pulizia deterministica prima dell'LLM: Markdown e numeri romani inequivocabili."""
+    return converti_romani(pulisci_markdown(text))
+
+
 def word_count(text):
     return len(text.split())
 
@@ -321,6 +427,7 @@ def normalizza_blocco(cfg, client, testo):
 
 def normalizza_testo(cfg, testo):
     client = lm_client(cfg)
+    testo = prepara_testo(testo)
     chunks = chunk_text(testo, cfg["llm_chunk_words"])
     paragraphs = []
     for i, chunk in enumerate(chunks, 1):
@@ -485,9 +592,11 @@ def trova_capitoli(cfg, file=None):
         if not os.path.exists(path):
             raise SystemExit(f"File non trovato: {path}")
         return [path]
-    files = sorted(glob.glob(os.path.join(cfg["input_dir"], "*.txt")))
+    estensioni = cfg.get("input_ext") or [".txt", ".md"]
+    files = sorted(f for f in glob.glob(os.path.join(cfg["input_dir"], "*"))
+                   if os.path.splitext(f)[1].lower() in estensioni)
     if not files:
-        raise SystemExit(f"Nessun file .txt in {cfg['input_dir']}")
+        raise SystemExit(f"Nessun file {'/'.join(estensioni)} in {cfg['input_dir']}")
     return files
 
 

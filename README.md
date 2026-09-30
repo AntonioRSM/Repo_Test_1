@@ -64,6 +64,17 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 
 Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
 
+Il server MCP espone anche gli strumenti per gli **audiolibri** (vedi [`audiobook/`](audiobook/README.md)):
+- `genera_audiolibro(file, formato, forza, solo_testo)`: avvia in background la pipeline sui capitoli `.txt`/`.md`
+  (file vuoto = tutti i capitoli della cartella di input) e risponde subito;
+- `stato_audiolibro(righe)`: stato della generazione e ultime righe del log (`app/output/audiolibro.log`).
+
+Esempio in chat: *"Genera l'audiolibro di capitolo_01.txt"*, poi *"A che punto è l'audiolibro?"*.
+Prima dell'uso: dopo l'aggiornamento premi **Aggiorna** in Pinokio (installa `openai`, `gradio_client`, `pydub` nell'ambiente
+del server MCP), prepara `audiobook/config.json` e `audiobook/voce_guida.wav` e avvia F5-TTS in Pinokio.
+Se la cartella della pipeline è altrove (es. `D:\Workspace\epub_build\audiobook`) aggiungi nel `mcp.json` di LM Studio
+`"env": {"AUDIOBOOK_DIR": "D:\\Workspace\\epub_build\\audiobook"}`.
+
 ## Clonazione della voce
 
 F5-TTS imita una voce di riferimento. Senza voce di riferimento viene usato l'esempio inglese incluso in F5-TTS:
@@ -96,9 +107,10 @@ python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
 | `app/tts_bridge.py` | client LM Studio (API compatibile OpenAI) + sintesi F5-TTS |
 | `app/web_ui.py` | interfaccia Gradio chat → voce |
 | `app/mcp_server.py`, `app/lmstudio_mcp_config.py` | server MCP per LM Studio e generatore della configurazione |
+| `app/audiobook_job.py` | avvio in background della pipeline audiolibri per gli strumenti MCP |
 
 ## Audiolibri (LM Studio + F5-TTS + Hermes Agent)
 
-La cartella [`audiobook/`](audiobook/README.md) contiene la pipeline che trasforma capitoli `.txt` in MP3:
+La cartella [`audiobook/`](audiobook/README.md) contiene la pipeline che trasforma capitoli `.txt`/`.md` in MP3:
 LM Studio normalizza il testo, F5-TTS (Gradio su Pinokio) genera la voce, pydub unisce i paragrafi.
 Include la skill per Hermes Agent (`audiobook/SKILL.md`) e un piano di test.
