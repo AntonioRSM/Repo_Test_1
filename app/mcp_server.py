@@ -1,6 +1,6 @@
 """Server MCP per LM Studio: aggiunge alla chat di LM Studio gli strumenti
 - `text_to_speech`: l'LLM genera un file audio con F5-TTS;
-- `genera_audiolibro` / `stato_audiolibro`: avviano e seguono la pipeline
+- `verifica_audiolibro` / `genera_audiolibro` / `stato_audiolibro`: verificano, avviano e seguono la pipeline
   audiobook/audiobook_pipeline.py (capitoli .txt/.md -> MP3).
 Configurazione: vedi `python lmstudio_mcp_config.py`.
 """
@@ -31,6 +31,17 @@ def text_to_speech(text: str, speed: float = 1.0) -> str:
 
 
 @mcp.tool()
+def verifica_audiolibro() -> str:
+    """Mostra dove sono configurazione (config.json), cartella dei capitoli e cartella di output della pipeline
+    audiolibri e verifica LM Studio, F5-TTS e voce di riferimento. Usalo prima di genera_audiolibro
+    e invece di cercare file sul disco."""
+    try:
+        return audiobook.check()
+    except FileNotFoundError as e:
+        return f"Impossibile verificare: {e}"
+
+
+@mcp.tool()
 def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False, solo_testo: bool = False) -> str:
     """Avvia in background la generazione di audiolibri dai capitoli .txt o .md.
 
@@ -40,6 +51,7 @@ def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False,
     formato: "mp3" oppure "wav". forza: rigenera anche i capitoli già esportati.
     solo_testo: solo normalizzazione, senza audio (per controllare il testo).
     La generazione dura minuti o ore: dopo l'avvio usa stato_audiolibro per l'avanzamento.
+    Non serve scrivere codice né cercare file: lo strumento fa tutto (percorsi: verifica_audiolibro).
     """
     try:
         return audiobook.start(file, formato, forza, solo_testo)
