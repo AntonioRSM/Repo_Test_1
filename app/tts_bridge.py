@@ -107,6 +107,33 @@ def clean_for_speech(text):
 
 # ---------------------------------------------------------------- F5-TTS
 
+def torchaudio_compatibile():
+    """torchaudio >= 2.9 legge l'audio solo con torchcodec (che su Windows spesso non si installa o
+    manca): in quel caso torchaudio.load, usato da F5-TTS per la voce di riferimento, passa a soundfile."""
+    try:
+        import torchaudio
+
+        versione = tuple(int(x) for x in re.findall(r"\d+", torchaudio.__version__)[:2])
+    except Exception:
+        return
+    if versione < (2, 9):
+        return
+    try:
+        import torchcodec  # noqa: F401
+
+        return
+    except Exception:
+        pass
+    import soundfile as sf
+    import torch
+
+    def load(path, *a, **k):
+        data, sr = sf.read(str(path), dtype="float32", always_2d=True)
+        return torch.from_numpy(data.T.copy()), sr
+
+    torchaudio.load = load
+
+
 class Speaker:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -114,6 +141,7 @@ class Speaker:
 
     def _load(self):
         if self._tts is None:
+            torchaudio_compatibile()
             from cached_path import cached_path
             from f5_tts.api import F5TTS
 

@@ -103,3 +103,16 @@ def test_python_env_rocm(tmp_path, monkeypatch):
     assert audiobook_job.pipeline_python() == str(exe)
     monkeypatch.setenv("AUDIOBOOK_PYTHON", "C:/altro/python.exe")
     assert audiobook_job.pipeline_python() == "C:/altro/python.exe"
+
+
+def test_tts_bridge_torchaudio_senza_torchcodec(monkeypatch):
+    import types
+    import tts_bridge
+    ta = types.SimpleNamespace(__version__="2.9.1+cpu", load=None)
+    arr = types.SimpleNamespace(T=types.SimpleNamespace(copy=lambda: "dati"))
+    monkeypatch.setitem(sys.modules, "torchaudio", ta)
+    monkeypatch.setitem(sys.modules, "torchcodec", None)
+    monkeypatch.setitem(sys.modules, "soundfile", types.SimpleNamespace(read=lambda *a, **k: (arr, 24000)))
+    monkeypatch.setitem(sys.modules, "torch", types.SimpleNamespace(from_numpy=lambda x: f"tensore({x})"))
+    tts_bridge.torchaudio_compatibile()
+    assert ta.load("voce.wav") == ("tensore(dati)", 24000)
