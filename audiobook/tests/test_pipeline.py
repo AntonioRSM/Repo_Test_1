@@ -453,3 +453,28 @@ def test_salta_trainer_f5(monkeypatch):
     with pytest.raises(RuntimeError):
         finto.Trainer()
     monkeypatch.delitem(sys.modules, "f5_tts.model.trainer")
+
+
+# ---------------------------------------------------------------- MP3 con ffmpeg incluso (imageio-ffmpeg)
+
+def test_mp3_con_imageio_ffmpeg(cfg, tmp_path, monkeypatch):
+    pytest.importorskip("imageio_ffmpeg")
+    monkeypatch.setattr(ap.shutil, "which", lambda *_: None)  # come sul PC senza ffmpeg nel PATH
+    segs = []
+    for i in range(2):
+        segs.append(str(tmp_path / f"{i:03d}_paragrafo.wav"))
+        write_wav(segs[-1], 1.0)
+    cfg.update(output_format="mp3", ffmpeg_path="")
+    out = str(tmp_path / "capitolo.mp3")
+    durata = ap.concatena(cfg, segs, out)
+    assert abs(durata - 2.2) < 0.05
+    with open(out, "rb") as f:
+        testa = f.read(3)
+    assert testa == b"ID3" or testa[:2] == b"\xff\xfb"
+
+
+def test_mp3_senza_ffmpeg_errore_chiaro(cfg, tmp_path, monkeypatch):
+    monkeypatch.setattr(ap, "trova_ffmpeg", lambda c: None)
+    cfg["output_format"] = "mp3"
+    with pytest.raises(RuntimeError, match="FFmpeg non trovato"):
+        ap.concatena(cfg, [], str(tmp_path / "x.mp3"))
