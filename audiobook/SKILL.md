@@ -28,7 +28,8 @@ I percorsi `D:\...` in `config.json` vengono convertiti in automatico in `/mnt/d
    ```
    Se un servizio è ❌, fermati e riporta all'utente il messaggio: non avviare il batch.
    - LM Studio: *Developer → Start Server* con un modello caricato.
-   - F5-TTS: avvialo da Pinokio; la porta viene trovata da sola (`"f5_tts_url": "auto"`).
+   - F5-TTS: se l'app F5-TTS ufficiale è avviata in Pinokio la porta viene trovata da sola; altrimenti lo script
+     carica il modello F5-TTS dell'app "F5-TTS + LM Studio" (serve il suo Python: `app\env\Scripts\python`).
 
 2. **Alla prima esecuzione o dopo aver cambiato modello LLM**, verifica la normalizzazione (niente audio):
    ```bash

@@ -18,6 +18,7 @@
   "llm_json_schema": true,
   "llm_retries": 2,
 
+  "tts_backend": "auto",
   "f5_tts_url": "auto",
   "f5_tts_porte": [[7860, 7880], [42000, 42300]],
   "f5_api_name": "/basic_tts",

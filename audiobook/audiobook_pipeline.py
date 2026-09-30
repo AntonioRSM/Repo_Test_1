@@ -31,6 +31,8 @@ from urllib.parse import urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(HERE, "config.json")
 TEST_TXT = os.path.join(HERE, "test_normalizzazione.txt")
+# App "F5-TTS + LM Studio" di questo repo: il suo F5-TTS installato e la sua voce predefinita
+APP_DIR = os.environ.get("F5_APP_DIR") or os.path.join(os.path.dirname(HERE), "app")
 
 # Configurazione default (sovrascritta da config.json)
 LM_STUDIO_URL = "http://localhost:1234/v1"
@@ -38,6 +40,14 @@ F5_TTS_URL = "auto"  # "auto" = cerca il server F5-TTS sulle porte locali (Pinok
 VOICE_REF_AUDIO = "voce_guida.wav"
 VOICE_REF_TEXT = "Trascrizione esatta del file audio di riferimento."
 PAUSA_PARAGRAFO_MS = 200  # 0.2 secondi come da requisiti
+# Modello per F5-TTS locale se l'app non ha un config.json (stesso di app/detect_hardware.py)
+F5_LOCALE_IT = {
+    "name": "F5-TTS Base @ it (alien79)",
+    "model": "F5TTS_Base",
+    "ckpt_file": "hf://alien79/F5-TTS-italian/model_159600.safetensors",
+    "vocab_file": "hf://alien79/F5-TTS-italian/vocab.txt",
+    "device": "",
+}
 
 DEFAULTS = {
     "input_dir": "capitoli_input",
@@ -57,6 +67,7 @@ DEFAULTS = {
     "llm_chunk_words": 700,
     "llm_json_schema": True,
     "llm_retries": 2,
+    "tts_backend": "auto",  # auto | gradio | locale
     "f5_tts_url": F5_TTS_URL,
     "f5_tts_porte": [[7860, 7880], [42000, 42300]],
     "f5_api_name": "/basic_tts",
@@ -222,6 +233,45 @@ def trova_f5(cfg):
     return None
 
 
+def app_config():
+    try:
+        with open(os.path.join(APP_DIR, "config.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def f5_locale_disponibile():
+    import importlib.util
+
+    return importlib.util.find_spec("f5_tts") is not None
+
+
+def risolvi_voce(cfg):
+    """voce_guida.wav, altrimenti la voce predefinita salvata nell'app (app/voices/voce_riferimento.wav).
+
+    Una trascrizione vuota o ancora segnaposto diventa "": F5-TTS la ricava da solo con Whisper.
+    Restituisce True se c'è una voce utilizzabile.
+    """
+    testo = cfg["voice_ref_text"].strip()
+    if not os.path.exists(cfg["voice_ref_audio"]):
+        voce_app = os.path.join(APP_DIR, "voices", "voce_riferimento.wav")
+        if not os.path.exists(voce_app):
+            log(f"❌ Voce di riferimento mancante: {cfg['voice_ref_audio']} (WAV di 6-10 s di parlato pulito), "
+                f"e nessuna voce predefinita salvata nell'app ({voce_app}).")
+            return False
+        log(f"ℹ️ {os.path.basename(cfg['voice_ref_audio'])} non trovato: uso la voce predefinita dell'app {voce_app}")
+        cfg["voice_ref_audio"] = voce_app
+        testo = (app_config().get("ref_text") or "").strip()
+    if testo in ("", VOICE_REF_TEXT):
+        log("⚠️ Trascrizione della voce di riferimento assente: F5-TTS la ricava da solo (Whisper). "
+            "Per una voce più fedele scrivi la trascrizione ESATTA in voice_ref_text.")
+        testo = ""
+    cfg["voice_ref_text"] = testo
+    log(f"✅ Voce di riferimento: {cfg['voice_ref_audio']}")
+    return True
+
+
 def check_services(cfg, need_tts=True):
     ok = True
     log(f"📁 Configurazione: {cfg['config_path']}")
@@ -246,19 +296,23 @@ def check_services(cfg, need_tts=True):
         log(f"❌ LM Studio non raggiungibile su {cfg['lmstudio_url']}: LM Studio > Developer > Start Server (porta 1234).")
         ok = False
     if need_tts:
-        trovato = trova_f5(cfg)
+        backend = (cfg.get("tts_backend") or "auto").lower()
+        trovato = trova_f5(cfg) if backend in ("auto", "gradio") else None
         if trovato:
-            cfg["f5_tts_url"] = trovato
+            cfg["f5_tts_url"], cfg["_backend"] = trovato, "gradio"
             log(f"✅ F5-TTS (Gradio {cfg['f5_api_name']}) raggiungibile su {trovato}")
+        elif backend in ("auto", "locale") and f5_locale_disponibile():
+            cfg["_backend"] = "locale"
+            log("✅ F5-TTS locale: il modello viene caricato da questo script (non serve l'app F5-TTS ufficiale)")
         else:
-            log(f"❌ F5-TTS non trovato (f5_tts_url: {cfg['f5_tts_url']}, porte provate: {cfg.get('f5_tts_porte')}): "
-                "avvia l'app F5-TTS in Pinokio; se usa un'altra porta scrivila in f5_tts_url.")
+            if backend == "locale":
+                log("❌ tts_backend è 'locale' ma f5-tts non è installato in questo Python: usa quello dell'app "
+                    "(app\\env\\Scripts\\python) o installa f5-tts.")
+            else:
+                log(f"❌ F5-TTS non trovato (f5_tts_url: {cfg['f5_tts_url']}, porte provate: {cfg.get('f5_tts_porte')}) "
+                    "e f5-tts non installato in questo Python: avvia l'app F5-TTS in Pinokio o usa il Python dell'app.")
             ok = False
-        if not os.path.exists(cfg["voice_ref_audio"]):
-            log(f"❌ Voce di riferimento mancante: {cfg['voice_ref_audio']} (WAV di 6-10 s di parlato pulito).")
-            ok = False
-        elif cfg["voice_ref_text"].strip() in ("", VOICE_REF_TEXT):
-            log("⚠️ voice_ref_text in config.json è ancora il segnaposto: scrivi la trascrizione ESATTA di voce_guida.wav.")
+        ok = risolvi_voce(cfg) and ok
     return ok
 
 
@@ -508,6 +562,43 @@ def normalizza_testo(cfg, testo):
     return paragraphs
 
 
+# ---------------------------------------------------------------- F5-TTS locale (senza Gradio)
+
+class LocalF5TTS:
+    """F5-TTS caricato in questo processo con il modello dell'app (app/config.json) o quello italiano."""
+
+    def __init__(self, cfg):
+        from cached_path import cached_path
+        from f5_tts.api import F5TTS
+
+        self.cfg = cfg
+        t = {**F5_LOCALE_IT, **(app_config().get("tts") or {}), **(cfg.get("f5_locale") or {})}
+        ckpt = str(cached_path(t["ckpt_file"])) if t.get("ckpt_file") else ""
+        vocab = str(cached_path(t["vocab_file"])) if t.get("vocab_file") else ""
+        log(f"   Carico F5-TTS locale: {t.get('name') or t['model']} su {t.get('device') or 'device automatico'}")
+        self.tts = F5TTS(model=t["model"], ckpt_file=ckpt, vocab_file=vocab, device=t.get("device") or None)
+
+    def synthesize(self, text, out_path):
+        c = self.cfg
+        self.tts.infer(
+            ref_file=c["voice_ref_audio"],
+            ref_text=c["voice_ref_text"],  # "" = trascrizione automatica
+            gen_text=text,
+            show_info=lambda *a, **k: None,
+            nfe_step=int(c["nfe_step"]),
+            speed=float(c["speed"]),
+            cross_fade_duration=float(c["cross_fade_duration"]),
+            remove_silence=bool(c["remove_silence"]),
+            seed=int(c["seed"]),
+            file_wave=out_path,
+        )
+        return out_path
+
+
+def crea_tts(cfg):
+    return LocalF5TTS(cfg) if cfg.get("_backend") == "locale" else F5TTSClient(cfg)
+
+
 # ---------------------------------------------------------------- F5-TTS (Gradio su Pinokio)
 
 class F5TTSClient:
@@ -630,7 +721,7 @@ def processa_capitolo(cfg, percorso_txt, tts=None, dry_run=False, force=False):
         return cache
 
     # 3-4. F5-TTS: 001_paragrafo.wav, 002_paragrafo.wav... (i segmenti già creati vengono riusati)
-    tts = tts or F5TTSClient(cfg)
+    tts = tts or crea_tts(cfg)
     segmenti = []
     for i, testo in enumerate(paragrafi, 1):
         seg = os.path.join(temp, f"{i:03d}_paragrafo.wav")
@@ -722,7 +813,7 @@ def main():
 
     capitoli = trova_capitoli(cfg, args.file)
     log(f"{len(capitoli)} capitoli da {cfg['input_dir']} → {cfg['output_dir']}")
-    tts = None if args.dry_run else F5TTSClient(cfg)
+    tts = None if args.dry_run else crea_tts(cfg)
     errori = []
     for path in capitoli:
         try:
