@@ -5,7 +5,7 @@ Trasforma i capitoli `.txt` e `.md` di `D:\Workspace\epub_build\testo_x_audio` i
 ```
 capitolo_01.txt ──► LM Studio :1234 ──► ["paragrafo 1", "paragrafo 2", ...]   (numeri, romani, date, accenti)
                                           │
-                     F5-TTS Pinokio :7860 /basic_tts  ──► 001_paragrafo.wav, 002_paragrafo.wav ...
+                     F5-TTS Pinokio (porta trovata da sola) /basic_tts  ──► 001_paragrafo.wav, 002_paragrafo.wav ...
                                           │
                      pydub + 200 ms di silenzio ──► D:\Workspace\epub_build\capitolo_01.mp3
 ```
@@ -35,7 +35,9 @@ capitolo_01.txt ──► LM Studio :1234 ──► ["paragrafo 1", "paragrafo 2
 5. Avvia **LM Studio** → *Developer* → *Start Server* (porta 1234) con un modello caricato.
    Consigliati: Qwen3 8B/14B, Gemma 3 12B, Mistral Small (i modelli da 3-4B sbagliano spesso le regole).
 6. Avvia **F5-TTS** in Pinokio. Nel terminale di Pinokio leggi la riga `Running on local URL: http://127.0.0.1:XXXX`:
-   se la porta non è 7860 correggi `f5_tts_url` in `config.json`.
+   Non serve annotare la porta: con `"f5_tts_url": "auto"` la pipeline cerca da sola il server Gradio con `/basic_tts`
+   sulle porte 7860-7880 e 42000-42300 (`f5_tts_porte`), perché Pinokio la cambia a ogni avvio.
+   Se trova solo l'interfaccia "F5-TTS + LM Studio" di questo repo (senza `/basic_tts`) lo segnala.
 
 ## Hermes Agent
 
@@ -77,7 +79,7 @@ rilanciandola riprende dai segmenti già creati.
 ## Uso diretto
 
 ```bat
-python audiobook_pipeline.py --check                     :: porte 1234 / 7860 e voce di riferimento
+python audiobook_pipeline.py --check                     :: LM Studio, F5-TTS (porta trovata da sola) e voce
 python audiobook_pipeline.py --test-normalizzazione      :: verifica regole LLM, niente audio
 python audiobook_pipeline.py --file capitolo_01.txt --dry-run   :: solo testo normalizzato
 python audiobook_pipeline.py --file capitolo_01.txt      :: un capitolo

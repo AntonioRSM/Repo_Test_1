@@ -25,6 +25,7 @@ import shutil
 import socket
 import sys
 import time
+import urllib.request
 from urllib.parse import urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +34,7 @@ TEST_TXT = os.path.join(HERE, "test_normalizzazione.txt")
 
 # Configurazione default (sovrascritta da config.json)
 LM_STUDIO_URL = "http://localhost:1234/v1"
-F5_TTS_URL = "http://127.0.0.1:7860/"
+F5_TTS_URL = "auto"  # "auto" = cerca il server F5-TTS sulle porte locali (Pinokio le cambia a ogni avvio)
 VOICE_REF_AUDIO = "voce_guida.wav"
 VOICE_REF_TEXT = "Trascrizione esatta del file audio di riferimento."
 PAUSA_PARAGRAFO_MS = 200  # 0.2 secondi come da requisiti
@@ -57,6 +58,7 @@ DEFAULTS = {
     "llm_json_schema": True,
     "llm_retries": 2,
     "f5_tts_url": F5_TTS_URL,
+    "f5_tts_porte": [[7860, 7880], [42000, 42300]],
     "f5_api_name": "/basic_tts",
     "voice_ref_audio": VOICE_REF_AUDIO,
     "voice_ref_text": VOICE_REF_TEXT,
@@ -177,6 +179,49 @@ def port_open(url, timeout=3):
         return False
 
 
+def gradio_endpoints(url, timeout=3):
+    """Nomi degli endpoint API di un server Gradio (dalla sua /config), None se non è Gradio."""
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))  # server locale: niente proxy
+        with opener.open(url.rstrip("/") + "/config", timeout=timeout) as r:
+            data = json.loads(r.read().decode("utf-8", "replace"))
+    except Exception:
+        return None
+    return {str(d.get("api_name")).lstrip("/") for d in data.get("dependencies", []) if d.get("api_name")}
+
+
+def trova_f5(cfg):
+    """Restituisce l'URL del server Gradio che espone l'endpoint di F5-TTS (/basic_tts).
+
+    Usa f5_tts_url se risponde con quell'endpoint; altrimenti (o con "auto") prova le porte
+    locali in f5_tts_porte, perché Pinokio assegna una porta diversa a ogni avvio.
+    """
+    api = cfg["f5_api_name"].lstrip("/")
+    url = (cfg.get("f5_tts_url") or "auto").strip()
+    if url.lower() != "auto":
+        eps = gradio_endpoints(url) if port_open(url, timeout=1) else None
+        if eps is not None and api in eps:
+            return url
+    senza_api = []
+    for inizio, fine in cfg.get("f5_tts_porte") or []:
+        for porta in range(int(inizio), int(fine) + 1):
+            cand = f"http://127.0.0.1:{porta}/"
+            if not port_open(cand, timeout=0.05):
+                continue
+            eps = gradio_endpoints(cand)
+            if eps is None:
+                continue
+            if api in eps:
+                if url.lower() != "auto":
+                    log(f"ℹ️ F5-TTS non è su {url}: trovato su {cand}")
+                return cand
+            senza_api.append(cand)
+    if senza_api:
+        log(f"⚠️ Server Gradio senza /{api} su {', '.join(senza_api)}: non è l'app F5-TTS ufficiale "
+            "(probabilmente l'interfaccia 'F5-TTS + LM Studio' di questo repo).")
+    return None
+
+
 def check_services(cfg, need_tts=True):
     ok = True
     log(f"📁 Configurazione: {cfg['config_path']}")
@@ -201,11 +246,13 @@ def check_services(cfg, need_tts=True):
         log(f"❌ LM Studio non raggiungibile su {cfg['lmstudio_url']}: LM Studio > Developer > Start Server (porta 1234).")
         ok = False
     if need_tts:
-        if port_open(cfg["f5_tts_url"]):
-            log(f"✅ F5-TTS (Gradio) raggiungibile su {cfg['f5_tts_url']}")
+        trovato = trova_f5(cfg)
+        if trovato:
+            cfg["f5_tts_url"] = trovato
+            log(f"✅ F5-TTS (Gradio {cfg['f5_api_name']}) raggiungibile su {trovato}")
         else:
-            log(f"❌ F5-TTS non raggiungibile su {cfg['f5_tts_url']}: avvia F5-TTS in Pinokio e controlla la porta "
-                "(la vedi nel terminale: 'Running on local URL').")
+            log(f"❌ F5-TTS non trovato (f5_tts_url: {cfg['f5_tts_url']}, porte provate: {cfg.get('f5_tts_porte')}): "
+                "avvia l'app F5-TTS in Pinokio; se usa un'altra porta scrivila in f5_tts_url.")
             ok = False
         if not os.path.exists(cfg["voice_ref_audio"]):
             log(f"❌ Voce di riferimento mancante: {cfg['voice_ref_audio']} (WAV di 6-10 s di parlato pulito).")

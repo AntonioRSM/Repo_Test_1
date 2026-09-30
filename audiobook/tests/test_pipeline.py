@@ -144,6 +144,7 @@ def test_verifiche_regole_su_output_corretto(cfg):
 
 def test_check_services(cfg):
     cfg["f5_tts_url"] = "http://127.0.0.1:1/"  # porta chiusa
+    cfg["f5_tts_porte"] = []
     assert ap.check_services(cfg, need_tts=False)
     assert not ap.check_services(cfg, need_tts=True)
 
@@ -238,3 +239,42 @@ def test_check_services_mostra_percorsi(cfg, capsys):
     cfg["input_dir"] = cfg["input_dir"] + "_manca"
     assert not ap.check_services(cfg, need_tts=False)
     assert "Cartella di input non trovata" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------- ricerca automatica di F5-TTS
+
+def gradio_finto(endpoints):
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def do_GET(self):
+            body = json.dumps({"dependencies": [{"api_name": e} for e in endpoints] + [{"api_name": None}]}).encode()
+            self.send_response(200 if self.path == "/config" else 404)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    srv = HTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+
+def test_trova_f5(cfg, capsys):
+    f5, repo_ui = gradio_finto(["basic_tts", "multistyle_tts"]), gradio_finto(["chat", "say"])
+    try:
+        p_f5, p_ui = f5.server_port, repo_ui.server_port
+        cfg["f5_tts_porte"] = [[p_ui, p_ui], [p_f5, p_f5]]  # solo le due porte di prova
+        cfg["f5_tts_url"] = f"http://127.0.0.1:{p_f5}/"
+        assert ap.trova_f5(cfg) == cfg["f5_tts_url"]  # URL esplicito giusto
+        cfg["f5_tts_url"] = "auto"
+        assert ap.trova_f5(cfg) == f"http://127.0.0.1:{p_f5}/"
+        cfg["f5_tts_url"] = "http://127.0.0.1:42003/"  # porta vecchia: ricerca automatica
+        assert ap.trova_f5(cfg) == f"http://127.0.0.1:{p_f5}/"
+        assert "trovato su" in capsys.readouterr().out
+        cfg["f5_tts_porte"] = [[p_ui, p_ui]]  # solo l'interfaccia senza /basic_tts
+        assert ap.trova_f5(cfg) is None
+        assert "senza /basic_tts" in capsys.readouterr().out
+    finally:
+        f5.shutdown()
+        repo_ui.shutdown()
