@@ -59,6 +59,19 @@ Poi, in chat con Hermes (o in modalità one-shot, es. `hermes chat -q "..."`; co
   (`ip route | awk '/default/ {print $3}'` da WSL). F5-TTS ascolta solo su 127.0.0.1: con questa seconda strada
   va avviato con `--host 0.0.0.0`, quindi il mirrored networking è la soluzione più semplice.
 
+## Dalla chat di LM Studio (MCP)
+
+Il server MCP del repo (`app/mcp_server.py`) ha gli strumenti `genera_audiolibro` e `stato_audiolibro`:
+configuralo come descritto nel [README principale](../README.md#b-server-mcp-voce-dentro-la-chat-di-lm-studio), poi in chat:
+
+> Genera l'audiolibro di capitolo_01.txt
+
+> A che punto è l'audiolibro?
+
+Lo strumento avvia lo script in background e risponde subito (una chiamata MCP non può durare ore);
+il log è in `app/output/audiolibro.log`. Chiudere LM Studio può interrompere la generazione:
+rilanciandola riprende dai segmenti già creati.
+
 ## Uso diretto
 
 ```bat
