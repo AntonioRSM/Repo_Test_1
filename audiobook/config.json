@@ -18,7 +18,7 @@
   "llm_json_schema": true,
   "llm_retries": 2,
 
-  "f5_tts_url": "http://127.0.0.1:7860/",
+  "f5_tts_url": "http://127.0.0.1:42003/",
   "f5_api_name": "/basic_tts",
   "voice_ref_audio": "voce_guida.wav",
   "voice_ref_text": "Trascrizione esatta del file audio di riferimento.",
