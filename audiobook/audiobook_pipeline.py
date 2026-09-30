@@ -697,7 +697,7 @@ def dispositivo_torch():
 
 
 def _torchaudio_compatibile():
-    """torchaudio >= 2.9 (es. le build ROCm per Windows) legge l'audio solo con torchcodec: se manca, soundfile."""
+    """torchaudio >= 2.9 (es. le build ROCm per Windows) legge l'audio solo con torchcodec: si usa soundfile."""
     try:
         import torchaudio
         versione = tuple(int(x) for x in re.findall(r"\d+", torchaudio.__version__)[:2])
@@ -705,11 +705,8 @@ def _torchaudio_compatibile():
         return
     if versione < (2, 9):
         return
-    try:
-        import torchcodec  # noqa: F401
-        return
-    except Exception:
-        pass
+    # Niente "import torchcodec" per provarlo: se la sua DLL non combacia con torch, Windows apre una finestra
+    # di errore modale che, in un processo in background, lo blocca per sempre. Il WAV si legge con soundfile.
     import soundfile as sf
     import torch
 
@@ -990,6 +987,13 @@ def main():
     import faulthandler
 
     faulthandler.enable()  # crash nativi (es. driver/ROCm): stack Python nel log invece del silenzio
+    if os.name == "nt":
+        import ctypes
+
+        # niente finestre di errore modali (es. DLL incompatibile): in background bloccherebbero il processo
+        ctypes.windll.kernel32.SetErrorMode(0x0001 | 0x0002 | 0x8000)
+    # attenzione "flash"/"mem efficient" sulle GPU AMD (gfx11xx): più veloce, AMD la segna ancora sperimentale
+    os.environ.setdefault("TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL", "1")
     p = argparse.ArgumentParser(description="Audiolibri: LM Studio + F5-TTS (Pinokio)")
     p.add_argument("--config", default=CONFIG_PATH, help="percorso di config.json")
     p.add_argument("--file", help="un solo capitolo (nome in input_dir o percorso completo)")
