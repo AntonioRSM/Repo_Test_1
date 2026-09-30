@@ -1,0 +1,5 @@
+openai>=1.0.0
+gradio_client>=0.10.0
+pydub>=0.25.1
+# pydub usa il modulo audioop, rimosso da Python 3.13
+audioop-lts; python_version >= "3.13"

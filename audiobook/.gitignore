@@ -1,0 +1,8 @@
+*.wav
+*.mp3
+temp_segments/*
+!temp_segments/.gitkeep
+capitoli_input/*
+!capitoli_input/.gitkeep
+audiolibri_output/*
+!audiolibri_output/.gitkeep
