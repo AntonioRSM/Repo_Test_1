@@ -96,3 +96,9 @@ python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
 | `app/tts_bridge.py` | client LM Studio (API compatibile OpenAI) + sintesi F5-TTS |
 | `app/web_ui.py` | interfaccia Gradio chat → voce |
 | `app/mcp_server.py`, `app/lmstudio_mcp_config.py` | server MCP per LM Studio e generatore della configurazione |
+
+## Audiolibri (LM Studio + F5-TTS + Hermes Agent)
+
+La cartella [`audiobook/`](audiobook/README.md) contiene la pipeline che trasforma capitoli `.txt` in MP3:
+LM Studio normalizza il testo, F5-TTS (Gradio su Pinokio) genera la voce, pydub unisce i paragrafi.
+Include la skill per Hermes Agent (`audiobook/SKILL.md`) e un piano di test.

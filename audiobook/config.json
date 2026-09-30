@@ -1,0 +1,35 @@
+{
+  "input_dir": "D:\\Workspace\\epub_build\\testo_x_audio",
+  "output_dir": "D:\\Workspace\\epub_build",
+  "temp_dir": "temp_segments",
+  "output_format": "mp3",
+  "mp3_bitrate": "192k",
+  "pausa_paragrafo_ms": 200,
+  "skip_existing": true,
+  "keep_temp": false,
+  "ffmpeg_path": "",
+
+  "lmstudio_url": "http://localhost:1234/v1",
+  "lmstudio_model": "",
+  "llm_temperature": 0.1,
+  "llm_max_tokens": 8192,
+  "llm_chunk_words": 700,
+  "llm_json_schema": true,
+  "llm_retries": 2,
+
+  "f5_tts_url": "http://127.0.0.1:7860/",
+  "f5_api_name": "/basic_tts",
+  "voice_ref_audio": "voce_guida.wav",
+  "voice_ref_text": "Trascrizione esatta del file audio di riferimento.",
+  "nfe_step": 32,
+  "temperature": 0.65,
+  "speed": 0.95,
+  "cross_fade_duration": 0.15,
+  "remove_silence": false,
+  "seed": 42,
+  "tts_retries": 2,
+
+  "parole_min": 100,
+  "parole_max": 200,
+  "parole_limite": 300
+}
