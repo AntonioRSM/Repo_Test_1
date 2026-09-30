@@ -68,8 +68,9 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
 
 Il server MCP espone anche gli strumenti per gli **audiolibri** (vedi [`audiobook/`](audiobook/README.md)):
-- `genera_audiolibro(file, formato, forza, solo_testo)`: avvia in background la pipeline sui capitoli `.txt`/`.md`
+- `genera_audiolibro(file, formato, forza, solo_testo, normalizzazione)`: avvia in background la pipeline sui capitoli `.txt`/`.md`
   (file vuoto = tutti i capitoli della cartella di input) e risponde subito;
+- `ferma_audiolibro()`: interrompe la generazione (riprende da dove era rimasta);
 - `stato_audiolibro(righe)`: stato della generazione e ultime righe del log (`app/output/audiolibro.log`);
 - `verifica_audiolibro()`: dove sono `config.json`, cartella dei capitoli e cartella di output, e se LM Studio,
   F5-TTS e voce di riferimento sono pronti (evita che l'LLM cerchi i file sul disco).

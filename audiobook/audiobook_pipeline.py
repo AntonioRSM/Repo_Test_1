@@ -67,6 +67,9 @@ DEFAULTS = {
     "llm_chunk_words": 700,
     "llm_json_schema": True,
     "llm_retries": 2,
+    "llm_timeout": 300,  # secondi per richiesta (poi un nuovo tentativo, con messaggio nel log)
+    "llm_no_think": True,  # "/no_think": i modelli che ragionano (Qwen3) rispondono subito
+    "normalizzazione": "llm",  # llm = LM Studio | regole = solo regole deterministiche (molto più veloce)
     "tts_backend": "auto",  # auto | gradio | locale
     "f5_tts_url": F5_TTS_URL,
     "f5_tts_porte": [[7860, 7880], [42000, 42300]],
@@ -282,7 +285,9 @@ def check_services(cfg, need_tts=True):
     else:
         log(f"📁 Input: {cfg['input_dir']} ({n} capitoli {'/'.join(cfg.get('input_ext') or ['.txt', '.md'])})")
     log(f"📁 Output: {cfg['output_dir']}")
-    if port_open(cfg["lmstudio_url"]):
+    if cfg.get("normalizzazione") == "regole":
+        log("✅ Normalizzazione a regole: LM Studio non serve")
+    elif port_open(cfg["lmstudio_url"]):
         try:
             models = list_models(cfg)
             log(f"✅ LM Studio raggiungibile su {cfg['lmstudio_url']} — modelli: {', '.join(models) or 'nessuno caricato'}")
@@ -368,7 +373,17 @@ def romano_a_int(r):
 
 
 def cardinale(n):
-    """Cardinale italiano da 1 a 3999 (ventuno, ventitré, centotto, milleduecento...)."""
+    """Cardinale italiano (zero, ventuno, ventitré, centotto, milleduecento, due milioni...)."""
+    if n == 0:
+        return "zero"
+    if n >= 1_000_000_000:
+        g, r = divmod(n, 1_000_000_000)
+        testa = "un miliardo" if g == 1 else cardinale(g) + " miliardi"
+        return testa + (" " + cardinale(r) if r else "")
+    if n >= 1_000_000:
+        m, r = divmod(n, 1_000_000)
+        testa = "un milione" if m == 1 else cardinale(m) + " milioni"
+        return testa + (" " + cardinale(r) if r else "")
     if n >= 1000:
         m, r = divmod(n, 1000)
         return ("mille" if m == 1 else cardinale(m) + "mila") + (cardinale(r) if r else "")
@@ -426,6 +441,94 @@ def converti_romani(text):
     text = re.sub(rf"\b({_ROMANO})\s+(secolo|secoli|sec\.)", secolo, text)
     return re.sub(rf"\b(capitolo|volume|libro|tomo|parte|canto|atto|scena|sezione)\s+({_ROMANO})\b(?![\w'’])",
                   titolo, text, flags=re.I)
+
+
+_MESI = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto",
+         "settembre", "ottobre", "novembre", "dicembre"]
+# Parole che dopo il nome indicano un sovrano/papa: "Luigi XIV", "Pio IX", "Carlo V"
+_ROMANO_SOVRANO = r"(?:M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))"
+_NON_NOMI = {"capitolo", "volume", "libro", "tomo", "parte", "canto", "atto", "scena", "sezione", "secolo",
+             "secoli", "vitamina", "classe", "tipo", "serie", "fase", "livello", "gruppo", "punto", "articolo"}
+
+
+def _intero(txt):
+    return int(txt.replace(".", "").replace("\u2009", "").replace(" ", ""))
+
+
+def converti_numeri(text):
+    """Numeri arabi in parole, senza LLM: date, ordinali (1°, 2ª), percentuali, euro, decimali, migliaia."""
+    def data(m):
+        g, me, a = int(m.group(1)), int(m.group(2)), m.group(3)
+        if not (1 <= g <= 31 and 1 <= me <= 12):
+            return m.group(0)
+        anno = int(a) if len(a) == 4 else 1900 + int(a) if int(a) >= 30 else 2000 + int(a)
+        return f"{'primo' if g == 1 else cardinale(g)} {_MESI[me]} {cardinale(anno)}"
+
+    def ordin(m):
+        n, segno, dopo = int(m.group(1)), m.group(2), m.group(3) or ""
+        parola = dopo.strip().lower()
+        fem = segno in "ªa" or (segno in "°º" and parola.endswith("a") and not parola.endswith("ma"))
+        return ordinale(n, fem) + dopo if 0 < n < 10_000 else m.group(0)
+
+    def decimale(m):
+        return f"{cardinale(_intero(m.group(1)))} virgola {' '.join(cardinale(int(c)) for c in m.group(2))}" \
+            if len(m.group(2)) > 2 else f"{cardinale(_intero(m.group(1)))} virgola {cardinale(int(m.group(2)))}"
+
+    text = re.sub(r"\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})\b", data, text)
+    text = re.sub(r"\b(\d{1,4})\s?([°ºª])(\s+[A-Za-zÀ-ÿ]+)?", ordin, text)
+    text = re.sub(r"€\s?(\d[\d.]*(?:,\d+)?)", r"\1 euro", text)
+    text = re.sub(r"(\d)\s?%", r"\1 per cento", text)
+    text = re.sub(r"\b(\d{1,3}(?:\.\d{3})+|\d+),(\d+)\b", decimale, text)
+    text = re.sub(r"\b\d{1,3}(?:\.\d{3})+\b", lambda m: cardinale(_intero(m.group(0))), text)
+    return re.sub(r"\b\d{1,12}\b", lambda m: cardinale(int(m.group(0))), text)
+
+
+def converti_sovrani(text):
+    """Luigi XIV -> Luigi Quattordicesimo, Pio IX -> Pio Nono (nome maiuscolo + numero romano)."""
+    def sost(m):
+        nome, rom = m.group(1), m.group(2)
+        if nome.lower() in _NON_NOMI or rom in ("C", "D", "L", "M"):
+            return m.group(0)
+        if rom == "I" and not re.match(r"[ \t]*(?:[.,;:!?)\]»”\"—–-]|$|\s+(?:di|d'|e|il|la|re|papa)\b)",
+                                      m.string[m.end():], flags=re.M):
+            return m.group(0)  # "I" come articolo: "Carlo I personaggi" resta invariato
+        return f"{nome} {ordinale(romano_a_int(rom)).capitalize()}"
+
+    return re.sub(rf"\b([A-ZÀ-Ý][a-zà-ÿ]+)\s+({_ROMANO_SOVRANO})\b(?![\w'’])",
+                  lambda m: sost(m) if m.group(2) else m.group(0), text)
+
+
+def dividi_paragrafi(text, minimo, massimo):
+    """Paragrafi da minimo-massimo parole, spezzando solo a fine frase (senza LLM)."""
+    pezzi = []
+    for par in re.split(r"\n\s*\n", text):
+        par = re.sub(r"\s+", " ", par).strip()
+        if par and not re.search(r"[.!?…:;][»”\"')]*$", par):
+            par += "."  # titoli e righe senza punto: pausa prima del testo che segue
+        if par:
+            pezzi += split_sentences(par) if word_count(par) > massimo else [par]
+    out, cur = [], []
+    for pz in pezzi:
+        if cur and word_count(" ".join(cur + [pz])) > massimo:
+            out.append(" ".join(cur))
+            cur = []
+        cur.append(pz)
+        if word_count(" ".join(cur)) >= minimo:
+            out.append(" ".join(cur))
+            cur = []
+    if cur:
+        if out and word_count(out[-1] + " " + " ".join(cur)) <= massimo:
+            out[-1] += " " + " ".join(cur)
+        else:
+            out.append(" ".join(cur))
+    return out
+
+
+def normalizza_regole(cfg, testo):
+    """Normalizzazione completa senza LLM (niente accenti sugli omografi, che richiedono il contesto)."""
+    testo = converti_numeri(converti_sovrani(prepara_testo(testo)))
+    return enforce_limits(dividi_paragrafi(testo, cfg["parole_min"], cfg["parole_max"]),
+                          cfg["parole_limite"], cfg["parole_max"])
 
 
 def prepara_testo(text):
@@ -506,7 +609,8 @@ def enforce_limits(paragraphs, limite, massimo):
 def lm_client(cfg):
     from openai import OpenAI
 
-    return OpenAI(base_url=cfg["lmstudio_url"], api_key="lm-studio", timeout=900)
+    # max_retries=0: i nuovi tentativi li gestisce normalizza_blocco, scrivendoli nel log
+    return OpenAI(base_url=cfg["lmstudio_url"], api_key="lm-studio", timeout=float(cfg["llm_timeout"]), max_retries=0)
 
 
 def list_models(cfg):
@@ -525,6 +629,8 @@ def pick_model(cfg):
 
 def normalizza_blocco(cfg, client, testo):
     prompt = SYSTEM_PROMPT_NORMALIZER.format(min=cfg["parole_min"], max=cfg["parole_max"], limite=cfg["parole_limite"])
+    if cfg.get("llm_no_think"):
+        prompt += "\n/no_think"
     kwargs = dict(
         model=pick_model(cfg),
         messages=[{"role": "system", "content": prompt}, {"role": "user", "content": testo}],
@@ -534,16 +640,23 @@ def normalizza_blocco(cfg, client, testo):
     last = None
     for attempt in range(cfg["llm_retries"] + 1):
         use_schema = cfg["llm_json_schema"] and attempt == 0
+        t0 = time.time()
         try:
             resp = client.chat.completions.create(**kwargs, **({"response_format": JSON_SCHEMA} if use_schema else {}))
-            return parse_paragraphs(resp.choices[0].message.content or "")
+            out = parse_paragraphs(resp.choices[0].message.content or "")
+            log(f"   LM Studio ha risposto in {time.time() - t0:.0f} s")
+            return out
         except Exception as e:  # schema non supportato, JSON malformato, timeout...
             last = e
-            log(f"   ⚠️ Tentativo {attempt + 1} di normalizzazione fallito: {e}")
+            log(f"   ⚠️ Tentativo {attempt + 1} di normalizzazione fallito dopo {time.time() - t0:.0f} s: {e}")
     raise RuntimeError(f"Normalizzazione non riuscita: {last}")
 
 
 def normalizza_testo(cfg, testo):
+    if cfg.get("normalizzazione") == "regole":
+        paragrafi = normalizza_regole(cfg, testo)
+        log(f"   Normalizzazione a regole (senza LLM): {len(paragrafi)} paragrafi")
+        return paragrafi
     client = lm_client(cfg)
     testo = prepara_testo(testo)
     chunks = chunk_text(testo, cfg["llm_chunk_words"])
@@ -726,8 +839,9 @@ def processa_capitolo(cfg, percorso_txt, tts=None, dry_run=False, force=False):
     for i, testo in enumerate(paragrafi, 1):
         seg = os.path.join(temp, f"{i:03d}_paragrafo.wav")
         if not (os.path.exists(seg) and os.path.getsize(seg) > 0) or force:
-            log(f"   🎙️  {i}/{len(paragrafi)} ({word_count(testo)} parole)")
+            t0 = time.time()
             tts.synthesize(testo, seg)
+            log(f"   🎙️  {i}/{len(paragrafi)} ({word_count(testo)} parole) in {time.time() - t0:.0f} s")
         segmenti.append(seg)
 
     # 5-6. Concatenazione con 200 ms di pausa, esportazione e pulizia
@@ -791,6 +905,8 @@ def main():
     p.add_argument("--test-normalizzazione", action="store_true", help="normalizza test_normalizzazione.txt e verifica le regole")
     p.add_argument("--dry-run", action="store_true", help="solo normalizzazione, salva i paragrafi JSON senza audio")
     p.add_argument("--force", action="store_true", help="rigenera anche i capitoli già esportati")
+    p.add_argument("--normalizzazione", choices=["llm", "regole"],
+                   help="llm = LM Studio (default di config.json), regole = senza LLM, molto più veloce")
     args = p.parse_args()
 
     if hasattr(sys.stdout, "reconfigure"):  # emoji e accenti nella console di Windows
@@ -802,6 +918,8 @@ def main():
         cfg["output_dir"] = _resolve(args.output_dir)
     if args.format:
         cfg["output_format"] = args.format
+    if args.normalizzazione:
+        cfg["normalizzazione"] = args.normalizzazione
 
     need_tts = not (args.dry_run or args.test_normalizzazione)
     if not check_services(cfg, need_tts=need_tts):

@@ -42,7 +42,8 @@ def verifica_audiolibro() -> str:
 
 
 @mcp.tool()
-def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False, solo_testo: bool = False) -> str:
+def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False, solo_testo: bool = False,
+                      normalizzazione: str = "") -> str:
     """Avvia in background la generazione di audiolibri dai capitoli .txt o .md.
 
     Il testo viene normalizzato con LM Studio (numeri, numeri romani, date, accenti),
@@ -50,13 +51,21 @@ def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False,
     file: nome di un solo capitolo (es. "capitolo_01.txt"); vuoto = tutti i .txt e .md della cartella di input.
     formato: "mp3" oppure "wav". forza: rigenera anche i capitoli già esportati.
     solo_testo: solo normalizzazione, senza audio (per controllare il testo).
+    normalizzazione: "llm" (LM Studio, più accurata) o "regole" (senza LLM, molto più veloce per molti capitoli);
+    vuoto = quella di config.json.
     La generazione dura minuti o ore: dopo l'avvio usa stato_audiolibro per l'avanzamento.
     Non serve scrivere codice né cercare file: lo strumento fa tutto (percorsi: verifica_audiolibro).
     """
     try:
-        return audiobook.start(file, formato, forza, solo_testo)
+        return audiobook.start(file, formato, forza, solo_testo, normalizzazione)
     except (FileNotFoundError, ValueError) as e:
         return f"Impossibile avviare: {e}"
+
+
+@mcp.tool()
+def ferma_audiolibro() -> str:
+    """Interrompe la generazione in corso (si può riprendere rilanciando genera_audiolibro)."""
+    return audiobook.stop()
 
 
 @mcp.tool()
