@@ -720,6 +720,42 @@ def _torchaudio_compatibile():
     torchaudio.load = load
 
 
+def _torch_distributed_compatibile():
+    """Le build PyTorch ROCm per Windows sono senza torch.distributed: encodec (usato da Vocos) cita
+    torch.distributed.ReduceOp già all'import. Per la sola inferenza bastano nomi "vuoti"."""
+    try:
+        import torch
+        import torch.distributed as dist
+    except Exception:
+        return
+    if not hasattr(dist, "ReduceOp"):
+        class ReduceOp:
+            SUM, PRODUCT, MIN, MAX, BAND, BOR, BXOR, AVG = range(8)
+
+        dist.ReduceOp = ReduceOp
+    if not hasattr(dist, "is_initialized"):
+        dist.is_initialized = lambda: False
+    if not hasattr(dist, "is_available"):
+        dist.is_available = lambda: False
+    torch.distributed = dist
+
+
+def _salta_trainer_f5():
+    """f5_tts.model importa il Trainer (accelerate, wandb, torch.distributed) che serve solo per addestrare:
+    per la sintesi basta un segnaposto, che evita errori con le build PyTorch senza distributed."""
+    import types
+
+    if "f5_tts.model.trainer" not in sys.modules:
+        finto = types.ModuleType("f5_tts.model.trainer")
+
+        class Trainer:  # noqa: D401 - usato solo se qualcuno prova ad addestrare
+            def __init__(self, *a, **k):
+                raise RuntimeError("Trainer non disponibile nella pipeline audiolibri (solo sintesi).")
+
+        finto.Trainer = Trainer
+        sys.modules["f5_tts.model.trainer"] = finto
+
+
 class LocalF5TTS:
     """F5-TTS caricato in questo processo con il modello dell'app (app/config.json) o quello italiano.
 
@@ -728,11 +764,13 @@ class LocalF5TTS:
     """
 
     def __init__(self, cfg):
+        _torch_distributed_compatibile()  # prima di importare f5_tts (-> vocos -> encodec)
+        _salta_trainer_f5()
+        _torchaudio_compatibile()
         from cached_path import cached_path
         from f5_tts.api import F5TTS
 
         self.cfg = cfg
-        _torchaudio_compatibile()
         t = {**F5_LOCALE_IT, **(app_config().get("tts") or {})}
         t["device"] = ""
         t.update(cfg.get("f5_locale") or {})

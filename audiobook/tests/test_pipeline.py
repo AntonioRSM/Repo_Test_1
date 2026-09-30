@@ -424,3 +424,32 @@ def test_torchaudio_senza_torchcodec_usa_soundfile(monkeypatch):
     monkeypatch.setitem(sys.modules, "torchaudio", vecchio)
     ap._torchaudio_compatibile()
     assert vecchio.load == "originale"
+
+
+
+def test_torch_senza_distributed(monkeypatch):
+    import types
+    dist = types.ModuleType("torch.distributed")  # come nelle build ROCm per Windows: vuoto
+    torch = types.ModuleType("torch")
+    torch.distributed = dist
+    monkeypatch.setitem(sys.modules, "torch", torch)
+    monkeypatch.setitem(sys.modules, "torch.distributed", dist)
+    ap._torch_distributed_compatibile()
+    assert dist.ReduceOp.SUM == 0 and dist.is_initialized() is False and dist.is_available() is False
+    # il default di encodec.distrib.all_reduce ora si valuta senza errori
+    exec("import torch\ndef all_reduce(t, op=torch.distributed.ReduceOp.SUM): return op", {})
+    vero = types.SimpleNamespace(ReduceOp="originale", is_initialized="orig", is_available="orig")
+    torch.distributed = vero
+    monkeypatch.setitem(sys.modules, "torch.distributed", vero)
+    ap._torch_distributed_compatibile()
+    assert vero.ReduceOp == "originale"  # PyTorch completo: non toccato
+
+
+
+def test_salta_trainer_f5(monkeypatch):
+    monkeypatch.delitem(sys.modules, "f5_tts.model.trainer", raising=False)
+    ap._salta_trainer_f5()
+    finto = sys.modules["f5_tts.model.trainer"]
+    with pytest.raises(RuntimeError):
+        finto.Trainer()
+    monkeypatch.delitem(sys.modules, "f5_tts.model.trainer")
