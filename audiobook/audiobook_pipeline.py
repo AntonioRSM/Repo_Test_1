@@ -323,6 +323,14 @@ def check_services(cfg, need_tts=True):
                     "e f5-tts non installato in questo Python: avvia l'app F5-TTS in Pinokio o usa il Python dell'app.")
             ok = False
         ok = risolvi_voce(cfg) and ok
+        if cfg["output_format"].lower() != "wav":
+            ffmpeg = trova_ffmpeg(cfg)
+            if ffmpeg:
+                log(f"✅ FFmpeg per l'MP3: {ffmpeg}")
+            else:
+                log("❌ FFmpeg non trovato (serve per l'MP3): in Pinokio Aggiorna e poi Accelerazione GPU AMD "
+                    "(installa imageio-ffmpeg), oppure 'winget install Gyan.FFmpeg', o usa il formato wav.")
+                ok = False
     return ok
 
 
@@ -877,17 +885,37 @@ def _audio_path(result):
 
 # ---------------------------------------------------------------- audio
 
+def trova_ffmpeg(cfg):
+    """ffmpeg per l'MP3: ffmpeg_path, poi quello nel PATH, poi quello incluso in imageio-ffmpeg (pip)."""
+    if cfg.get("ffmpeg_path") and os.path.exists(cfg["ffmpeg_path"]):
+        return cfg["ffmpeg_path"]
+    trovato = shutil.which("ffmpeg")
+    if trovato:
+        return trovato
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return None
+
+
 def concatena(cfg, segmenti, out_path):
+    fmt = cfg["output_format"].lower()
+    ffmpeg = trova_ffmpeg(cfg)
+    if fmt != "wav" and not ffmpeg:
+        raise RuntimeError("FFmpeg non trovato: serve per l'MP3. Installa imageio-ffmpeg nel Python della pipeline "
+                           "(in Pinokio: Aggiorna, poi Accelerazione GPU AMD) oppure 'winget install Gyan.FFmpeg', "
+                           "o imposta ffmpeg_path in config.json. In alternativa usa il formato wav.")
     from pydub import AudioSegment
 
-    if cfg.get("ffmpeg_path"):
-        AudioSegment.converter = cfg["ffmpeg_path"]
+    if ffmpeg:
+        AudioSegment.converter = ffmpeg
     pausa = AudioSegment.silent(duration=int(cfg["pausa_paragrafo_ms"]))
     audio = None
     for seg in segmenti:
         a = AudioSegment.from_wav(seg)
         audio = a if audio is None else audio + pausa + a
-    fmt = cfg["output_format"].lower()
     tmp = out_path + ".part"
     params = {"bitrate": cfg["mp3_bitrate"]} if fmt == "mp3" else {}
     audio.export(tmp, format=fmt, **params)

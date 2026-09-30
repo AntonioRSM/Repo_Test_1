@@ -1,5 +1,7 @@
 openai>=1.0.0
 gradio_client>=0.10.0
 pydub>=0.25.1
+# ffmpeg incluso (per l'MP3) se non è installato nel sistema
+imageio-ffmpeg
 # pydub usa il modulo audioop, rimosso da Python 3.13
 audioop-lts; python_version >= "3.13"

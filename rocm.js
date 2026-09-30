@@ -16,7 +16,7 @@ module.exports = {
         message: [
           "uv venv --python 3.12 --allow-existing env-rocm",
           "uv pip install --python env-rocm\\Scripts\\python.exe --find-links https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/ --index-strategy unsafe-best-match torch==2.9.1+rocm7.2.1 torchaudio==2.9.1+rocm7.2.1",
-          "uv pip install --python env-rocm\\Scripts\\python.exe --find-links https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/ --index-strategy unsafe-best-match f5-tts openai gradio_client pydub soundfile torch==2.9.1+rocm7.2.1 torchaudio==2.9.1+rocm7.2.1",
+          "uv pip install --python env-rocm\\Scripts\\python.exe --find-links https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/ --index-strategy unsafe-best-match f5-tts openai gradio_client pydub soundfile imageio-ffmpeg torch==2.9.1+rocm7.2.1 torchaudio==2.9.1+rocm7.2.1",
           "uv pip uninstall --python env-rocm\\Scripts\\python.exe torchcodec",
           "env-rocm\\Scripts\\python.exe gpu_check.py"
         ]
