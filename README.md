@@ -60,7 +60,7 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 
 1. In Pinokio premi **Installa MCP in LM Studio**: aggiunge la voce `f5-tts` a `%USERPROFILE%\.lmstudio\mcp.json`
    (gli altri server restano, la versione precedente è salvata in `mcp.json.bak`).
-   Se la pipeline audiolibri è fuori dal repo: `env\Scripts\python app\lmstudio_mcp_config.py --install --audiobook-dir D:\Workspace\epub_build\audiobook`.
+   Se la pipeline audiolibri è fuori dal repo: `app\env\Scripts\python app\lmstudio_mcp_config.py --install --audiobook-dir D:\Workspace\epub_build\audiobook`.
    In alternativa `python lmstudio_mcp_config.py` stampa il blocco da incollare a mano in **Program → Install → Edit mcp.json**.
 2. In LM Studio: scheda **Program → Integrations**, attiva `mcp/f5-tts` (se non compare, riavvia LM Studio).
 3. In chat abilita lo strumento `f5-tts` e chiedi ad esempio: *"Leggi ad alta voce questo testo: …"*. L'LLM chiamerà `text_to_speech` e ti dirà dove si trova il file `.wav`.
