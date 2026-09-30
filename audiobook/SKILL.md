@@ -22,13 +22,13 @@ I percorsi `D:\...` in `config.json` vengono convertiti in automatico in `/mnt/d
 
 ## Procedura
 
-1. **Verifica sempre i servizi prima di tutto** (porte 1234 e 7860, voce di riferimento):
+1. **Verifica sempre i servizi prima di tutto** (LM Studio sulla 1234, F5-TTS cercato in automatico, voce di riferimento):
    ```bash
    cd AUDIOBOOK_DIR && python audiobook_pipeline.py --check
    ```
    Se un servizio è ❌, fermati e riporta all'utente il messaggio: non avviare il batch.
    - LM Studio: *Developer → Start Server* con un modello caricato.
-   - F5-TTS: avvialo da Pinokio; se la porta non è 7860 aggiorna `f5_tts_url` in `config.json`.
+   - F5-TTS: avvialo da Pinokio; la porta viene trovata da sola (`"f5_tts_url": "auto"`).
 
 2. **Alla prima esecuzione o dopo aver cambiato modello LLM**, verifica la normalizzazione (niente audio):
    ```bash
