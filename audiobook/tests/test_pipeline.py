@@ -186,3 +186,45 @@ def test_pipeline_completa(cfg, tmp_path):
         durata = w.getnframes() / w.getframerate()
     assert abs(durata - 3.4) < 0.02  # 3 segmenti da 1 s + 2 pause da 200 ms
     assert not os.path.exists(os.path.join(cfg["temp_dir"], "capitolo_01"))  # temporanei cancellati
+
+
+# ---------------------------------------------------------------- pre-elaborazione deterministica
+
+@pytest.mark.parametrize("n,card,ordn", [
+    (1, "uno", "primo"), (4, "quattro", "quarto"), (11, "undici", "undicesimo"), (13, "tredici", "tredicesimo"),
+    (19, "diciannove", "diciannovesimo"), (20, "venti", "ventesimo"), (21, "ventuno", "ventunesimo"),
+    (23, "ventitré", "ventitreesimo"), (26, "ventisei", "ventiseiesimo"), (28, "ventotto", "ventottesimo"),
+    (100, "cento", "centesimo"), (108, "centotto", "centottesimo"), (1000, "mille", "millesimo"),
+    (1998, "millenovecentonovantotto", "millenovecentonovantottesimo"),
+])
+def test_cardinali_ordinali(n, card, ordn):
+    assert ap.cardinale(n) == card
+    assert ap.ordinale(n) == ordn
+
+
+def test_romano_a_int():
+    assert [ap.romano_a_int(r) for r in ("IV", "IX", "XIII", "XIX", "XXI", "MCMXCVIII")] == [4, 9, 13, 19, 21, 1998]
+    with pytest.raises(ValueError):
+        ap.romano_a_int("IIII")
+
+
+def test_converti_romani():
+    testo = ("Capitolo IV, Volume II. Nel XIII secolo e nel XIX sec. I secoli bui. Parte II. "
+             "Nel capitolo I personaggi. Capitolo I, inizio. Luigi XIV e Pio IX.")
+    assert ap.converti_romani(testo) == (
+        "Capitolo quarto, Volume secondo. Nel tredicesimo secolo e nel diciannovesimo secolo. I secoli bui. "
+        "Parte seconda. Nel capitolo I personaggi. Capitolo primo, inizio. Luigi XIV e Pio IX.")
+
+
+def test_pulisci_markdown():
+    md = ("# Capitolo XIII\n\nTesto con **grassetto**, _corsivo_ e un [link](http://x.it).[^1]\n\n"
+          "> Citazione\n\n- voce di elenco\n\n---\n\n![img](a.png)\n```\ncodice\n```\n<br>Fine.")
+    assert ap.pulisci_markdown(md) == ("Capitolo XIII.\n\nTesto con grassetto, corsivo e un link.\n\n"
+                                       "Citazione\n\nvoce di elenco\n\nFine.")
+    assert ap.prepara_testo("## Capitolo XIII") == "Capitolo tredicesimo."
+
+
+def test_trova_capitoli_txt_e_md(cfg):
+    for nome in ("000_0157.md", "001.txt", "note.docx"):
+        open(os.path.join(cfg["input_dir"], nome), "w").close()
+    assert [os.path.basename(f) for f in ap.trova_capitoli(cfg)] == ["000_0157.md", "001.txt"]

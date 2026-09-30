@@ -65,7 +65,7 @@ I file vengono salvati in `app/output/`. Indirizzo, modello e prompt di sistema 
 Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
 
 Il server MCP espone anche gli strumenti per gli **audiolibri** (vedi [`audiobook/`](audiobook/README.md)):
-- `genera_audiolibro(file, formato, forza, solo_testo)`: avvia in background la pipeline sui capitoli `.txt`
+- `genera_audiolibro(file, formato, forza, solo_testo)`: avvia in background la pipeline sui capitoli `.txt`/`.md`
   (file vuoto = tutti i capitoli della cartella di input) e risponde subito;
 - `stato_audiolibro(righe)`: stato della generazione e ultime righe del log (`app/output/audiolibro.log`).
 
@@ -111,6 +111,6 @@ python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
 
 ## Audiolibri (LM Studio + F5-TTS + Hermes Agent)
 
-La cartella [`audiobook/`](audiobook/README.md) contiene la pipeline che trasforma capitoli `.txt` in MP3:
+La cartella [`audiobook/`](audiobook/README.md) contiene la pipeline che trasforma capitoli `.txt`/`.md` in MP3:
 LM Studio normalizza il testo, F5-TTS (Gradio su Pinokio) genera la voce, pydub unisce i paragrafi.
 Include la skill per Hermes Agent (`audiobook/SKILL.md`) e un piano di test.

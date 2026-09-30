@@ -1,6 +1,6 @@
 ---
 name: audiobook-f5tts
-description: Genera audiolibri MP3 da capitoli .txt italiani. LM Studio normalizza il testo (numeri arabi e romani, date, accenti sugli omografi) e lo divide in paragrafi; F5-TTS su Pinokio (Gradio /basic_tts) sintetizza la voce clonata; pydub unisce i segmenti con pause di 200 ms. Usala quando l'utente chiede di creare un audiolibro, leggere un capitolo o convertire file .txt in audio/MP3.
+description: Genera audiolibri MP3 da capitoli .txt o .md italiani. LM Studio normalizza il testo (numeri arabi e romani, date, accenti sugli omografi) e lo divide in paragrafi; F5-TTS su Pinokio (Gradio /basic_tts) sintetizza la voce clonata; pydub unisce i segmenti con pause di 200 ms. Usala quando l'utente chiede di creare un audiolibro, leggere un capitolo o convertire file .txt o .md in audio/MP3.
 version: 1.0.0
 metadata:
   hermes:
@@ -14,7 +14,7 @@ metadata:
 | Cosa | Windows | Da WSL2 (Hermes Agent) |
 |---|---|---|
 | Script e configurazione | `D:\Workspace\epub_build\audiobook\` | `/mnt/d/Workspace/epub_build/audiobook/` |
-| Capitoli `.txt` di input | `D:\Workspace\epub_build\testo_x_audio\` | `/mnt/d/Workspace/epub_build/testo_x_audio/` |
+| Capitoli `.txt`/`.md` di input | `D:\Workspace\epub_build\testo_x_audio\` | `/mnt/d/Workspace/epub_build/testo_x_audio/` |
 | MP3 generati | `D:\Workspace\epub_build\` | `/mnt/d/Workspace/epub_build/` |
 
 Nel resto di questa skill `AUDIOBOOK_DIR` indica la cartella dello script.
@@ -58,4 +58,4 @@ I percorsi `D:\...` in `config.json` vengono convertiti in automatico in `/mnt/d
   `remove_silence false` (tassativo: conserva le pause della punteggiatura).
 - Se l'utente segnala sibilanti metalliche imposta `"nfe_step": 48` in `config.json`.
 - Se `voice_ref_text` è ancora il segnaposto, chiedi all'utente la trascrizione esatta di `voce_guida.wav`.
-- Non cancellare i `.txt` di input.
+- Non cancellare i file `.txt`/`.md` di input.

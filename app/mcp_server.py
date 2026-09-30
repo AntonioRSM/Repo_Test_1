@@ -1,7 +1,7 @@
 """Server MCP per LM Studio: aggiunge alla chat di LM Studio gli strumenti
 - `text_to_speech`: l'LLM genera un file audio con F5-TTS;
 - `genera_audiolibro` / `stato_audiolibro`: avviano e seguono la pipeline
-  audiobook/audiobook_pipeline.py (capitoli .txt -> MP3).
+  audiobook/audiobook_pipeline.py (capitoli .txt/.md -> MP3).
 Configurazione: vedi `python lmstudio_mcp_config.py`.
 """
 import contextlib
@@ -32,11 +32,11 @@ def text_to_speech(text: str, speed: float = 1.0) -> str:
 
 @mcp.tool()
 def genera_audiolibro(file: str = "", formato: str = "mp3", forza: bool = False, solo_testo: bool = False) -> str:
-    """Avvia in background la generazione di audiolibri dai capitoli .txt.
+    """Avvia in background la generazione di audiolibri dai capitoli .txt o .md.
 
     Il testo viene normalizzato con LM Studio (numeri, numeri romani, date, accenti),
     letto con F5-TTS su Pinokio e salvato come MP3 nelle cartelle di audiobook/config.json.
-    file: nome di un solo capitolo (es. "capitolo_01.txt"); vuoto = tutti i .txt della cartella di input.
+    file: nome di un solo capitolo (es. "capitolo_01.txt"); vuoto = tutti i .txt e .md della cartella di input.
     formato: "mp3" oppure "wav". forza: rigenera anche i capitoli già esportati.
     solo_testo: solo normalizzazione, senza audio (per controllare il testo).
     La generazione dura minuti o ore: dopo l'avvio usa stato_audiolibro per l'avanzamento.
