@@ -108,8 +108,8 @@ def clean_for_speech(text):
 # ---------------------------------------------------------------- F5-TTS
 
 def torchaudio_compatibile():
-    """torchaudio >= 2.9 legge l'audio solo con torchcodec (che su Windows spesso non si installa o
-    manca): in quel caso torchaudio.load, usato da F5-TTS per la voce di riferimento, passa a soundfile."""
+    """torchaudio >= 2.9 legge l'audio solo con torchcodec (su Windows spesso assente o incompatibile):
+    torchaudio.load, usato da F5-TTS per la voce di riferimento, passa a soundfile."""
     try:
         import torchaudio
 
@@ -118,12 +118,8 @@ def torchaudio_compatibile():
         return
     if versione < (2, 9):
         return
-    try:
-        import torchcodec  # noqa: F401
-
-        return
-    except Exception:
-        pass
+    # Niente "import torchcodec" per provarlo: se la sua DLL non combacia con torch, Windows apre una finestra
+    # di errore modale che blocca il processo. Il WAV di riferimento si legge con soundfile.
     import soundfile as sf
     import torch
 
