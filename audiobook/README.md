@@ -31,13 +31,18 @@ capitolo_01.txt ──► LM Studio :1234 ──► ["paragrafo 1", "paragrafo 2
    python -m pip install -r requirements.txt
    ```
 3. **FFmpeg** serve per l'MP3: `winget install Gyan.FFmpeg`, oppure indica il percorso di `ffmpeg.exe` in `config.json` → `ffmpeg_path`.
-4. Metti `voce_guida.wav` nella cartella e scrivi in `config.json` → `voice_ref_text` la sua **trascrizione esatta**.
+4. **Voce di riferimento**: metti `voce_guida.wav` nella cartella e scrivi in `config.json` → `voice_ref_text` la sua
+   **trascrizione esatta**. Se `voce_guida.wav` manca viene usata la voce predefinita salvata nell'app
+   (`app/voices/voce_riferimento.wav`, pulsante *Salva come voce predefinita* dell'interfaccia). Se la trascrizione
+   è vuota o è ancora il segnaposto, F5-TTS la ricava da solo con Whisper (meno preciso).
 5. Avvia **LM Studio** → *Developer* → *Start Server* (porta 1234) con un modello caricato.
    Consigliati: Qwen3 8B/14B, Gemma 3 12B, Mistral Small (i modelli da 3-4B sbagliano spesso le regole).
-6. Avvia **F5-TTS** in Pinokio. Nel terminale di Pinokio leggi la riga `Running on local URL: http://127.0.0.1:XXXX`:
-   Non serve annotare la porta: con `"f5_tts_url": "auto"` la pipeline cerca da sola il server Gradio con `/basic_tts`
-   sulle porte 7860-7880 e 42000-42300 (`f5_tts_porte`), perché Pinokio la cambia a ogni avvio.
-   Se trova solo l'interfaccia "F5-TTS + LM Studio" di questo repo (senza `/basic_tts`) lo segnala.
+6. **F5-TTS** (`"tts_backend": "auto"`): la pipeline cerca prima un'app Gradio con `/basic_tts` (l'app F5-TTS
+   ufficiale di Pinokio) sulle porte 7860-7880 e 42000-42300 (`f5_tts_porte`), perché Pinokio le cambia a ogni avvio.
+   Se non la trova, **carica da sola il modello F5-TTS installato nell'app "F5-TTS + LM Studio"** (stesso modello
+   italiano, impostazioni da `app/config.json`): basta lanciarla con il Python dell'app
+   (`app\env\Scripts\python`), come fanno gli strumenti MCP. L'interfaccia web dell'app non serve: puoi fermarla
+   per liberare memoria della GPU. Per forzare una modalità: `"tts_backend": "gradio"` oppure `"locale"`.
 
 ## Hermes Agent
 

@@ -278,3 +278,62 @@ def test_trova_f5(cfg, capsys):
     finally:
         f5.shutdown()
         repo_ui.shutdown()
+
+
+# ---------------------------------------------------------------- F5-TTS locale e voce dell'app
+
+def test_risolvi_voce_usa_quella_dell_app(cfg, tmp_path, monkeypatch):
+    app = tmp_path / "app"
+    (app / "voices").mkdir(parents=True)
+    write_wav(app / "voices" / "voce_riferimento.wav")
+    (app / "config.json").write_text(json.dumps({"ref_text": "Ciao a tutti."}))
+    monkeypatch.setattr(ap, "APP_DIR", str(app))
+    cfg["voice_ref_audio"] = str(tmp_path / "manca.wav")
+    assert ap.risolvi_voce(cfg)
+    assert cfg["voice_ref_audio"] == str(app / "voices" / "voce_riferimento.wav")
+    assert cfg["voice_ref_text"] == "Ciao a tutti."
+
+
+def test_risolvi_voce_segnaposto_e_mancante(cfg, tmp_path, monkeypatch):
+    monkeypatch.setattr(ap, "APP_DIR", str(tmp_path / "nessuna_app"))
+    cfg["voice_ref_text"] = ap.VOICE_REF_TEXT
+    assert ap.risolvi_voce(cfg) and cfg["voice_ref_text"] == ""  # trascrizione automatica
+    cfg["voice_ref_audio"] = str(tmp_path / "manca.wav")
+    assert not ap.risolvi_voce(cfg)
+
+
+def test_backend_locale_senza_basic_tts(cfg, monkeypatch, capsys):
+    cfg["f5_tts_porte"] = []
+    monkeypatch.setattr(ap, "f5_locale_disponibile", lambda: True)
+    assert ap.check_services(cfg, need_tts=True)
+    assert cfg["_backend"] == "locale" and "F5-TTS locale" in capsys.readouterr().out
+    cfg["tts_backend"] = "gradio"
+    cfg.pop("_backend")
+    assert not ap.check_services(cfg, need_tts=True)
+
+
+def test_local_f5tts(cfg, tmp_path, monkeypatch):
+    chiamate = {}
+
+    class FintoF5TTS:
+        def __init__(self, **kw):
+            chiamate["init"] = kw
+
+        def infer(self, **kw):
+            chiamate["infer"] = kw
+            write_wav(kw["file_wave"])
+
+    import types
+    monkeypatch.setitem(sys.modules, "f5_tts", types.ModuleType("f5_tts"))
+    monkeypatch.setitem(sys.modules, "f5_tts.api", types.SimpleNamespace(F5TTS=FintoF5TTS))
+    monkeypatch.setitem(sys.modules, "cached_path", types.SimpleNamespace(cached_path=lambda u: "/cache/" + u.split("/")[-1]))
+    monkeypatch.setattr(ap, "APP_DIR", str(tmp_path / "nessuna_app"))
+    cfg["_backend"] = "locale"
+    tts = ap.crea_tts(cfg)
+    assert isinstance(tts, ap.LocalF5TTS)
+    assert chiamate["init"] == {"model": "F5TTS_Base", "ckpt_file": "/cache/model_159600.safetensors",
+                                "vocab_file": "/cache/vocab.txt", "device": None}
+    out = tts.synthesize("Testo.", str(tmp_path / "001_paragrafo.wav"))
+    kw = chiamate["infer"]
+    assert os.path.exists(out) and kw["gen_text"] == "Testo."
+    assert (kw["nfe_step"], kw["speed"], kw["cross_fade_duration"], kw["remove_silence"], kw["seed"]) == (32, 0.95, 0.15, False, 42)
