@@ -68,3 +68,23 @@ def test_verifica(job, monkeypatch):
     assert "Cartella pipeline:" in out and "argomenti: --check" in out and out.endswith("Tutto pronto.")
     monkeypatch.setenv("FAKE_EXIT", "1")
     assert job.check().endswith("Ci sono problemi da risolvere (righe con ❌).")
+
+
+def test_ferma_e_pid(job, monkeypatch):
+    monkeypatch.setenv("FAKE_SLEEP", "30")
+    assert job.stop() == "Nessuna generazione in corso."
+    job.start(normalizzazione="regole")
+    assert os.path.exists(job.pid_path)
+    # un nuovo server MCP (nuova istanza) vede la generazione avviata dal precedente
+    altro = audiobook_job.AudiobookJob(log_path=job.log_path)
+    assert altro.running() and altro.status().startswith("In corso (avviata da una sessione precedente")
+    assert altro.start().startswith("Una generazione è già in corso.")
+    assert altro.stop().startswith("Generazione interrotta.")
+    wait(job)
+    assert not job.running() and not altro.running()
+
+
+def test_normalizzazione_nel_comando(job):
+    assert job.build_command(normalizzazione="regole")[-2:] == ["--normalizzazione", "regole"]
+    with pytest.raises(ValueError):
+        job.build_command(normalizzazione="altro")

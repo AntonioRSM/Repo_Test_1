@@ -337,3 +337,44 @@ def test_local_f5tts(cfg, tmp_path, monkeypatch):
     kw = chiamate["infer"]
     assert os.path.exists(out) and kw["gen_text"] == "Testo."
     assert (kw["nfe_step"], kw["speed"], kw["cross_fade_duration"], kw["remove_silence"], kw["seed"]) == (32, 0.95, 0.15, False, 42)
+
+
+# ---------------------------------------------------------------- normalizzazione a regole e LLM più robusto
+
+def test_converti_numeri():
+    t = ap.converti_numeri("Nel 1848 c'erano 12.000 soldati, il 3,5% e costo €20; la 1ª volta, il 2° gara, "
+                           "il 21° giorno; 15/05/1998; 1.250.000 abitanti; 0 errori.")
+    assert t == ("Nel milleottocentoquarantotto c'erano dodicimila soldati, il tre virgola cinque per cento e costo "
+                 "venti euro; la prima volta, il seconda gara, il ventunesimo giorno; quindici maggio "
+                 "millenovecentonovantotto; un milione duecentocinquantamila abitanti; zero errori.")
+
+
+def test_converti_sovrani():
+    assert ap.converti_sovrani("Luigi XIV e Pio IX, Carlo V. Carlo I di Spagna. Vitamina C. Poi Carlo I personaggi.") == \
+        "Luigi Quattordicesimo e Pio Nono, Carlo Quinto. Carlo Primo di Spagna. Vitamina C. Poi Carlo I personaggi."
+
+
+def test_dividi_paragrafi():
+    frase = " ".join(["parola"] * 30) + "."
+    testo = "Titolo senza punto\n\n" + "\n\n".join([frase] * 12)
+    par = ap.dividi_paragrafi(testo, 100, 200)
+    assert par[0].startswith("Titolo senza punto. parola")
+    assert all(100 <= ap.word_count(p) <= 200 for p in par[:-1]) and ap.word_count(" ".join(par)) == 363
+
+
+def test_normalizzazione_regole_supera_il_test(cfg):
+    cfg["normalizzazione"] = "regole"
+    assert ap.test_normalizzazione(cfg)  # senza LM Studio
+
+
+def test_check_services_regole_senza_lmstudio(cfg, capsys):
+    cfg.update(normalizzazione="regole", lmstudio_url="http://127.0.0.1:1/v1")
+    assert ap.check_services(cfg, need_tts=False)
+    assert "LM Studio non serve" in capsys.readouterr().out
+
+
+def test_llm_senza_retry_nascosti_e_no_think(cfg):
+    client = ap.lm_client(cfg)
+    assert client.max_retries == 0 and client.timeout == 300
+    ap.normalizza_testo(cfg, "Testo di prova.")
+    assert FakeLMStudio.requests[-1]["messages"][0]["content"].endswith("/no_think")

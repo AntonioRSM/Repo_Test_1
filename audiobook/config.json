@@ -17,6 +17,9 @@
   "llm_chunk_words": 700,
   "llm_json_schema": true,
   "llm_retries": 2,
+  "llm_timeout": 300,
+  "llm_no_think": true,
+  "normalizzazione": "llm",
 
   "tts_backend": "auto",
   "f5_tts_url": "auto",

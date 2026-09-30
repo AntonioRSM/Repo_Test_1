@@ -120,6 +120,21 @@ Verifiche del passo 3 sul testo di prova:
 Gli accenti sugli omografi (*àncora/ancóra*, *sùbito*, *princìpi*) vanno controllati a occhio nel testo stampato:
 dipendono dal contesto e non hanno una forma unica verificabile in automatico.
 
+## Velocità e migliaia di capitoli
+
+- **Normalizzazione a regole** (`"normalizzazione": "regole"`, `--normalizzazione regole`, o in chat
+  *genera_audiolibro con normalizzazione "regole"*): niente LLM. Converte numeri, date (15/05/1998), ordinali (1°, 2ª),
+  percentuali, euro, decimali, migliaia, numeri romani (secoli, capitoli, sovrani e papi) e divide in paragrafi da
+  100-200 parole in una frazione di secondo. Non mette gli accenti sugli omografi (serve il contesto: solo `llm`).
+- **Con LM Studio** (`"normalizzazione": "llm"`): ogni richiesta ha un timeout di `llm_timeout` secondi (300) e i
+  nuovi tentativi sono scritti nel log (prima la libreria li ripeteva in silenzio fino a 45 minuti). Con
+  `llm_no_think` i modelli che "ragionano" (Qwen3) rispondono senza il lungo blocco di ragionamento.
+- **F5-TTS su CPU è lento**: ogni paragrafo può richiedere minuti; il log mostra i secondi per paragrafo. Con una GPU
+  NVIDIA la sintesi è molte volte più veloce. Su CPU si può ridurre `nfe_step` (es. 16: circa il doppio più veloce,
+  qualità un po' inferiore).
+- `ferma_audiolibro` (MCP) interrompe la generazione, anche se avviata prima di un riavvio del server MCP;
+  rilanciando riparte dai paragrafi già pronti.
+
 ## Note sui parametri
 
 - **Pre-elaborazione senza LLM** (prima di LM Studio): dai file `.md` viene tolta la sintassi Markdown
