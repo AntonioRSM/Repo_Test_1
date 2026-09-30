@@ -61,8 +61,10 @@ Poi, in chat con Hermes (o in modalità one-shot, es. `hermes chat -q "..."`; co
 
 ## Dalla chat di LM Studio (MCP)
 
-Il server MCP del repo (`app/mcp_server.py`) ha gli strumenti `genera_audiolibro` e `stato_audiolibro`:
+Il server MCP del repo (`app/mcp_server.py`) ha gli strumenti `verifica_audiolibro`, `genera_audiolibro` e `stato_audiolibro`:
 configuralo come descritto nel [README principale](../README.md#b-server-mcp-voce-dentro-la-chat-di-lm-studio), poi in chat:
+
+> Chiama verifica_audiolibro
 
 > Genera l'audiolibro di capitolo_01.txt
 

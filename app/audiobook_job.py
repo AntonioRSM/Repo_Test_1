@@ -46,6 +46,20 @@ class AudiobookJob:
             cmd.append("--dry-run")
         return cmd
 
+    def check(self, timeout=90):
+        """Esegue audiobook_pipeline.py --check: percorsi, LM Studio, F5-TTS e voce di riferimento."""
+        cmd = self.build_command()[:3] + ["--check"]
+        intro = f"Cartella pipeline: {pipeline_dir()}\n"
+        try:
+            r = subprocess.run(cmd, cwd=pipeline_dir(), stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=timeout,
+                               env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except subprocess.TimeoutExpired:
+            return intro + f"Verifica non completata entro {timeout} s."
+        esito = "Tutto pronto." if r.returncode == 0 else "Ci sono problemi da risolvere (righe con ❌)."
+        return intro + (r.stdout + r.stderr).strip() + "\n\n" + esito
+
     def start(self, file="", formato="mp3", forza=False, solo_testo=False):
         if self.running():
             return "Una generazione è già in corso.\n\n" + self.status()

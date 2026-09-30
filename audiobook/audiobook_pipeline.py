@@ -153,7 +153,16 @@ def load_config(path=CONFIG_PATH):
     cfg["f5_tts_url"] = os.environ.get("F5_TTS_URL", cfg["f5_tts_url"])
     for key in ("input_dir", "output_dir", "temp_dir", "voice_ref_audio"):
         cfg[key] = _resolve(cfg[key])
+    cfg["config_path"] = os.path.abspath(path)
     return cfg
+
+
+def conta_capitoli(cfg):
+    estensioni = cfg.get("input_ext") or [".txt", ".md"]
+    try:
+        return sum(os.path.splitext(f)[1].lower() in estensioni for f in os.listdir(cfg["input_dir"]))
+    except OSError:
+        return None
 
 
 # ---------------------------------------------------------------- verifiche
@@ -170,6 +179,14 @@ def port_open(url, timeout=3):
 
 def check_services(cfg, need_tts=True):
     ok = True
+    log(f"📁 Configurazione: {cfg['config_path']}")
+    n = conta_capitoli(cfg)
+    if n is None:
+        log(f"❌ Cartella di input non trovata: {cfg['input_dir']} (input_dir in config.json)")
+        ok = False
+    else:
+        log(f"📁 Input: {cfg['input_dir']} ({n} capitoli {'/'.join(cfg.get('input_ext') or ['.txt', '.md'])})")
+    log(f"📁 Output: {cfg['output_dir']}")
     if port_open(cfg["lmstudio_url"]):
         try:
             models = list_models(cfg)

@@ -228,3 +228,13 @@ def test_trova_capitoli_txt_e_md(cfg):
     for nome in ("000_0157.md", "001.txt", "note.docx"):
         open(os.path.join(cfg["input_dir"], nome), "w").close()
     assert [os.path.basename(f) for f in ap.trova_capitoli(cfg)] == ["000_0157.md", "001.txt"]
+
+
+def test_check_services_mostra_percorsi(cfg, capsys):
+    open(os.path.join(cfg["input_dir"], "000_0157.md"), "w").close()
+    ap.check_services(cfg, need_tts=False)
+    out = capsys.readouterr().out
+    assert "📁 Configurazione:" in out and f"📁 Input: {cfg['input_dir']} (1 capitoli" in out
+    cfg["input_dir"] = cfg["input_dir"] + "_manca"
+    assert not ap.check_services(cfg, need_tts=False)
+    assert "Cartella di input non trovata" in capsys.readouterr().out

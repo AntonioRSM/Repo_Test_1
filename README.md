@@ -70,7 +70,9 @@ Serve un modello con supporto ai *tool* (es. Qwen3, Llama 3.1+, Mistral).
 Il server MCP espone anche gli strumenti per gli **audiolibri** (vedi [`audiobook/`](audiobook/README.md)):
 - `genera_audiolibro(file, formato, forza, solo_testo)`: avvia in background la pipeline sui capitoli `.txt`/`.md`
   (file vuoto = tutti i capitoli della cartella di input) e risponde subito;
-- `stato_audiolibro(righe)`: stato della generazione e ultime righe del log (`app/output/audiolibro.log`).
+- `stato_audiolibro(righe)`: stato della generazione e ultime righe del log (`app/output/audiolibro.log`);
+- `verifica_audiolibro()`: dove sono `config.json`, cartella dei capitoli e cartella di output, e se LM Studio,
+  F5-TTS e voce di riferimento sono pronti (evita che l'LLM cerchi i file sul disco).
 
 Esempio in chat: *"Genera l'audiolibro di capitolo_01.txt"*, poi *"A che punto è l'audiolibro?"*.
 Prima dell'uso: dopo l'aggiornamento premi **Aggiorna** in Pinokio (installa `openai`, `gradio_client`, `pydub` nell'ambiente

@@ -61,3 +61,10 @@ def test_errore_e_doppio_avvio(job, monkeypatch):
     assert job.start().startswith("Una generazione è già in corso.")
     wait(job)
     assert "Terminata con errori (codice 1)" in job.status()
+
+
+def test_verifica(job, monkeypatch):
+    out = job.check()
+    assert "Cartella pipeline:" in out and "argomenti: --check" in out and out.endswith("Tutto pronto.")
+    monkeypatch.setenv("FAKE_EXIT", "1")
+    assert job.check().endswith("Ci sono problemi da risolvere (righe con ❌).")
