@@ -26,5 +26,22 @@ for _ in range(20):
     x = x / x.norm()
 torch.cuda.synchronize()
 print(f"GPU: {nome} | test di calcolo: {time.time() - t0:.2f} s")
+
+# F5-TTS deve anche importarsi: le build ROCm per Windows non hanno torch.distributed (encodec/vocos lo citano).
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "audiobook"))
+try:
+    import audiobook_pipeline as ap
+
+    ap._torch_distributed_compatibile()
+    ap._salta_trainer_f5()
+    ap._torchaudio_compatibile()
+    from f5_tts.api import F5TTS  # noqa: F401
+    import vocos  # noqa: F401
+except Exception as e:
+    if os.path.exists(PRONTO):
+        os.remove(PRONTO)
+    raise SystemExit(f"F5-TTS non si carica in questo ambiente: {type(e).__name__}: {e}\n"
+                     "La pipeline continuerà a usare la CPU. Incolla questo messaggio per assistenza.")
+print("F5-TTS importabile con PyTorch ROCm.")
 open(os.path.normpath(PRONTO), "w").close()
 print("GPU pronta: la pipeline audiolibri userà questo ambiente (app/env-rocm).")
