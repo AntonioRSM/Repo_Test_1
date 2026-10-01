@@ -321,9 +321,11 @@ def test_local_f5tts(cfg, tmp_path, monkeypatch):
 
         def infer(self, **kw):
             chiamate["infer"] = kw
-            write_wav(kw["file_wave"])
+            return "onda", 24000, None
 
     import types
+    monkeypatch.setitem(sys.modules, "soundfile",
+                        types.SimpleNamespace(write=lambda p, wav, sr: write_wav(p, rate=sr)))
     monkeypatch.setitem(sys.modules, "f5_tts", types.ModuleType("f5_tts"))
     monkeypatch.setitem(sys.modules, "f5_tts.api", types.SimpleNamespace(F5TTS=FintoF5TTS))
     monkeypatch.setitem(sys.modules, "cached_path", types.SimpleNamespace(cached_path=lambda u: "/cache/" + u.split("/")[-1]))
@@ -337,6 +339,7 @@ def test_local_f5tts(cfg, tmp_path, monkeypatch):
     kw = chiamate["infer"]
     assert os.path.exists(out) and kw["gen_text"] == "Testo."
     assert (kw["nfe_step"], kw["speed"], kw["cross_fade_duration"], kw["remove_silence"], kw["seed"]) == (32, 0.95, 0.15, False, 42)
+    assert kw["file_wave"] is None and not [f for f in os.listdir(tmp_path) if f.endswith(".tmp.wav")]
 
 
 # ---------------------------------------------------------------- normalizzazione a regole e LLM più robusto
@@ -478,3 +481,36 @@ def test_mp3_senza_ffmpeg_errore_chiaro(cfg, tmp_path, monkeypatch):
     cfg["output_format"] = "mp3"
     with pytest.raises(RuntimeError, match="FFmpeg non trovato"):
         ap.concatena(cfg, [], str(tmp_path / "x.mp3"))
+
+
+
+def test_scrivi_atomico_ritenta_se_il_file_e_occupato(tmp_path, monkeypatch):
+    monkeypatch.setattr(ap.time, "sleep", lambda s: None)
+    tentativi = []
+
+    def scrivi(p):
+        tentativi.append(p)
+        if len(tentativi) < 3:
+            raise RuntimeError("Error opening '%s': System error." % p)
+        write_wav(p)
+
+    out = str(tmp_path / "004_paragrafo.wav")
+    assert ap.scrivi_atomico(out, scrivi) == out
+    assert len(tentativi) == 3 and os.path.exists(out) and not os.path.exists(tentativi[0])
+    with pytest.raises(RuntimeError, match="dopo 2 tentativi"):
+        ap.scrivi_atomico(str(tmp_path / "x.wav"), lambda p: (_ for _ in ()).throw(OSError("occupato")), tentativi=2)
+
+
+def test_una_sola_generazione_alla_volta(cfg, monkeypatch):
+    ap.blocca_generazione(cfg)  # questo processo prende il blocco
+    lock = os.path.join(cfg["temp_dir"], ".generazione.lock")
+    assert open(lock).read() == str(os.getpid())
+    ap.blocca_generazione(cfg)  # stesso processo: nessun problema
+    with open(lock, "w") as f:
+        f.write("4194300")  # processo inesistente: blocco orfano, si riprende
+    ap.blocca_generazione(cfg)
+    monkeypatch.setattr(ap, "_pid_attivo", lambda pid: True)
+    with open(lock, "w") as f:
+        f.write("12345")  # un altro processo vivo
+    with pytest.raises(SystemExit, match="già in corso"):
+        ap.blocca_generazione(cfg)

@@ -690,6 +690,77 @@ def normalizza_testo(cfg, testo):
 
 # ---------------------------------------------------------------- F5-TTS locale (senza Gradio)
 
+def scrivi_atomico(out_path, scrivi, tentativi=6):
+    """Scrive su un file temporaneo e lo rinomina, ritentando se Windows tiene il file occupato
+    (antivirus, indicizzazione, un altro processo): evita "Error opening ...wav: System error"."""
+    tmp = f"{out_path}.{os.getpid()}.tmp.wav"
+    ultimo = None
+    for i in range(tentativi):
+        try:
+            scrivi(tmp)
+            os.replace(tmp, out_path)
+            return out_path
+        except (OSError, RuntimeError) as e:  # soundfile.LibsndfileError deriva da RuntimeError
+            ultimo = e
+            log(f"   ⚠️ Scrittura di {os.path.basename(out_path)} non riuscita ({e}): riprovo")
+            time.sleep(1 + 2 * i)
+    try:
+        os.remove(tmp)
+    except OSError:
+        pass
+    raise RuntimeError(f"Impossibile scrivere {out_path} dopo {tentativi} tentativi: {ultimo}")
+
+
+def _pid_attivo(pid):
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        import ctypes
+
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x1000, False, pid)
+        if not h:
+            return False
+        code = ctypes.c_ulong()
+        ok = k32.GetExitCodeProcess(h, ctypes.byref(code))
+        k32.CloseHandle(h)
+        return bool(ok) and code.value == 259
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def blocca_generazione(cfg):
+    """Una sola generazione alla volta sulla stessa cartella temporanea (es. LM Studio + genera_tutto.bat):
+    due processi sugli stessi file si rovinano a vicenda."""
+    import atexit
+
+    os.makedirs(cfg["temp_dir"], exist_ok=True)
+    lock = os.path.join(cfg["temp_dir"], ".generazione.lock")
+    try:
+        with open(lock) as f:
+            altro = int(f.read().strip() or 0)
+    except (OSError, ValueError):
+        altro = 0
+    if altro and altro != os.getpid() and _pid_attivo(altro):
+        raise SystemExit(f"❌ Un'altra generazione è già in corso (processo {altro}): attendi che finisca o fermala "
+                         f"(ferma_audiolibro / chiudi l'altra finestra), poi rilancia.")
+    with open(lock, "w") as f:
+        f.write(str(os.getpid()))
+
+    def rilascia():
+        try:
+            with open(lock) as f:
+                if f.read().strip() == str(os.getpid()):
+                    os.remove(lock)
+        except OSError:
+            pass
+
+    atexit.register(rilascia)
+
+
 def dispositivo_torch():
     """("cuda", nome GPU) se PyTorch vede una GPU (NVIDIA CUDA o AMD ROCm), altrimenti ("cpu", "CPU")."""
     try:
@@ -789,8 +860,10 @@ class LocalF5TTS:
         self.tts = F5TTS(model=t["model"], ckpt_file=ckpt, vocab_file=vocab, device=device)
 
     def synthesize(self, text, out_path):
+        import soundfile as sf
+
         c = self.cfg
-        self.tts.infer(
+        wav, sr, _ = self.tts.infer(
             ref_file=c["voice_ref_audio"],
             ref_text=c["voice_ref_text"],  # "" = trascrizione automatica
             gen_text=text,
@@ -798,10 +871,15 @@ class LocalF5TTS:
             nfe_step=int(c["nfe_step"]),
             speed=float(c["speed"]),
             cross_fade_duration=float(c["cross_fade_duration"]),
-            remove_silence=bool(c["remove_silence"]),
+            remove_silence=False,
             seed=int(c["seed"]),
-            file_wave=out_path,
+            file_wave=None,  # il file lo scriviamo noi, con i nuovi tentativi
         )
+        scrivi_atomico(out_path, lambda p: sf.write(p, wav, sr))
+        if c["remove_silence"]:
+            from f5_tts.infer.utils_infer import remove_silence_for_generated_wav
+
+            remove_silence_for_generated_wav(out_path)
         return out_path
 
 
@@ -876,7 +954,8 @@ class F5TTSClient:
         for attempt in range(self.cfg["tts_retries"] + 1):
             try:
                 result = self.client.predict(api_name=self.cfg["f5_api_name"], **kwargs)
-                shutil.copyfile(_audio_path(result), out_path)
+                sorgente = _audio_path(result)
+                scrivi_atomico(out_path, lambda p: shutil.copyfile(sorgente, p))
                 return out_path
             except Exception as e:
                 last = e
@@ -1070,6 +1149,8 @@ def main():
     if args.test_normalizzazione:
         raise SystemExit(0 if test_normalizzazione(cfg) else 1)
 
+    if not args.check and not args.test_normalizzazione:
+        blocca_generazione(cfg)
     if args.lista:
         with open(args.lista, encoding="utf-8") as f:
             capitoli = [r.strip() for r in f if r.strip()]
