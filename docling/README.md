@@ -1,7 +1,7 @@
 # Docling – conversione archivi documentali per LightRAG
 
 Converte in **Markdown pulito** tutti i documenti di un progetto, pronti per l'indicizzazione in LightRAG.
-Gira in **WSL2** (Ubuntu) su Windows.
+Funziona direttamente su **Windows 11** (avvio dal menu Start); in alternativa anche in WSL2.
 
 | Formato | Come viene gestito |
 |---|---|
@@ -11,39 +11,41 @@ Gira in **WSL2** (Ubuntu) su Windows.
 | DOC, XLS, PPT (vecchi Office) | conversione tramite LibreOffice |
 | Email `.eml` / `.msg` | corpo + mittente/destinatari/data/oggetto; gli **allegati** vengono estratti e convertiti a loro volta |
 
-## Installazione (una volta sola)
+## Installazione su Windows 11 (una volta sola)
 
-1. In PowerShell come amministratore, se WSL2 non è ancora installato:
-   ```powershell
-   wsl --install -d Ubuntu
-   ```
-2. Apri il terminale **Ubuntu**, vai nella cartella `docling` di questo repository e lancia:
-   ```bash
-   bash installa_wsl.sh
-   ```
-   Installa Python, Tesseract (ita+eng), LibreOffice, PyTorch (con CUDA se in WSL è visibile una GPU NVIDIA),
-   Docling e i suoi modelli, e crea il comando `converti-archivio`.
+1. Scarica questa cartella `docling` sul PC.
+2. Apri la sottocartella `windows` e fai **doppio clic su `INSTALLA.bat`**.
+   Windows può chiedere più volte l'autorizzazione (per Python, Tesseract e LibreOffice): rispondi **Sì**.
+3. Attendi la fine (la prima volta 10–30 minuti: scarica alcuni GB fra PyTorch e i modelli).
+
+L'installatore:
+- installa con `winget`, se mancano, **Python 3.12**, **Tesseract OCR** e **LibreOffice**;
+- scarica i dizionari OCR **italiano e inglese**;
+- crea un ambiente Python dedicato con **Docling** e **PyTorch** (con CUDA se trova una GPU NVIDIA);
+- scarica i modelli di Docling;
+- crea nel **menu Start** la cartella **Docling Archivio** con:
+  - **Converti archivio documentale**: avvia la conversione;
+  - **Leggimi**: queste istruzioni;
+  - **Disinstalla Docling Archivio**.
+
+Tutto viene installato in `%LOCALAPPDATA%\DoclingArchivio` (i modelli in `%USERPROFILE%\.cache\docling`).
 
 ## Struttura di un progetto
 
 ```
 D:\RAG\progetto-alfa\
  ├─ originali\     ← metti qui i documenti (anche in sottocartelle)
- ├─ markdown\      ← creato dallo script: tutti i Markdown + registro + quarantena
- └─ inputs\        ← creato dallo script: solo i Markdown validi, da far leggere a LightRAG
+ ├─ markdown\      ← creato dal programma: tutti i Markdown + registro + quarantena
+ └─ inputs\        ← creato dal programma: solo i Markdown validi, da far leggere a LightRAG
 ```
 
 ## Uso
 
-**Da Windows:** trascina la cartella del progetto su `converti_archivio.bat`
-(oppure `converti_archivio.bat "D:\RAG\progetto-alfa"`).
-
-**Da Ubuntu/WSL:**
-```bash
-converti-archivio /mnt/d/RAG/progetto-alfa
-converti-archivio /mnt/d/RAG/progetto-alfa --ocr easyocr      # motore OCR alternativo
-converti-archivio /mnt/d/RAG/progetto-alfa --timeout 1800     # documenti molto lunghi
-```
+1. Menu Start → **Converti archivio documentale**.
+2. Scegli la cartella del progetto (es. `D:\RAG\progetto-alfa`). Se manca `originali`, il programma
+   propone di crearla e la apre in Esplora file.
+3. La conversione procede nella finestra; alla fine si apre la cartella `markdown` e ti viene proposto di
+   aprire il registro in Excel.
 
 ## Cosa trovi in `markdown\`
 
@@ -74,5 +76,21 @@ quelli andati in errore.
   Prima converti tutto, poi indicizza.
 - Prima del carico completo, prova su 50–100 documenti rappresentativi e apri alcuni Markdown accanto agli
   originali, in particolare tabelle e scansioni.
-- Le cartelle su `D:\` (viste da WSL come `/mnt/d/...`) sono più lente del disco interno di WSL,
-  ma per qualche migliaio di documenti la differenza è accettabile.
+- Tieni i percorsi brevi (es. `D:\RAG\progetto`): Windows ha problemi oltre i 260 caratteri, a meno che
+  l'installatore sia stato eseguito come amministratore (abilita i percorsi lunghi).
+
+## Uso da riga di comando (avanzato)
+
+```powershell
+$env:TESSDATA_PREFIX = "$env:LOCALAPPDATA\DoclingArchivio\tessdata"
+& "$env:LOCALAPPDATA\DoclingArchivio\env\Scripts\python.exe" "$env:LOCALAPPDATA\DoclingArchivio\app\converti.py" `
+    D:\RAG\progetto-alfa\originali D:\RAG\progetto-alfa\markdown --copia-in D:\RAG\progetto-alfa\inputs `
+    --tesseract-cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"
+```
+
+Opzioni utili: `--ocr easyocr` (motore OCR alternativo), `--timeout 1800` (documenti molto lunghi).
+
+## Alternativa: WSL2 (Ubuntu)
+
+Se preferisci lavorare in WSL2: dal terminale Ubuntu lancia `bash installa_wsl.sh`, poi
+`converti-archivio /mnt/d/RAG/progetto-alfa`, oppure trascina la cartella del progetto su `converti_archivio.bat`.

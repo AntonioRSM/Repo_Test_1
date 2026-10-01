@@ -24,6 +24,7 @@ import hashlib
 import html
 import json
 import logging
+import os
 import re
 import shutil
 import sys
@@ -65,9 +66,10 @@ CARTELLA_ALLEGATI = "_allegati_estratti"
 
 # ---------------------------------------------------------------- converter
 
-def crea_converter(ocr: str, lingue: list[str], forza_ocr: bool, timeout: float) -> DocumentConverter:
+def crea_converter(ocr: str, lingue: list[str], forza_ocr: bool, timeout: float,
+                   tesseract_cmd: str = "tesseract") -> DocumentConverter:
     if ocr == "tesseract":
-        ocr_opts = TesseractCliOcrOptions(lang=lingue)
+        ocr_opts = TesseractCliOcrOptions(lang=lingue, tesseract_cmd=tesseract_cmd)
     elif ocr == "easyocr":
         # EasyOCR usa codici ISO a 2 lettere (it, en)
         ocr_opts = EasyOcrOptions(lang=[{"ita": "it", "eng": "en"}.get(l, l) for l in lingue])
@@ -179,13 +181,13 @@ class Convertitore:
         self.copia_in: Path | None = args.copia_in.resolve() if args.copia_in else None
         self.uscita.mkdir(parents=True, exist_ok=True)
         lingue = args.lingue.split("+")
-        self.conv = crea_converter(args.ocr, lingue, False, args.timeout)
-        self.conv_ocr_forzato = crea_converter(args.ocr, lingue, True, args.timeout)
+        self.conv = crea_converter(args.ocr, lingue, False, args.timeout, args.tesseract_cmd)
+        self.conv_ocr_forzato = crea_converter(args.ocr, lingue, True, args.timeout, args.tesseract_cmd)
         self.percorso_stato = self.uscita / FILE_STATO
-        self.stato = json.loads(self.percorso_stato.read_text()) if self.percorso_stato.exists() else {}
+        self.stato = json.loads(self.percorso_stato.read_text(encoding="utf-8")) if self.percorso_stato.exists() else {}
         self.percorso_registro = self.uscita / FILE_REGISTRO
         nuovo = not self.percorso_registro.exists()
-        self.registro = self.percorso_registro.open("a", newline="", encoding="utf-8")
+        self.registro = self.percorso_registro.open("a", newline="", encoding="utf-8-sig")
         self.csv = csv.writer(self.registro, delimiter=";")
         if nuovo:
             self.csv.writerow(["data", "file", "esito", "pagine", "caratteri", "secondi", "note"])
@@ -199,7 +201,7 @@ class Convertitore:
 
     def salva_stato(self):
         tmp = self.percorso_stato.with_suffix(".tmp")
-        tmp.write_text(json.dumps(self.stato, indent=1, ensure_ascii=False))
+        tmp.write_text(json.dumps(self.stato, indent=1, ensure_ascii=False), encoding="utf-8")
         tmp.replace(self.percorso_stato)
 
     def esegui(self):
@@ -286,6 +288,8 @@ def main():
     ap.add_argument("--copia-in", type=Path, help="copia i Markdown validi qui (es. la cartella inputs di LightRAG)")
     ap.add_argument("--ocr", choices=["tesseract", "easyocr", "rapidocr"], default="tesseract")
     ap.add_argument("--lingue", default="ita+eng", help="lingue OCR (default ita+eng)")
+    ap.add_argument("--tesseract-cmd", default=os.environ.get("TESSERACT_CMD", "tesseract"),
+                    help="percorso di tesseract (default: variabile TESSERACT_CMD o 'tesseract')")
     ap.add_argument("--timeout", type=float, default=900, help="secondi massimi per documento")
     args = ap.parse_args()
 
