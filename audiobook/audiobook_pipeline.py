@@ -656,13 +656,23 @@ def normalizza_blocco(cfg, client, testo):
         t0 = time.time()
         try:
             resp = client.chat.completions.create(**kwargs, **({"response_format": JSON_SCHEMA} if use_schema else {}))
-            out = parse_paragraphs(resp.choices[0].message.content or "")
+            scelta = resp.choices[0]
+            contenuto = scelta.message.content or ""
+            if not contenuto.strip():
+                motivo = " (token esauriti: il modello ha speso la risposta nel ragionamento)" \
+                    if getattr(scelta, "finish_reason", "") == "length" else ""
+                raise ValueError(f"risposta vuota dell'LLM{motivo}")
+            out = parse_paragraphs(contenuto)
             log(f"   LM Studio ha risposto in {time.time() - t0:.0f} s")
             return out
         except Exception as e:  # schema non supportato, JSON malformato, timeout...
             last = e
             log(f"   ⚠️ Tentativo {attempt + 1} di normalizzazione fallito dopo {time.time() - t0:.0f} s: {e}")
     raise RuntimeError(f"Normalizzazione non riuscita: {last}")
+
+
+def _blocco_a_regole(cfg, testo):
+    return dividi_paragrafi(converti_numeri(converti_sovrani(testo)), cfg["parole_min"], cfg["parole_max"])
 
 
 def normalizza_testo(cfg, testo):
@@ -675,8 +685,23 @@ def normalizza_testo(cfg, testo):
     chunks = chunk_text(testo, cfg["llm_chunk_words"])
     paragraphs = []
     for i, chunk in enumerate(chunks, 1):
+        if cfg.get("_llm_disattivato"):
+            paragraphs += _blocco_a_regole(cfg, chunk)
+            continue
         log(f"   LM Studio: blocco {i}/{len(chunks)} ({word_count(chunk)} parole)")
-        out = normalizza_blocco(cfg, client, chunk)
+        try:
+            out = normalizza_blocco(cfg, client, chunk)
+            cfg["_llm_fallimenti"] = 0
+        except RuntimeError as e:
+            # mai perdere un capitolo per l'LLM: questo blocco si normalizza con le regole
+            log(f"   ⚠️ {e} → blocco normalizzato con le regole (senza LLM)")
+            paragraphs += _blocco_a_regole(cfg, chunk)
+            cfg["_llm_fallimenti"] = cfg.get("_llm_fallimenti", 0) + 1
+            if cfg["_llm_fallimenti"] >= 2:
+                cfg["_llm_disattivato"] = True
+                log("   ⚠️ LM Studio ha fallito 2 blocchi di fila: da qui in poi normalizzazione a regole "
+                    "(più veloce). Per usare l'LLM carica un modello senza ragionamento, es. Qwen3 8B Instruct.")
+            continue
         ratio = word_count(" ".join(out)) / max(word_count(chunk), 1)
         if ratio < 0.85:
             log(f"   ⚠️ Il blocco {i} normalizzato ha il {ratio:.0%} delle parole originali: l'LLM potrebbe aver tagliato testo.")
