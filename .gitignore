@@ -4,3 +4,4 @@ app/output/
 __pycache__/
 app/voices/
 app/env-rocm/
+app/bin/

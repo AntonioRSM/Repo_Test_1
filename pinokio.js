@@ -37,6 +37,7 @@ module.exports = {
       { icon: "fa-solid fa-microchip", text: "Rileva hardware / cambia lingua", href: "detect.js" },
       { icon: "fa-solid fa-link", text: "Verifica LM Studio", href: "check.js" },
       { icon: "fa-solid fa-plug-circle-bolt", text: "Installa MCP in LM Studio", href: "mcp.js" },
+      { icon: "fa-brands fa-js", text: "JavaScript con accesso ai file (LM Studio)", href: "deno.js" },
       { icon: "fa-solid fa-bolt", text: "Accelerazione GPU AMD (ROCm)", href: "rocm.js" },
       { icon: "fa-solid fa-rotate", text: "Aggiorna", href: "update.js" },
       { icon: "fa-solid fa-plug", text: "Reinstalla", href: "install.js" },

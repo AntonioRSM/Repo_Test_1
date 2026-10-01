@@ -82,6 +82,35 @@ del server MCP), prepara `audiobook/config.json` e `audiobook/voce_guida.wav` e 
 Se la cartella della pipeline è altrove (es. `D:\Workspace\epub_build\audiobook`) aggiungi nel `mcp.json` di LM Studio
 `"env": {"AUDIOBOOK_DIR": "D:\\Workspace\\epub_build\\audiobook"}`.
 
+### C. `run_javascript` con accesso al filesystem (Deno)
+
+La sandbox JavaScript integrata in LM Studio (`run_javascript`) gira in Deno con permessi fissi e
+**non** ha un campo per aggiungere `--allow-read` / `--allow-write` / `--allow-run`.
+Questo repository aggiunge quindi un server MCP `deno-js` con lo stesso strumento `run_javascript`,
+che esegue gli script con i permessi scelti:
+
+| Permesso | Valore predefinito |
+|---|---|
+| `--allow-read` | `D:\Workspace,C:\pinokio\api\Repo_Test_1.git` |
+| `--allow-write` | `D:\Workspace` |
+| `--allow-run` | attivo (gli script possono avviare processi esterni) |
+
+1. In Pinokio premi **JavaScript con accesso ai file (LM Studio)**: scarica Deno in `app/bin/` se non è già installato
+   e aggiunge la voce `deno-js` a `%USERPROFILE%\.lmstudio\mcp.json` (copia di sicurezza in `mcp.json.bak`).
+   Per altre cartelle: `app\env\Scripts\python app\lmstudio_deno_config.py --install --allow-read "D:\Dati,E:\Progetti" --allow-write "D:\Dati"`
+   (`--no-allow-run` per vietare i processi esterni, `--allow-net` / `--allow-env` se servono).
+   Senza `--install` stampa il blocco da incollare a mano in **Program → Install → Edit mcp.json**.
+2. In LM Studio: **Program → Integrations**, attiva `mcp/deno-js` e **disattiva** la sandbox JavaScript integrata,
+   così il modello non usa per errore quella senza accesso ai file.
+3. In chat: *"Elenca i file in D:/Workspace"* oppure *"Esegui `git status` in C:/pinokio/api/Repo_Test_1.git"*.
+
+Note:
+- Deno non accetta i caratteri jolly: `D:\Workspace\*` viene scritto come `D:\Workspace`, che vale già per tutte le sottocartelle.
+- `--allow-run` senza restrizioni permette ai processi avviati (cmd, PowerShell, git…) di uscire dai limiti di lettura/scrittura:
+  abilitalo solo con modelli e prompt di cui ti fidi, oppure limitalo ai programmi necessari modificando in `mcp.json`
+  l'argomento in `--allow-run=git,python`.
+- Ogni chiamata ha un tempo massimo di 120 s (parametro `timeout_ms`).
+
 ## Clonazione della voce
 
 F5-TTS imita una voce di riferimento. Senza voce di riferimento viene usato l'esempio inglese incluso in F5-TTS:
@@ -109,11 +138,12 @@ python tts_bridge.py --ask "Raccontami una curiosità su Roma" --out roma.wav
 
 | File | Scopo |
 |---|---|
-| `pinokio.js`, `install.js`, `start.js`, `torch.js`, `detect.js`, `check.js`, `mcp.js`, `update.js`, `reset.js` | script Pinokio |
+| `pinokio.js`, `install.js`, `start.js`, `torch.js`, `detect.js`, `check.js`, `mcp.js`, `deno.js`, `update.js`, `reset.js` | script Pinokio |
 | `app/detect_hardware.py` | rilevazione hardware e scelta del modello, scrive `config.json` |
 | `app/tts_bridge.py` | client LM Studio (API compatibile OpenAI) + sintesi F5-TTS |
 | `app/web_ui.py` | interfaccia Gradio chat → voce |
 | `app/mcp_server.py`, `app/lmstudio_mcp_config.py` | server MCP per LM Studio e installazione in `~/.lmstudio/mcp.json` |
+| `deno.js`, `app/deno_js_server.ts`, `app/lmstudio_deno_config.py` | server MCP `deno-js` (`run_javascript` con permessi Deno su file e processi) |
 | `app/audiobook_job.py` | avvio in background della pipeline audiolibri per gli strumenti MCP |
 
 ## Audiolibri (LM Studio + F5-TTS + Hermes Agent)

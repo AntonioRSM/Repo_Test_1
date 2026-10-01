@@ -25,7 +25,7 @@ def lmstudio_mcp_path():
     return os.path.join(home, "mcp.json")
 
 
-def install(path, entry):
+def install(path, entry, name="f5-tts"):
     data = {}
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
@@ -39,7 +39,7 @@ def install(path, entry):
     elif not os.path.isdir(os.path.dirname(path)):
         raise SystemExit(f"Cartella di LM Studio non trovata: {os.path.dirname(path)} "
                          "(avvia LM Studio almeno una volta o imposta LMSTUDIO_HOME).")
-    data.setdefault("mcpServers", {})["f5-tts"] = entry
+    data.setdefault("mcpServers", {})[name] = entry
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     return path
