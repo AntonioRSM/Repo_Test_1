@@ -141,3 +141,11 @@ def test_popen_staccato_ripiega(monkeypatch):
     monkeypatch.setattr(audiobook_job, "_STACCATO", 0x01000200)
     assert audiobook_job._popen_staccato(["python"]) == "processo"
     assert chiamate == [0x01000200, audiobook_job._NO_WINDOW]
+
+
+def test_tutti_i_capitoli_usano_il_supervisore(job, tmp_path):
+    (tmp_path / "esegui_tutto.py").write_text("")
+    cmd = job.build_command(normalizzazione="regole")
+    assert cmd[2].endswith("esegui_tutto.py") and cmd[-2:] == ["--normalizzazione", "regole"]
+    assert job.build_command(file="001.md")[2].endswith("audiobook_pipeline.py")
+    assert job.build_command(solo_testo=True)[2].endswith("audiobook_pipeline.py")

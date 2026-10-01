@@ -113,6 +113,15 @@ class AudiobookJob:
             raise FileNotFoundError(f"Script non trovato: {script} (imposta AUDIOBOOK_DIR)")
         if formato not in ("mp3", "wav"):
             raise ValueError("formato deve essere 'mp3' o 'wav'")
+        supervisore = os.path.join(pipeline_dir(), "esegui_tutto.py")
+        if not file.strip() and not solo_testo and not forza and os.path.exists(supervisore):
+            # tutti i capitoli: il supervisore riavvia la pipeline se si blocca e arriva fino alla fine
+            cmd = [pipeline_python(), "-u", supervisore, "--format", formato]
+            if normalizzazione:
+                if normalizzazione not in ("llm", "regole"):
+                    raise ValueError("normalizzazione deve essere 'llm' o 'regole'")
+                cmd += ["--normalizzazione", normalizzazione]
+            return cmd
         cmd = [pipeline_python(), "-u", script, "--format", formato]
         if file.strip():
             cmd += ["--file", file.strip()]
