@@ -36,12 +36,12 @@ from pathlib import Path
 from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 from docling.datamodel.base_models import ConversionStatus, FormatToExtensions, InputFormat
 from docling.datamodel.pipeline_options import (
-    EasyOcrOptions,
     PdfPipelineOptions,
     RapidOcrOptions,
     TableFormerMode,
     TesseractCliOcrOptions,
 )
+from docling.datamodel.settings import settings
 from docling.document_converter import DocumentConverter, ImageFormatOption, PdfFormatOption
 
 log = logging.getLogger("converti")
@@ -68,11 +68,9 @@ CARTELLA_ALLEGATI = "_allegati_estratti"
 
 def crea_converter(ocr: str, lingue: list[str], forza_ocr: bool, timeout: float,
                    tesseract_cmd: str = "tesseract") -> DocumentConverter:
+    # RapidOCR è il predefinito: nelle prove ha letto meglio di Tesseract testo e tabelle scansionate
     if ocr == "tesseract":
         ocr_opts = TesseractCliOcrOptions(lang=lingue, tesseract_cmd=tesseract_cmd)
-    elif ocr == "easyocr":
-        # EasyOCR usa codici ISO a 2 lettere (it, en)
-        ocr_opts = EasyOcrOptions(lang=[{"ita": "it", "eng": "en"}.get(l, l) for l in lingue])
     else:
         ocr_opts = RapidOcrOptions()
     ocr_opts.force_full_page_ocr = forza_ocr
@@ -286,19 +284,24 @@ def main():
     ap.add_argument("origine", type=Path, help="cartella con i file originali")
     ap.add_argument("uscita", type=Path, help="cartella dove scrivere i Markdown")
     ap.add_argument("--copia-in", type=Path, help="copia i Markdown validi qui (es. la cartella inputs di LightRAG)")
-    ap.add_argument("--ocr", choices=["tesseract", "easyocr", "rapidocr"], default="tesseract")
-    ap.add_argument("--lingue", default="ita+eng", help="lingue OCR (default ita+eng)")
+    ap.add_argument("--ocr", choices=["rapidocr", "tesseract"], default="rapidocr",
+                    help="motore OCR (default rapidocr; tesseract richiede il programma installato)")
+    ap.add_argument("--lingue", default="ita+eng", help="lingue OCR di Tesseract (default ita+eng)")
     ap.add_argument("--tesseract-cmd", default=os.environ.get("TESSERACT_CMD", "tesseract"),
                     help="percorso di tesseract (default: variabile TESSERACT_CMD o 'tesseract')")
     ap.add_argument("--timeout", type=float, default=900, help="secondi massimi per documento")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
-    for rumoroso in ("docling", "docling_core", "rapidocr", "easyocr", "httpx"):
+    for rumoroso in ("docling", "docling_core", "RapidOCR", "rapidocr", "httpx"):
         logging.getLogger(rumoroso).setLevel(logging.WARNING)
 
     if not args.origine.is_dir():
         sys.exit(f"Cartella non trovata: {args.origine}")
+    # usa i modelli scaricati con "docling-tools models download" invece di riscaricarli
+    modelli = settings.cache_dir / "models"
+    if settings.artifacts_path is None and modelli.is_dir():
+        settings.artifacts_path = modelli
     try:
         Convertitore(args).esegui()
     except KeyboardInterrupt:

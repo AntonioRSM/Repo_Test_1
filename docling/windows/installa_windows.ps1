@@ -63,14 +63,14 @@ if (-not $Python) {
 Write-Host "Python: $Python"
 
 # ---------------------------------------------------------------- 2. Tesseract OCR
-Passo '2/7 Tesseract OCR (italiano + inglese)'
+Passo '2/7 Tesseract OCR (motore alternativo, italiano + inglese)'
 $TessPercorsi = @("$env:ProgramFiles\Tesseract-OCR\tesseract.exe", "$env:LOCALAPPDATA\Programs\Tesseract-OCR\tesseract.exe")
 $Tesseract = Trova-Exe $TessPercorsi
 if (-not $Tesseract) {
     Installa-Winget 'UB-Mannheim.TesseractOCR' 'Tesseract OCR'
     $Tesseract = Trova-Exe $TessPercorsi
 }
-if (-not $Tesseract) { Avviso 'Tesseract non trovato: l''OCR dei documenti scansionati non funzionerà.' }
+if (-not $Tesseract) { Avviso 'Tesseract non trovato: resta disponibile l''OCR predefinito (RapidOCR).' }
 else { Write-Host "Tesseract: $Tesseract" }
 
 New-Item -ItemType Directory -Force -Path $TessData | Out-Null
@@ -79,7 +79,7 @@ foreach ($lingua in 'ita', 'eng', 'osd') {
     if (-not (Test-Path $dest)) {
         Write-Host "Scarico il dizionario OCR '$lingua'..."
         try {
-            Invoke-WebRequest "https://github.com/tesseract-ocr/tessdata/raw/main/$lingua.traineddata" -OutFile $dest -UseBasicParsing -ErrorAction Stop
+            Invoke-WebRequest "https://raw.githubusercontent.com/tesseract-ocr/tessdata/main/$lingua.traineddata" -OutFile $dest -UseBasicParsing -ErrorAction Stop
         } catch { Avviso "Download di $lingua.traineddata non riuscito: $($_.Exception.Message)" }
     }
 }
@@ -117,7 +117,7 @@ if ($GpuNvidia) {
     Write-Host 'Nessuna GPU NVIDIA: installo PyTorch per CPU.'
     & $Py -m pip install -q torch torchvision
 }
-& $Py -m pip install -q docling
+& $Py -m pip install -q "docling[rapidocr]"
 if ($LASTEXITCODE -ne 0) { Esci 'Installazione di Docling non riuscita.' }
 
 # ---------------------------------------------------------------- 6. Modelli

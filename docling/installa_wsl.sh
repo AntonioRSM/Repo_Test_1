@@ -12,7 +12,7 @@ SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
 passo() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 avviso() { printf '\033[1;33m[!] %s\033[0m\n' "$*"; }
 
-passo "1/6 Pacchetti di sistema (Python, Tesseract OCR ita+eng, LibreOffice per .doc/.xls/.ppt)"
+passo "1/6 Pacchetti di sistema (Python, LibreOffice per .doc/.xls/.ppt, Tesseract come OCR alternativo)"
 $SUDO apt-get update -q
 $SUDO apt-get install -y -q --no-install-recommends \
     python3 python3-venv python3-pip \
@@ -34,8 +34,8 @@ else
         || "$ENV_DIR/bin/pip" install -q torch torchvision
 fi
 
-passo "4/6 Docling (con supporto email .eml/.msg)"
-"$ENV_DIR/bin/pip" install -q docling
+passo "4/6 Docling con OCR RapidOCR (e supporto email .eml/.msg)"
+"$ENV_DIR/bin/pip" install -q "docling[rapidocr]"
 
 passo "5/6 Modelli Docling (impaginazione, tabelle, OCR) - qualche minuto la prima volta"
 if ! "$ENV_DIR/bin/docling-tools" models download; then
@@ -50,7 +50,7 @@ cat > "$BIN_DIR/converti-archivio" <<EOF
 # Converte CARTELLA_PROGETTO/originali -> markdown/ (e copia i file validi in inputs/ per LightRAG).
 set -e
 if [ -z "\${1:-}" ]; then
-    echo "Uso: converti-archivio CARTELLA_PROGETTO [--ocr tesseract|easyocr|rapidocr] [--timeout SECONDI]"
+    echo "Uso: converti-archivio CARTELLA_PROGETTO [--ocr rapidocr|tesseract] [--timeout SECONDI]"
     echo "Es.: converti-archivio 'D:\\RAG\\progetto-alfa'   oppure   converti-archivio /mnt/d/RAG/progetto-alfa"
     exit 1
 fi

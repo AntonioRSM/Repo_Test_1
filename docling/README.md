@@ -6,7 +6,7 @@ Funziona direttamente su **Windows 11** (avvio dal menu Start); in alternativa a
 | Formato | Come viene gestito |
 |---|---|
 | PDF nativi | testo estratto direttamente, tabelle ricostruite |
-| PDF scansionati, immagini (JPG, PNG, TIFF…) | OCR con Tesseract **italiano + inglese**; se il risultato è scarso, riprova con OCR su tutta la pagina |
+| PDF scansionati, immagini (JPG, PNG, TIFF…) | OCR con **RapidOCR** (lettere accentate, €, tabelle); se il risultato è scarso, riprova con OCR su tutta la pagina |
 | DOCX, PPTX, XLSX, ODT/ODS/ODP, RTF, HTML, EPUB, CSV | conversione diretta |
 | DOC, XLS, PPT (vecchi Office) | conversione tramite LibreOffice |
 | Email `.eml` / `.msg` | corpo + mittente/destinatari/data/oggetto; gli **allegati** vengono estratti e convertiti a loro volta |
@@ -19,9 +19,8 @@ Funziona direttamente su **Windows 11** (avvio dal menu Start); in alternativa a
 3. Attendi la fine (la prima volta 10–30 minuti: scarica alcuni GB fra PyTorch e i modelli).
 
 L'installatore:
-- installa con `winget`, se mancano, **Python 3.12**, **Tesseract OCR** e **LibreOffice**;
-- scarica i dizionari OCR **italiano e inglese**;
-- crea un ambiente Python dedicato con **Docling** e **PyTorch** (con CUDA se trova una GPU NVIDIA);
+- installa con `winget`, se mancano, **Python 3.12**, **LibreOffice** e **Tesseract OCR** (motore alternativo, con dizionari italiano e inglese);
+- crea un ambiente Python dedicato con **Docling**, l'OCR **RapidOCR** e **PyTorch** (con CUDA se trova una GPU NVIDIA);
 - scarica i modelli di Docling;
 - crea nel **menu Start** la cartella **Docling Archivio** con:
   - **Converti archivio documentale**: avvia la conversione;
@@ -82,13 +81,11 @@ quelli andati in errore.
 ## Uso da riga di comando (avanzato)
 
 ```powershell
-$env:TESSDATA_PREFIX = "$env:LOCALAPPDATA\DoclingArchivio\tessdata"
 & "$env:LOCALAPPDATA\DoclingArchivio\env\Scripts\python.exe" "$env:LOCALAPPDATA\DoclingArchivio\app\converti.py" `
-    D:\RAG\progetto-alfa\originali D:\RAG\progetto-alfa\markdown --copia-in D:\RAG\progetto-alfa\inputs `
-    --tesseract-cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"
+    D:\RAG\progetto-alfa\originali D:\RAG\progetto-alfa\markdown --copia-in D:\RAG\progetto-alfa\inputs
 ```
 
-Opzioni utili: `--ocr easyocr` (motore OCR alternativo), `--timeout 1800` (documenti molto lunghi).
+Opzioni utili: `--ocr tesseract` (motore OCR alternativo), `--timeout 1800` (documenti molto lunghi).
 
 ## Alternativa: WSL2 (Ubuntu)
 
