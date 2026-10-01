@@ -514,3 +514,29 @@ def test_una_sola_generazione_alla_volta(cfg, monkeypatch):
         f.write("12345")  # un altro processo vivo
     with pytest.raises(SystemExit, match="già in corso"):
         ap.blocca_generazione(cfg)
+
+
+def test_llm_vuoto_ripiega_sulle_regole(cfg, monkeypatch):
+    monkeypatch.setattr(ap, "normalizza_blocco", lambda c, cl, t: (_ for _ in ()).throw(
+        RuntimeError("Normalizzazione non riuscita: risposta vuota dell'LLM")))
+    testo = "Nel 1848 il XIX secolo vide 28 soldati.\n\n" * 3
+    par = ap.normalizza_testo(cfg, testo)
+    assert par and "milleottocentoquarantotto" in " ".join(par) and "ventotto" in " ".join(par)
+    assert cfg["_llm_fallimenti"] == 1 and not cfg.get("_llm_disattivato")
+    ap.normalizza_testo(cfg, testo)
+    assert cfg["_llm_disattivato"]  # due fallimenti di fila: niente più attese su LM Studio
+    chiamate = []
+    monkeypatch.setattr(ap, "normalizza_blocco", lambda *a: chiamate.append(1))
+    ap.normalizza_testo(cfg, testo)
+    assert chiamate == []
+
+
+def test_risposta_vuota_spiega_la_causa(cfg):
+    import types
+    vuota = types.SimpleNamespace(choices=[types.SimpleNamespace(
+        message=types.SimpleNamespace(content=""), finish_reason="length")])
+    client = types.SimpleNamespace(chat=types.SimpleNamespace(completions=types.SimpleNamespace(
+        create=lambda **kw: vuota)))
+    cfg["lmstudio_model"] = "qwen"
+    with pytest.raises(RuntimeError, match="token esauriti"):
+        ap.normalizza_blocco(cfg, client, "Testo.")
