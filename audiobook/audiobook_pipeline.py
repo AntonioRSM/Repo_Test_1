@@ -805,6 +805,19 @@ class LocalF5TTS:
         return out_path
 
 
+def libera_memoria_gpu():
+    """Tra un capitolo e l'altro: evita che la memoria della GPU cresca su migliaia di capitoli."""
+    import gc
+
+    gc.collect()
+    torch = sys.modules.get("torch")
+    try:
+        if torch is not None and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass
+
+
 def crea_tts(cfg):
     return LocalF5TTS(cfg) if cfg.get("_backend") == "locale" else F5TTSClient(cfg)
 
@@ -1025,6 +1038,7 @@ def main():
     p = argparse.ArgumentParser(description="Audiolibri: LM Studio + F5-TTS (Pinokio)")
     p.add_argument("--config", default=CONFIG_PATH, help="percorso di config.json")
     p.add_argument("--file", help="un solo capitolo (nome in input_dir o percorso completo)")
+    p.add_argument("--lista", help="file di testo con i capitoli da elaborare, uno per riga (usato da esegui_tutto.py)")
     p.add_argument("--input-dir", help="sovrascrive input_dir")
     p.add_argument("--output-dir", help="sovrascrive output_dir")
     p.add_argument("--format", choices=["mp3", "wav"], help="formato di uscita")
@@ -1056,7 +1070,11 @@ def main():
     if args.test_normalizzazione:
         raise SystemExit(0 if test_normalizzazione(cfg) else 1)
 
-    capitoli = trova_capitoli(cfg, args.file)
+    if args.lista:
+        with open(args.lista, encoding="utf-8") as f:
+            capitoli = [r.strip() for r in f if r.strip()]
+    else:
+        capitoli = trova_capitoli(cfg, args.file)
     log(f"{len(capitoli)} capitoli da {cfg['input_dir']} → {cfg['output_dir']}")
     tts = None if args.dry_run else crea_tts(cfg)
     errori = []
@@ -1066,6 +1084,7 @@ def main():
         except Exception as e:
             log(f"   ❌ {os.path.basename(path)}: {e} (i segmenti già creati restano in {cfg['temp_dir']} per riprendere)")
             errori.append(path)
+        libera_memoria_gpu()
     log(f"\nCompletati {len(capitoli) - len(errori)}/{len(capitoli)} capitoli.")
     if errori:
         raise SystemExit(1)

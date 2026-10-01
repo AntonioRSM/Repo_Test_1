@@ -6,3 +6,4 @@ capitoli_input/*
 !capitoli_input/.gitkeep
 audiolibri_output/*
 !audiolibri_output/.gitkeep
+logs/

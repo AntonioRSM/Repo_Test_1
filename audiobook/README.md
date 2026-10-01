@@ -120,6 +120,21 @@ Verifiche del passo 3 sul testo di prova:
 Gli accenti sugli omografi (*àncora/ancóra*, *sùbito*, *princìpi*) vanno controllati a occhio nel testo stampato:
 dipendono dal contesto e non hanno una forma unica verificabile in automatico.
 
+## Tutti i capitoli, senza fermarsi: `genera_tutto.bat`
+
+Doppio clic su **`audiobook\genera_tutto.bat`** (usa da solo l'ambiente GPU `app\env-rocm` se c'è).
+Lancia `esegui_tutto.py`, un supervisore che:
+- fa lavorare la pipeline a lotti di 25 capitoli (processo nuovo a ogni lotto: la memoria della GPU non cresce);
+- se il log non avanza per 10 minuti (GPU bloccata, LM Studio appeso…) termina il processo e lo riavvia dal
+  capitolo in corso, riusando i paragrafi già sintetizzati;
+- salta un capitolo dopo 3 tentativi falliti e li elenca alla fine (`logs\stato_batch.json`; si riprovano con
+  `genera_tutto.bat --azzera-falliti`);
+- disattiva la "Modifica rapida" della console, che sospende i programmi se si clicca nella finestra.
+
+Usa la normalizzazione **a regole** (`--normalizzazione llm` per LM Studio). Si può chiudere e rilanciare quando
+si vuole: riparte dai capitoli mancanti. Log completo in `audiobook\logs\genera_tutto.log`.
+In chat, `genera_audiolibro` senza `file` usa lo stesso supervisore.
+
 ## Velocità e migliaia di capitoli
 
 - **Normalizzazione a regole** (`"normalizzazione": "regole"`, `--normalizzazione regole`, o in chat
