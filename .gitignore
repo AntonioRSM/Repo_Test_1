@@ -1,0 +1,7 @@
+engine/.venv/
+engine/.pytest_cache/
+__pycache__/
+desktop/node_modules/
+desktop/dist/
+*.log
+.claude/

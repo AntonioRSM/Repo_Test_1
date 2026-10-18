@@ -1,0 +1,45 @@
+[project]
+name = "vault-engine"
+version = "0.1.0"
+description = "RAG Vault Studio engine: local ingestion, OCR, chunking, embeddings and LanceDB vaults"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.27",
+    "pydantic>=2.9",
+    "lancedb>=0.17",
+    # pyarrow 26's _dataset DLL has no Smart App Control reputation yet and is blocked.
+    "pyarrow>=17,<22",
+    "numpy>=1.26",
+    "pymupdf>=1.24",
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    "python-pptx>=1.0",
+    # .msg files are OLE compound documents; read with olefile because extract-msg
+    # needs an sdist build that Smart App Control blocks.
+    "olefile>=0.47",
+    "pillow>=10.4",
+    "rapidocr-onnxruntime>=1.3",
+    "watchdog>=5.0",
+    "psutil>=6.0",
+    "pywin32>=306; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+# Heavy layout-aware parser (pulls in torch). Enabled per vault with parser = "docling".
+docling = ["docling>=2.10"]
+tesseract = ["pytesseract>=0.3.13"]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "reportlab>=4.2"]
+
+# Not built as a package: Smart App Control blocks the temporary interpreter that
+# PEP 517 builds run in. Start with `uv run python -m vault_engine`.
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["live: needs a running LM Studio or Ollama server"]
