@@ -17,6 +17,7 @@ import {
 import { CheckmarkRegular } from "@fluentui/react-icons";
 import { useEffect, useState } from "react";
 import { api, modelLabel, type AppSettings, type ModelRef, type OcrSettings } from "../api";
+import { McpServers } from "../components/McpServers";
 import { useModels, useStore } from "../store";
 
 const useStyles = makeStyles({
@@ -181,7 +182,10 @@ export default function SettingsPage() {
         />
       </Card>
 
-      <Button appearance="primary" icon={<CheckmarkRegular />} onClick={save}>Salva impostazioni</Button>
+      <Button appearance="primary" icon={<CheckmarkRegular />} onClick={save} style={{ marginBottom: 24 }}>Salva impostazioni</Button>
+
+      {/* MCP servers are saved individually, not with the button above. */}
+      <McpServers />
     </>
   );
 }

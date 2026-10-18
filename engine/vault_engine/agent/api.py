@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from ..config import ModelRef
 from .runner import AgentRunner
 from .store import AgentStore, Thread
-from .tools import TOOLS
 
 router = APIRouter(prefix="/agent")
 
@@ -41,7 +40,7 @@ def _view(thread: Thread) -> dict:
 
 @router.get("/tools")
 def list_tools():
-    return [{"name": t.name, "description": t.description, "risk": t.risk, "needs_approval": t.needs_approval} for t in TOOLS.values()]
+    return [{"name": t.name, "description": t.description, "risk": t.risk, "needs_approval": t.needs_approval} for t in state.runner.tools().values()]
 
 
 @router.get("/threads")

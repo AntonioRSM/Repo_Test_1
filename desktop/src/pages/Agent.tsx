@@ -47,12 +47,13 @@ const TOOL_LABEL: Record<string, string> = {
   fetch_url: "Lettura pagina web",
   task_list: "Piano di lavoro",
 };
-const RISK_COLOR: Record<string, "informative" | "warning" | "danger" | "important" | "subtle"> = {
+const RISK_COLOR: Record<string, "informative" | "warning" | "danger" | "important" | "subtle" | "brand"> = {
   read: "informative",
   network: "important",
   write: "warning",
   execute: "danger",
   plan: "subtle",
+  mcp: "brand",
 };
 
 const useStyles = makeStyles({
@@ -78,6 +79,15 @@ const useStyles = makeStyles({
   composer: { display: "flex", gap: "8px", alignItems: "flex-end", paddingTop: "8px", borderTop: `1px solid ${tokens.colorNeutralStroke2}` },
   tasks: { padding: "8px 12px", marginBottom: "8px" },
 });
+
+/** "mcp__github__create_issue" → "MCP · github · create_issue". */
+function toolLabel(name: string): string {
+  if (name.startsWith("mcp__")) {
+    const [, server, ...tool] = name.split("__");
+    return `MCP · ${server} · ${tool.join("__")}`;
+  }
+  return TOOL_LABEL[name] ?? name;
+}
 
 function parseArgs(raw: string | Record<string, unknown>): Record<string, unknown> {
   if (typeof raw !== "string") return raw;
@@ -279,7 +289,7 @@ export default function AgentPage() {
           {thread && thread.auto_approve.length > 0 && (
             <Tooltip content="Strumenti che non chiedono più conferma in questa conversazione. Clic per revocare." relationship="description">
               <Badge appearance="tint" color="warning" icon={<ShieldCheckmarkRegular />} style={{ cursor: "pointer" }} onClick={() => patchThread({ auto_approve: [] })}>
-                Sempre consentiti: {thread.auto_approve.map((n) => TOOL_LABEL[n] ?? n).join(", ")}
+                Sempre consentiti: {thread.auto_approve.map(toolLabel).join(", ")}
               </Badge>
             </Tooltip>
           )}
@@ -397,7 +407,7 @@ function ToolCard({
   const meta = result?.meta ?? {};
   const denied = meta.decision === "deny";
   const failed = meta.ok === false && !denied;
-  const risk = (meta.risk as string) ?? ({ write_file: "write", edit_file: "write", run_powershell: "execute", web_search: "network", fetch_url: "network", task_list: "plan" } as Record<string, string>)[name] ?? "read";
+  const risk = name.startsWith("mcp__") ? "mcp" : (meta.risk as string) ?? ({ write_file: "write", edit_file: "write", run_powershell: "execute", web_search: "network", fetch_url: "network", task_list: "plan" } as Record<string, string>)[name] ?? "read";
   const summary = summarize(args);
   const big = name === "write_file" || name === "run_powershell" || name === "edit_file";
 
@@ -405,7 +415,7 @@ function ToolCard({
     <div className={styles.tool} style={{ marginTop: 8 }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center", cursor: result ? "pointer" : undefined }} onClick={() => result && setOpen(!open)}>
         {result ? (open ? <ChevronDownRegular /> : <ChevronRightRegular />) : null}
-        <Badge appearance="tint" color={RISK_COLOR[risk] ?? "informative"}>{TOOL_LABEL[name] ?? name}</Badge>
+        <Badge appearance="tint" color={RISK_COLOR[risk] ?? "informative"}>{toolLabel(name)}</Badge>
         <Caption1 truncate wrap={false} style={{ flex: 1 }} title={summary}>{summary}</Caption1>
         {executing && <Spinner size="extra-tiny" label="in esecuzione" />}
         {result && !denied && !failed && <CheckmarkCircleRegular color={tokens.colorPaletteGreenForeground1} />}

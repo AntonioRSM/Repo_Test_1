@@ -116,6 +116,28 @@ export type AgentEvent = { type: "agent"; thread_id: string } & (
   | { kind: "run_finished"; seconds?: number; error?: string; cancelled?: boolean }
 );
 
+export interface McpTool { name: string; server_id: string; original_name: string; description: string; read_only: boolean | null }
+export interface McpServerInput {
+  name: string;
+  transport: "stdio" | "http";
+  command: string;
+  args: string[];
+  cwd: string | null;
+  url: string;
+  env: Record<string, string>;
+  headers: Record<string, string>;
+  enabled: boolean;
+  timeout_seconds: number;
+}
+export interface McpServer extends McpServerInput {
+  id: string;
+  status: "disabled" | "connecting" | "connected" | "error";
+  error: string | null;
+  server_info: { name: string | null; version: string | null } | null;
+  tools: McpTool[];
+}
+export const SECRET_MASK = "••••••••";
+
 export type EngineEvent =
   | { type: "job"; job: Job }
   | { type: "file"; vault_id: string; path: string; status: string; chunks?: number; error?: string | null }
@@ -218,6 +240,12 @@ export const api = {
   cancelJob: (id: string) => call<void>("POST", `/jobs/${id}/cancel`),
   search: (id: string, body: { query: string; k: number; metric?: Metric; rerank?: boolean }) =>
     call<{ metric: Metric; results: SearchHit[]; rerank_error: string | null }>("POST", `/vaults/${id}/search`, body),
+  mcpServers: () => call<McpServer[]>("GET", "/mcp/servers"),
+  addMcpServer: (body: McpServerInput) => call<McpServer>("POST", "/mcp/servers", body),
+  updateMcpServer: (id: string, patch: Partial<McpServerInput>) => call<McpServer>("PATCH", `/mcp/servers/${id}`, patch),
+  removeMcpServer: (id: string) => call<void>("DELETE", `/mcp/servers/${id}`),
+  reconnectMcpServer: (id: string) => call<McpServer>("POST", `/mcp/servers/${id}/reconnect`),
+  mcpLog: (id: string) => call<{ lines: string[] }>("GET", `/mcp/servers/${id}/log`),
   threads: () => call<AgentThread[]>("GET", "/agent/threads"),
   thread: (id: string) => call<AgentThread>("GET", `/agent/threads/${id}`),
   createThread: (body: { model?: ModelRef | null; vault_ids?: string[] } = {}) => call<AgentThread>("POST", "/agent/threads", body),

@@ -24,6 +24,8 @@ dependencies = [
     "watchdog>=5.0",
     "psutil>=6.0",
     "pywin32>=306; sys_platform == 'win32'",
+    # Model Context Protocol client (stdio and streamable HTTP servers) for the agent.
+    "mcp>=1.9",
 ]
 
 [project.optional-dependencies]

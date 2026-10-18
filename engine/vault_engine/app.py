@@ -24,6 +24,8 @@ from .pipeline import JobManager
 from .providers import ProviderClient, ProviderError, discover, ensure_loaded
 from .vaults import Metric, VaultConfig, VaultRegistry, quote_sql
 from .agent import api as agent_api
+from .agent import mcp_api
+from .agent.mcp import McpManager
 from .agent.runner import AgentRunner
 from .agent.store import AgentStore
 from .watcher import VaultWatcher
@@ -69,7 +71,10 @@ async def lifespan(app: FastAPI):
     state.watcher = VaultWatcher(state.registry, state.jobs, loop)
     state.watcher.start()
     agent_store = AgentStore()
-    agent_api.init(AgentRunner(state.registry, state.settings, state.events, agent_store), agent_store)
+    mcp_manager = McpManager()
+    await mcp_manager.start()
+    mcp_api.init(mcp_manager)
+    agent_api.init(AgentRunner(state.registry, state.settings, state.events, agent_store, mcp_manager), agent_store)
     # Catch up on changes made while the app was closed.
     for vault in state.registry.list():
         if vault.config.watch and vault.config.sources:
@@ -78,6 +83,7 @@ async def lifespan(app: FastAPI):
     state.watcher.stop()
     state.hardware.stop()
     await state.jobs.shutdown()
+    await mcp_manager.shutdown()
 
 
 app = FastAPI(title="RAG Vault Studio engine", version="0.1.0", lifespan=lifespan)
@@ -101,6 +107,7 @@ def require_token(request: Request) -> None:
 
 api = Depends(require_token)
 app.include_router(agent_api.router, dependencies=[api])
+app.include_router(mcp_api.router, dependencies=[api])
 
 
 def get_vault(vault_id: str):
