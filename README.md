@@ -10,6 +10,19 @@ desktop/   Electron 33 + React 18 + Fluent UI v9 (Mica, tray, drag & drop)
 engine/    Python 3.12: FastAPI su 127.0.0.1, LanceDB, PyMuPDF, RapidOCR-ONNX, watchdog
 ```
 
+## Installazione rapida (Windows 11)
+
+1. Scarica il progetto: `git clone -b workspace-os https://github.com/AntonioRSM/Repo_Test_1.git WorkspaceOS`
+   (oppure il file ZIP del ramo, ma senza git l'aggiornamento automatico non è disponibile).
+2. Doppio clic su **`INSTALLA.bat`**. Se mancano installa con `winget` **uv** (che scarica Python 3.12) e
+   **Node.js LTS**, poi prepara il motore (`uv sync --no-build`) e compila l'interfaccia (`npm install`, `npm run build`).
+3. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
+   - **RAG Vault Studio**: avvia l'app;
+   - **Manuale RAG Vault Studio**: il manuale d'uso;
+   - **Aggiorna RAG Vault Studio** (solo se la cartella è un clone git): `git pull` e reinstallazione.
+
+Per aggiornare, chiudi prima l'app (anche dall'icona vicino all'orologio).
+
 ## Avvio
 
 Prerequisiti: [uv](https://docs.astral.sh/uv/), Node.js 22+, LM Studio e/o Ollama con un
