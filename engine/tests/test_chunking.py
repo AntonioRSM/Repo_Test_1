@@ -7,6 +7,7 @@ from vault_engine.chunking import (
     detect_language,
     drop_running_headers,
     split_recursive,
+    split_with_overlap,
 )
 from vault_engine.parsers import Block
 
@@ -19,6 +20,25 @@ def test_recursive_respects_size_and_overlap():
     assert all(len(c) <= 200 for c in chunks)
     # Consecutive chunks share their boundary words.
     assert chunks[0].split()[-1] in chunks[1]
+
+
+def test_overlap_present_with_ordinary_prose():
+    # Paragraphs and sentences longer than the overlap: whole-piece overlap would be empty.
+    sentence = "Clausola {n}: il fornitore consegna la merce presso il magazzino indicato nel contratto entro i termini concordati."
+    text = "\n\n".join(" ".join(sentence.format(n=p * 3 + s) for s in range(3)) for p in range(4))
+    chunks = split_with_overlap(text, 300, 80)
+    assert len(chunks) > 3
+    assert all(len(c) <= 300 for c in chunks)
+    for previous, current in zip(chunks, chunks[1:]):
+        shared = next(n for n in range(min(len(previous), len(current)), 0, -1) if previous.endswith(current[:n]))
+        assert 20 <= shared <= 80
+        assert not current[0].isspace()
+
+
+def test_overlap_zero_and_short_text():
+    assert split_with_overlap("breve testo", 300, 80) == ["breve testo"]
+    chunks = split_with_overlap("parola " * 200, 200, 0)
+    assert all(len(c) <= 200 for c in chunks)
 
 
 def test_sections_carry_heading_path_and_pages():

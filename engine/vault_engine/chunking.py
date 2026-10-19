@@ -138,6 +138,36 @@ def split_recursive(text: str, size: int, overlap: int, separators: list[str] = 
     return [c.strip() for c in chunks if c.strip()]
 
 
+def _overlap_tail(text: str, overlap: int) -> str:
+    """The last `overlap` characters of a chunk, starting at a sentence or word boundary."""
+    if overlap <= 0 or not text:
+        return ""
+    tail = text[-overlap:]
+    if len(text) <= overlap:
+        return text
+    for boundary in (". ", "\n", "; ", ", ", " "):
+        cut = tail.find(boundary)
+        if cut != -1 and cut + len(boundary) < len(tail):
+            return tail[cut + len(boundary) :].lstrip()
+    return tail
+
+
+def split_with_overlap(text: str, size: int, overlap: int) -> list[str]:
+    """Recursive split where every chunk after the first repeats the end of the previous one.
+
+    split_recursive alone only carries over whole pieces (paragraphs, sentences) that are
+    shorter than the overlap, so with ordinary prose the overlap almost never happens.
+    Here the base chunks are size - overlap long and get the previous chunk's tail
+    prepended, so the overlap is always present and chunks never exceed `size`."""
+    overlap = max(0, min(overlap, size // 2))
+    base = split_recursive(text, size - overlap - 1, 0)  # -1 for the joining space
+    chunks = base[:1]
+    for previous, current in zip(base, base[1:]):
+        tail = _overlap_tail(previous, overlap)
+        chunks.append(f"{tail} {current}" if tail else current)
+    return chunks
+
+
 def _pages_of(text_units: list[tuple[str, int | None]]) -> tuple[int | None, int | None]:
     pages = [p for _, p in text_units if p is not None]
     return (min(pages), max(pages)) if pages else (None, None)
@@ -156,7 +186,7 @@ def chunk_recursive(sections: list[Section], settings: ChunkingSettings) -> list
             text += unit
             offset += len(unit)
         cursor = 0
-        for piece in split_recursive(text, settings.chunk_size, settings.chunk_overlap):
+        for piece in split_with_overlap(text, settings.chunk_size, settings.chunk_overlap):
             start = text.find(piece[:50], max(0, cursor - settings.chunk_overlap - 50))
             start = cursor if start < 0 else start
             end = start + len(piece)
@@ -219,7 +249,7 @@ async def chunk_semantic(sections: list[Section], settings: ChunkingSettings, em
         for group in groups:
             text = " ".join(s for s, _ in group)
             first, last = _pages_of(group)
-            pieces = [text] if len(text) <= settings.chunk_size else split_recursive(text, settings.chunk_size, settings.chunk_overlap)
+            pieces = [text] if len(text) <= settings.chunk_size else split_with_overlap(text, settings.chunk_size, settings.chunk_overlap)
             chunks.extend(Chunk(p, section.heading_path, first, last) for p in pieces)
     return _number(_merge_small(chunks, settings.min_chunk_size, settings.chunk_size))
 
