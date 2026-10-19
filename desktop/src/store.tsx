@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { api, subscribeEvents, type AgentEvent, type AppSettings, type HardwareSample, type Job, type ProviderStatus, type Vault } from "./api";
+import { api, subscribeEvents, type AgentEvent, type AppSettings, type HardwareSample, type Job, type OllamaEvent, type ProviderStatus, type Vault } from "./api";
 
 const HISTORY = 90; // seconds of hardware history kept for the charts
 
@@ -15,6 +15,7 @@ interface Store {
   notify(message: string, intent?: "success" | "error" | "info"): void;
   toast: { message: string; intent: "success" | "error" | "info"; id: number } | null;
   onAgentEvent(listener: (e: AgentEvent) => void): () => void;
+  onOllamaEvent(listener: (e: OllamaEvent) => void): () => void;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -28,10 +29,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<Store["toast"]>(null);
   const refreshTimer = useRef<number | null>(null);
   const agentListeners = useRef(new Set<(e: AgentEvent) => void>());
+  const ollamaListeners = useRef(new Set<(e: OllamaEvent) => void>());
   const onAgentEvent = useCallback((listener: (e: AgentEvent) => void) => {
     agentListeners.current.add(listener);
     return () => {
       agentListeners.current.delete(listener);
+    };
+  }, []);
+  const onOllamaEvent = useCallback((listener: (e: OllamaEvent) => void) => {
+    ollamaListeners.current.add(listener);
+    return () => {
+      ollamaListeners.current.delete(listener);
     };
   }, []);
 
@@ -58,6 +66,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const unsubscribe = subscribeEvents((event) => {
       if (event.type === "agent") {
         agentListeners.current.forEach((listener) => listener(event));
+      } else if (event.type === "ollama") {
+        ollamaListeners.current.forEach((listener) => listener(event));
       } else if (event.type === "job") {
         setJobs((prev) => ({ ...prev, [event.job.id]: event.job }));
         scheduleVaultRefresh();
@@ -83,8 +93,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [refreshVaults, refreshProviders]);
 
   const value = useMemo<Store>(
-    () => ({ vaults, jobs, providers, settings, hardware, refreshVaults, refreshProviders, setSettings, notify, toast, onAgentEvent }),
-    [vaults, jobs, providers, settings, hardware, refreshVaults, refreshProviders, notify, toast, onAgentEvent],
+    () => ({ vaults, jobs, providers, settings, hardware, refreshVaults, refreshProviders, setSettings, notify, toast, onAgentEvent, onOllamaEvent }),
+    [vaults, jobs, providers, settings, hardware, refreshVaults, refreshProviders, notify, toast, onAgentEvent, onOllamaEvent],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

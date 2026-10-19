@@ -46,6 +46,7 @@ Sviluppo dell'interfaccia: `npm run dev` (Vite su :5173) e, in un altro terminal
 | Area | Implementazione |
 |---|---|
 | Auto-discovery | Sonda LM Studio (`/api/v0/models`, fallback `/v1/models`) e Ollama (`/api/tags`, `/api/show` per le capability) su endpoint configurabili; ogni modello è classificato come embedding / LLM / vision e mostra se è caricato |
+| Modelli (Ollama) | Pagina **Modelli**: ricerca nella libreria pubblica, download con barra di avanzamento, caricamento in RAM/VRAM e rilascio manuale; i modelli mancanti vengono scaricati automaticamente quando un Vault o l'agente li richiedono (`ollama_auto_pull`), con tempo di residenza configurabile (`ollama_keep_alive_minutes`) |
 | Model Router | Embedding per Vault; LLM globale per riassunti contestuali, re-ranking e risposte RAG; modello vision per l'OCR. Le chiamate usano gli endpoint OpenAI-compatibili `/v1/embeddings` e `/v1/chat/completions`. I blocchi `<think>` dei modelli di ragionamento vengono rimossi |
 | Hardware | CPU/RAM con psutil; GPU e VRAM dai contatori Windows "GPU Engine" e "GPU Adapter Memory" (Intel, AMD e NVIDIA) oppure da `nvidia-smi`; grafici live nella Dashboard |
 | Formati | `.docx .xlsx .pptx .msg .pdf .png .jpg .jpeg .tif .tiff .bmp .webp .txt .md .json .csv`. I `.msg` includono gli allegati supportati |

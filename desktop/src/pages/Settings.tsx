@@ -166,6 +166,24 @@ export default function SettingsPage() {
       </Card>
 
       <Card className={styles.card}>
+        <Subtitle2>Ollama</Subtitle2>
+        <div className={styles.row}>
+          <Field
+            label="Scaricamento automatico"
+            hint="Quando un Vault o l'agente richiedono un modello Ollama non presente, viene scaricato da solo (con barra di avanzamento nella pagina Modelli)"
+          >
+            <Switch checked={draft.ollama_auto_pull} onChange={(_, d) => set({ ollama_auto_pull: d.checked })} label={draft.ollama_auto_pull ? "Attivo" : "Disattivato"} />
+          </Field>
+          <Field label="Tempo di residenza in memoria" hint="Minuti dopo cui Ollama libera RAM/VRAM di un modello non usato (1-240)">
+            <SpinButton value={draft.ollama_keep_alive_minutes} min={1} max={240} onChange={(_, d) => set({ ollama_keep_alive_minutes: d.value ?? (Number(d.displayValue) || 30) })} />
+          </Field>
+        </div>
+        <Body1 style={{ color: tokens.colorNeutralForeground3 }}>
+          La pagina Modelli permette di cercare nella libreria, scaricare, caricare in memoria e liberare RAM/VRAM manualmente.
+        </Body1>
+      </Card>
+
+      <Card className={styles.card}>
         <Subtitle2>Agente</Subtitle2>
         <div className={styles.row}>
           <Field label="Passi massimi per richiesta" hint="Ogni passo è una chiamata al modello; poi l'agente deve rispondere">

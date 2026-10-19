@@ -191,15 +191,29 @@ class ProviderClient:
         return chat_content(ref, body)
 
 
-async def ensure_loaded(endpoints: dict[str, str], refs: list[tuple[ModelRef, ModelKind]]) -> None:
+async def ensure_loaded(
+    endpoints: dict[str, str],
+    refs: list[tuple[ModelRef, ModelKind]],
+    *,
+    events: Any = None,
+    auto_pull: bool = True,
+    keep_alive_minutes: int = 30,
+) -> None:
     """Loads the given models explicitly so they stay resident together.
 
     LM Studio's just-in-time loading keeps a single model: alternating the chat model and
     the embedding model (every agent step, every ingestion wave) would reload one of them
     each time. Explicitly loaded models are not evicted. Ollama gets a long keep_alive.
+    For Ollama, a missing model is downloaded automatically (auto_pull) with progress
+    events, so vault jobs and the agent can ask for any model by name.
     Best effort: older servers without these APIs fall back to on-demand loading."""
     targets = dict(DEFAULT_ENDPOINTS) | endpoints
     unique = {(r.provider, r.model): (r, kind) for r, kind in refs}
+
+    async def report(model: str, **data: Any) -> None:
+        if events is not None:
+            events.publish({"type": "ollama", "kind": "pull", "model": model, **data})
+
     async with httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=3.0)) as client:
         lms_loaded: set[str] | None = None
         for (provider, model), (ref, kind) in unique.items():
@@ -214,8 +228,21 @@ async def ensure_loaded(endpoints: dict[str, str], refs: list[tuple[ModelRef, Mo
                         resp.raise_for_status()
                         lms_loaded.add(model)
                 else:
+                    from . import ollama_hub
+
+                    if auto_pull and not await ollama_hub.is_installed(targets, model):
+                        await report(model, status="download_avviato", completed=None, total=None)
+                        await ollama_hub.pull(
+                            targets,
+                            model,
+                            on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                        )
+                        await report(model, status="download_completato", completed=None, total=None)
                     route, body = ("/api/embed", {"input": ""}) if kind == "embedding" else ("/api/generate", {})
-                    await client.post(f"{base}{route}", json={"model": model, "keep_alive": "30m"} | body)
+                    await client.post(
+                        f"{base}{route}",
+                        json={"model": model, "keep_alive": f"{keep_alive_minutes}m"} | body,
+                    )
             except (httpx.HTTPError, KeyError, ValueError) as exc:
                 log.info("could not preload %s/%s: %s", provider, model, exc)
 

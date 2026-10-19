@@ -101,7 +101,7 @@ def no_model_preload(monkeypatch, request):
     from vault_engine import app, pipeline
     from vault_engine.agent import runner
 
-    async def noop(endpoints, refs):
+    async def noop(endpoints, refs, **_):
         return None
 
     for module in (app, pipeline, runner):

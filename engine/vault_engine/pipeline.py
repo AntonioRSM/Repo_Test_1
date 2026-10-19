@@ -147,7 +147,14 @@ class JobManager:
             try:
                 vault = self.registry.get(vault_id)
                 if job.kind != "remove":
-                    await ensure_loaded(self.settings.get().endpoints, self._models_for(vault))
+                    settings = self.settings.get()
+                    await ensure_loaded(
+                        settings.endpoints,
+                        self._models_for(vault),
+                        events=self.events,
+                        auto_pull=settings.ollama_auto_pull,
+                        keep_alive_minutes=settings.ollama_keep_alive_minutes,
+                    )
                 if job.kind == "rebuild":
                     vault.reset_vectors()
                     await self._sync(job, vault, force=True)

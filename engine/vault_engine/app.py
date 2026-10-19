@@ -19,6 +19,7 @@ from .chunking import ChunkingSettings
 from .config import ModelRef, OcrSettings, SettingsStore
 from .events import EventBus
 from .hardware import HardwareMonitor
+from . import ollama_hub
 from .parsers import SUPPORTED_EXTS
 from .pipeline import JobManager
 from .providers import ProviderClient, ProviderError, discover, ensure_loaded
@@ -198,6 +199,97 @@ async def test_embedding(body: EmbedTest):
     return {"dimension": len(vector), "preview": vector[:8]}
 
 
+# ------------------------------------------------------------------ ollama hub
+
+_pulls: dict[str, asyncio.Task] = {}
+
+
+class PullBody(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
+
+
+@app.get("/ollama/status", dependencies=[api])
+async def ollama_status():
+    """Installed models and what is currently resident in RAM/VRAM."""
+    return await ollama_hub.status(state.settings.get().endpoints)
+
+
+@app.get("/ollama/library", dependencies=[api])
+async def ollama_library(q: str = ""):
+    """Searchable view of the public Ollama model library."""
+    try:
+        return {"models": [m.model_dump() for m in await ollama_hub.library_search(q)]}
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+
+
+@app.post("/ollama/pull", dependencies=[api], status_code=202)
+async def ollama_pull(body: PullBody):
+    """Downloads a model in the background; progress arrives as {type: "ollama"} events."""
+    current = _pulls.get(body.model)
+    if current is not None and not current.done():
+        return {"accepted": True, "model": body.model, "already": True}
+
+    async def run() -> None:
+        async def progress(p: dict) -> None:
+            state.events.publish(
+                {
+                    "type": "ollama",
+                    "kind": "pull",
+                    "model": body.model,
+                    "status": p.get("status") or "download",
+                    "completed": p.get("completed"),
+                    "total": p.get("total"),
+                }
+            )
+
+        try:
+            await ollama_hub.pull(state.settings.get().endpoints, body.model, progress)
+            state.events.publish({"type": "ollama", "kind": "pull", "model": body.model, "status": "download_completato"})
+        except ollama_hub.HubError as exc:
+            state.events.publish({"type": "ollama", "kind": "pull", "model": body.model, "status": "errore", "error": str(exc)})
+        finally:
+            _pulls.pop(body.model, None)
+
+    _pulls[body.model] = asyncio.create_task(run())
+    return {"accepted": True, "model": body.model}
+
+
+class LoadBody(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
+    keep_alive_minutes: int = Field(30, ge=1, le=240)
+
+
+@app.post("/ollama/load", dependencies=[api])
+async def ollama_load(body: LoadBody):
+    try:
+        await ollama_hub.load(state.settings.get().endpoints, body.model, body.keep_alive_minutes)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"loaded": body.model}
+
+
+@app.post("/ollama/unload", dependencies=[api])
+async def ollama_unload(body: PullBody):
+    """Frees the model's RAM/VRAM immediately."""
+    try:
+        await ollama_hub.unload(state.settings.get().endpoints, body.model)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"unloaded": body.model}
+
+
+@app.delete("/ollama/models/{name}", dependencies=[api])
+async def ollama_delete(name: str):
+    """Removes a model from disk (frees disk space; RAM/VRAM freed first if loaded)."""
+    try:
+        await ollama_hub.unload(state.settings.get().endpoints, name)
+        await ollama_hub.delete(state.settings.get().endpoints, name)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"deleted": name}
+
+
 # ------------------------------------------------------------------ vaults
 
 
@@ -351,7 +443,13 @@ async def retrieve(vault, body: SearchBody) -> tuple[list[dict], str | None]:
     wanted = [(vault.config.embedding, "embedding")]
     if settings.llm is not None and (body.rerank or isinstance(body, AskBody)):
         wanted.append((settings.llm, "llm"))
-    await ensure_loaded(settings.endpoints, wanted)
+    await ensure_loaded(
+        settings.endpoints,
+        wanted,
+        events=state.events,
+        auto_pull=settings.ollama_auto_pull,
+        keep_alive_minutes=settings.ollama_keep_alive_minutes,
+    )
     try:
         vector = (await client.embed(vault.config.embedding, [body.query]))[0]
     except ProviderError as exc:

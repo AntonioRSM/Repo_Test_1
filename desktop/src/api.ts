@@ -21,6 +21,8 @@ export interface AppSettings {
   ocr: OcrSettings;
   ingest_workers: number;
   embed_batch_size: number;
+  ollama_auto_pull: boolean;
+  ollama_keep_alive_minutes: number;
   agent_max_steps: number;
   agent_max_tokens: number;
   agent_reasoning: boolean;
@@ -138,9 +140,25 @@ export interface McpServer extends McpServerInput {
 }
 export const SECRET_MASK = "••••••••";
 
+export type OllamaEvent = {
+  type: "ollama";
+  kind: "pull";
+  model: string;
+  status: string;
+  completed: number | null;
+  total: number | null;
+  error?: string;
+};
+
+export interface OllamaInstalledModel { name: string; size: number; digest: string | null }
+export interface OllamaRunningModel { name: string; size: number; size_vram: number; expires_at: string | null }
+export interface OllamaStatus { online: boolean; installed: OllamaInstalledModel[]; running: OllamaRunningModel[] }
+export interface OllamaLibraryModel { name: string; label: string; description: string }
+
 export type EngineEvent =
   | { type: "job"; job: Job }
   | { type: "file"; vault_id: string; path: string; status: string; chunks?: number; error?: string | null }
+  | OllamaEvent
   | AgentEvent;
 
 declare global {
@@ -258,6 +276,13 @@ export const api = {
   cancelRun: (id: string) => call<void>("POST", `/agent/threads/${id}/cancel`),
   ask: (id: string, body: { query: string; k: number; rerank?: boolean }) =>
     call<{ answer: string; sources: SearchHit[]; rerank_error: string | null }>("POST", `/vaults/${id}/ask`, body),
+  ollamaStatus: () => call<OllamaStatus>("GET", "/ollama/status"),
+  ollamaLibrary: (query: string) => call<{ models: OllamaLibraryModel[] }>("GET", `/ollama/library${q({ q: query })}`),
+  ollamaPull: (model: string) => call<{ accepted: boolean; already?: boolean }>("POST", "/ollama/pull", { model }),
+  ollamaLoad: (model: string, keepAliveMinutes: number) =>
+    call<{ loaded: string }>("POST", "/ollama/load", { model, keep_alive_minutes: keepAliveMinutes }),
+  ollamaUnload: (model: string) => call<{ unloaded: string }>("POST", "/ollama/unload", { model }),
+  ollamaDelete: (model: string) => call<{ deleted: string }>("DELETE", `/ollama/models/${encodeURIComponent(model)}`),
 };
 
 export function subscribeEvents(onEvent: (e: EngineEvent) => void): () => void {

@@ -204,7 +204,13 @@ class AgentRunner:
             if model is None:
                 raise ProviderError("nessun LLM configurato: sceglilo in Impostazioni")
             vault_models = [(v.config.embedding, "embedding") for v in self.registry.list() if not thread.vault_ids or v.config.id in thread.vault_ids]
-            await ensure_loaded(settings.endpoints, [(model, "llm"), *vault_models])
+            await ensure_loaded(
+                settings.endpoints,
+                [(model, "llm"), *vault_models],
+                events=self.events,
+                auto_pull=settings.ollama_auto_pull,
+                keep_alive_minutes=settings.ollama_keep_alive_minutes,
+            )
             tools = [t.schema() for t in self.tools().values()]
             for step in range(1, settings.agent_max_steps + 2):
                 run.step = step
