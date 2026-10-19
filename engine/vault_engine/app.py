@@ -83,6 +83,7 @@ async def lifespan(app: FastAPI):
     yield
     state.watcher.stop()
     state.hardware.stop()
+    await ollama_hub.cancel_pulls()
     await state.jobs.shutdown()
     await mcp_manager.shutdown()
 
@@ -96,7 +97,8 @@ def _cors_origin_regex() -> str:
     With the per-launch token (desktop mode) the renderer may be a file:// or null origin.
     Without a token (manual start on a known port) those origins would let any web page
     sandboxed in an iframe read the API: keep only explicit http localhost origins.
-    """
+    NOTE: evaluated once at import time, so WSOS_TOKEN must be set before the module
+    is imported (the desktop app guarantees this via the spawned environment)."""
     local = r"http://(localhost|127\.0\.0\.1)(:\d+)?"
     return rf"^({local}|file://.*|null)$" if os.environ.get("WSOS_TOKEN") else rf"^({local})$"
 
@@ -107,6 +109,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if not os.environ.get("WSOS_TOKEN"):
+    # Bug #6 (DNS rebinding): without the per-launch token the API is reachable by any
+    # local process, so the Host header must be loopback-only. (WSOS_TOKEN is read at
+    # import time: the desktop app sets it before spawning the engine.)
+    from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["127.0.0.1", "localhost", "*.localhost", "testserver"],  # testserver: TestClient default host
+    )
 
 
 def require_token(request: Request) -> None:
@@ -223,8 +236,6 @@ async def test_embedding(body: EmbedTest):
 
 # ------------------------------------------------------------------ ollama hub
 
-_pulls: dict[str, asyncio.Task] = {}
-
 
 class PullBody(BaseModel):
     model: str = Field(min_length=1, max_length=200)
@@ -247,34 +258,33 @@ async def ollama_library(q: str = ""):
 
 @app.post("/ollama/pull", dependencies=[api], status_code=202)
 async def ollama_pull(body: PullBody):
-    """Downloads a model in the background; progress arrives as {type: "ollama"} events."""
-    current = _pulls.get(body.model)
-    if current is not None and not current.done():
-        return {"accepted": True, "model": body.model, "already": True}
+    """Downloads a model in the background; progress arrives as {type: "ollama"} events.
+    Concurrent pulls of the same model join the one already running (Miglioramento #2)."""
+    started = ollama_hub.start_pull(
+        state.settings.get().endpoints,
+        body.model,
+        on_progress=lambda p, m=body.model: state.events.publish(
+            {
+                "type": "ollama",
+                "kind": "pull",
+                "model": m,
+                "status": p.get("status") or "download",
+                "completed": p.get("completed"),
+                "total": p.get("total"),
+            }
+        ),
+        on_finished=lambda m=body.model: _report_pull_done(m),
+        on_error=lambda exc, m=body.model: _report_pull_error(m, exc),
+    )
+    return {"accepted": True, "model": body.model, "already": not started}
 
-    async def run() -> None:
-        async def progress(p: dict) -> None:
-            state.events.publish(
-                {
-                    "type": "ollama",
-                    "kind": "pull",
-                    "model": body.model,
-                    "status": p.get("status") or "download",
-                    "completed": p.get("completed"),
-                    "total": p.get("total"),
-                }
-            )
 
-        try:
-            await ollama_hub.pull(state.settings.get().endpoints, body.model, progress)
-            state.events.publish({"type": "ollama", "kind": "pull", "model": body.model, "status": "download_completato"})
-        except ollama_hub.HubError as exc:
-            state.events.publish({"type": "ollama", "kind": "pull", "model": body.model, "status": "errore", "error": str(exc)})
-        finally:
-            _pulls.pop(body.model, None)
+async def _report_pull_done(model: str) -> None:
+    state.events.publish({"type": "ollama", "kind": "pull", "model": model, "status": "download_completato"})
 
-    _pulls[body.model] = asyncio.create_task(run())
-    return {"accepted": True, "model": body.model}
+
+async def _report_pull_error(model: str, exc: Exception) -> None:
+    state.events.publish({"type": "ollama", "kind": "pull", "model": model, "status": "errore", "error": str(exc)})
 
 
 class LoadBody(BaseModel):
@@ -301,15 +311,18 @@ async def ollama_unload(body: PullBody):
     return {"unloaded": body.model}
 
 
-@app.delete("/ollama/models/{name}", dependencies=[api])
-async def ollama_delete(name: str):
-    """Removes a model from disk (frees disk space; RAM/VRAM freed first if loaded)."""
+@app.post("/ollama/delete", dependencies=[api])
+async def ollama_delete(body: PullBody):
+    """Removes a model from disk (frees disk space; RAM/VRAM freed first if loaded).
+
+    POST with a JSON body — not DELETE with a path parameter — so names containing
+    '/' (hf.co/…, namespace/model) survive routing (Bug #4)."""
     try:
-        await ollama_hub.unload(state.settings.get().endpoints, name)
-        await ollama_hub.delete(state.settings.get().endpoints, name)
+        await ollama_hub.unload(state.settings.get().endpoints, body.model)
+        await ollama_hub.delete(state.settings.get().endpoints, body.model)
     except ollama_hub.HubError as exc:
         raise HTTPException(502, str(exc)) from exc
-    return {"deleted": name}
+    return {"deleted": body.model}
 
 
 # ------------------------------------------------------------------ vaults
@@ -465,13 +478,19 @@ async def retrieve(vault, body: SearchBody) -> tuple[list[dict], str | None]:
     wanted = [(vault.config.embedding, "embedding")]
     if settings.llm is not None and (body.rerank or isinstance(body, AskBody)):
         wanted.append((settings.llm, "llm"))
-    await ensure_loaded(
-        settings.endpoints,
-        wanted,
-        events=state.events,
-        auto_pull=settings.ollama_auto_pull,
-        keep_alive_minutes=settings.ollama_keep_alive_minutes,
-    )
+    try:
+        # Miglioramento #1: interactive requests must not sit through a multi-GB
+        # download; a missing model is pulled in background and we answer 409.
+        await ensure_loaded(
+            settings.endpoints,
+            wanted,
+            events=state.events,
+            auto_pull=settings.ollama_auto_pull,
+            keep_alive_minutes=settings.ollama_keep_alive_minutes,
+            allow_download=False,
+        )
+    except ProviderError as exc:
+        raise HTTPException(409, str(exc)) from exc
     try:
         vector = (await client.embed(vault.config.embedding, [body.query]))[0]
     except ProviderError as exc:

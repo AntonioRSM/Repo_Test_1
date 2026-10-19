@@ -8,7 +8,6 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from itertools import islice
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -118,22 +117,82 @@ async def _vault_search(ctx: ToolContext, args: dict) -> dict:
 # ---------------------------------------------------------------------- files
 
 
-async def _list_directory(ctx: ToolContext, args: dict) -> dict:
-    path = _path(args.get("path", ""))
-    if not path.is_dir():
-        raise ToolError(f"cartella inesistente: {path}")
-    pattern = args.get("pattern") or "*"
-    # glob is lazy: cap the scan at 301 matches so a pattern like "**" cannot walk a
-    # whole disk before the limit is applied.
-    found = list(islice(path.glob(pattern), 301))
+# Miglioramento #4: a sparse pattern must not walk an entire (possibly network) disk,
+# and the scan must stay off the event-loop thread so /health and SSE keep answering.
+SCAN_VISITED_LIMIT = 20_000
+
+
+def _glob_match(rel: str, pattern: str) -> bool:
+    """glob semantics on a POSIX relative path: `*` and `?` do not cross '/',
+    `**/` matches zero or more directories, `**` matches anything."""
+    out = []
+    i, n = 0, len(pattern)
+    while i < n:
+        char = pattern[i]
+        if char == "*":
+            if pattern[i : i + 3] == "**/":
+                out.append("(?:.*/)?")
+                i += 3
+            elif pattern[i : i + 2] == "**":
+                out.append(".*")
+                i += 2
+            else:
+                out.append("[^/]*")
+                i += 1
+        elif char == "?":
+            out.append("[^/]")
+            i += 1
+        elif char == "[":
+            end = pattern.find("]", i + 1)
+            if end == -1:
+                out.append(r"\[")
+                i += 1
+            else:
+                cls = pattern[i : end + 1]
+                out.append(cls.replace("[!", "[^"))  # glob negation -> regex negation
+                i = end + 1
+        else:
+            out.append(re.escape(char))
+            i += 1
+    return re.fullmatch("".join(out), rel) is not None
+
+
+def _scan_directory(path: Path, pattern: str) -> dict:
+    """Sync scan executed in a worker thread (asyncio.to_thread). Visits at most
+    SCAN_VISITED_LIMIT entries; `truncated` is True when either the visit budget or
+    the 300-entry result budget is exhausted."""
+    rel_pattern = pattern.replace("\\", "/")
+    matches: list[Path] = []
+    visited = 0
+    budget_exhausted = False
+    for dirpath, dirnames, filenames in os.walk(path):
+        for name in (*dirnames, *filenames):
+            visited += 1
+            if visited > SCAN_VISITED_LIMIT:
+                budget_exhausted = True
+                break
+            full = Path(dirpath) / name
+            rel = full.relative_to(path).as_posix()
+            if _glob_match(rel, rel_pattern):
+                matches.append(full)
+        if budget_exhausted:
+            break
     entries = []
-    for entry in sorted(found, key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
+    for entry in sorted(matches, key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
         try:
             stat = entry.stat()
         except OSError:
             continue
         entries.append({"name": entry.name, "type": "dir" if entry.is_dir() else "file", "size": None if entry.is_dir() else stat.st_size})
-    return {"path": str(path), "entries": entries, "truncated": len(found) > 300}
+    return {"path": str(path), "entries": entries, "truncated": budget_exhausted or len(matches) > 300}
+
+
+async def _list_directory(ctx: ToolContext, args: dict) -> dict:
+    path = _path(args.get("path", ""))
+    if not path.is_dir():
+        raise ToolError(f"cartella inesistente: {path}")
+    pattern = args.get("pattern") or "*"
+    return await asyncio.to_thread(_scan_directory, path, pattern)
 
 
 async def _read_file(ctx: ToolContext, args: dict) -> dict:
@@ -187,20 +246,32 @@ async def _edit_file(ctx: ToolContext, args: dict) -> dict:
 # ---------------------------------------------------------------------- shell
 
 
-# powershell.exe accepts -EncodedCommand under abbreviated forms: every prefix of the
-# parameter name (-e, -enc, -enco…) and, empirically, the alias -ec. The filter must
-# catch them all. Quoted segments are skipped: they are data, not switches (a quoted
-# "-e" stays visible in the approval card anyway — this guard is a tripwire, not a sandbox).
-_ENCODED_SWITCH = re.compile(r"(?:^|[\s;|&])-([a-z]+)", re.IGNORECASE)
-_QUOTED_SEGMENT = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'')
+# powershell.exe/pwsh accept -EncodedCommand (and -EncodedArguments) under abbreviated
+# forms: every prefix (-e, -enc, -enco…), the aliases -ec/-ea, and the '/' or Unicode
+# dash prefixes (–, —, ―). The check applies ONLY to tokens following an explicit
+# powershell/pwsh invocation: `node -e …` or `Get-Content -Enc UTF8` are legitimate
+# and must not be flagged. Quoted tokens still count: PowerShell strips the quotes and
+# treats '-e' as the switch anyway. This guard is a tripwire, not a sandbox.
+_PWSH_NAMES = {"powershell", "powershell.exe", "pwsh", "pwsh.exe"}
+_PWSH_DASHES = ("-", "/", "\u2013", "\u2014", "\u2015")
+_ENCODED_PARAM = ("encodedcommand", "encodedarguments")
+_TOKEN = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'|\S+')
 
 
 def _uses_encoded_command(command: str) -> bool:
-    bare = _QUOTED_SEGMENT.sub("''", command)
-    for m in _ENCODED_SWITCH.finditer(bare):
-        token = m.group(1).lower()
-        if token == "ec" or "encodedcommand".startswith(token):
-            return True
+    tokens = _TOKEN.findall(command)
+    # Scan from every powershell/pwsh invocation: nested calls are the dangerous ones.
+    for i, token in enumerate(tokens):
+        if token.strip('"\'').lower() not in _PWSH_NAMES:
+            continue
+        for arg in tokens[i + 1 :]:
+            inner = arg.strip('"\'')  # PowerShell re-parses quoted switches as switches
+            if not inner.startswith(_PWSH_DASHES):
+                continue
+            name = inner.lstrip("".join(_PWSH_DASHES)).lower()
+            # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
+            if name and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM)):
+                return True
     return False
 
 

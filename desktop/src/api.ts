@@ -282,7 +282,7 @@ export const api = {
   ollamaLoad: (model: string, keepAliveMinutes: number) =>
     call<{ loaded: string }>("POST", "/ollama/load", { model, keep_alive_minutes: keepAliveMinutes }),
   ollamaUnload: (model: string) => call<{ unloaded: string }>("POST", "/ollama/unload", { model }),
-  ollamaDelete: (model: string) => call<{ deleted: string }>("DELETE", `/ollama/models/${encodeURIComponent(model)}`),
+  ollamaDelete: (model: string) => call<{ deleted: string }>("POST", "/ollama/delete", { model }),
 };
 
 export function subscribeEvents(onEvent: (e: EngineEvent) => void): () => void {

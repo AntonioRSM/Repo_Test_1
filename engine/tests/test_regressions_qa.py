@@ -12,6 +12,9 @@ from vault_engine.config import ModelRef
 # ---------------------------------------------------------------------- Bug #1
 
 
+# ---------------------------------------------------------------------- Bug #5 (ciclo 2) — encoded command filter
+
+
 @pytest.mark.parametrize(
     "command",
     [
@@ -20,7 +23,15 @@ from vault_engine.config import ModelRef
         "powershell -enc SGVsbG8=",
         "powershell -ENCO SGVsbG8=",
         "powershell -encodedCommand SGVsbG8=",
-        "Get-ChildItem C:\\; -e SGVsbG8=",
+        # Ciclo 2 bypasses, now covered:
+        "powershell /enc SGVsbG8=",          # '/' prefix is accepted by powershell.exe
+        "powershell /e SGVsbG8=",
+        "powershell \u2013e SGVsbG8=",        # en-dash, treated as '-' by PowerShell
+        "powershell \u2014e SGVsbG8=",        # em-dash
+        "powershell '-e' SGVsbG8=",          # quoted switches are still switches for PowerShell
+        "powershell -ea SGVsbG8=",           # -EncodedArguments
+        "pwsh -enc SGVsbG8=",
+        "cmd /c powershell.exe -encodedcommand SGVsbG8=",  # nested invocation
     ],
 )
 def test_encoded_command_abbreviations_are_rejected(command):
@@ -35,6 +46,13 @@ def test_encoded_command_abbreviations_are_rejected(command):
         "git -C repo log --oneline",
         "Get-Content file.txt -Encoding utf8",
         "Remove-Item -Recurse -Force C:\\temp\\old",
+        # Ciclo 2 false positives, now allowed: the check only applies to tokens
+        # following an explicit powershell/pwsh invocation. A bare "-e" inside a
+        # -Command string is PowerShell language, not an exe-level switch.
+        'node -e "console.log(1)"',
+        "Get-Content f.txt -Enc UTF8",
+        "Select-String -Path *.log -E 'x'",
+        "Get-ChildItem C:\\; -e SGVsbG8=",
     ],
 )
 def test_ordinary_commands_are_not_flagged(command):

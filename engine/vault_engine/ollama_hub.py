@@ -1,6 +1,8 @@
 """Ollama model hub: library search, download, load/unload and RAM/VRAM-aware management.
 
-Everything goes through the local Ollama HTTP API; nothing leaves the machine.
+Model downloads and inference go through the local Ollama HTTP API. The only exception
+is `library_search`, which sends the user's search query to ollama.com (the query
+leaves the machine there — the Models page says so).
 """
 
 from __future__ import annotations
@@ -9,6 +11,7 @@ import asyncio
 import json
 import logging
 import re
+import time
 from html import unescape
 from typing import Any, Awaitable, Callable
 from urllib.parse import quote
@@ -111,10 +114,37 @@ async def library_search(query: str, limit: int = 24) -> list[LibraryModel]:
 
 # ---------------------------------------------------------------------- pull / load / unload / delete
 
+# Seconds between progress events while a download streams (Miglioramento #3):
+# Ollama emits one NDJSON line per block; forwarding them all floods the SSE bus and
+# re-renders React per block. Terminal states always pass through immediately.
+PROGRESS_THROTTLE_SECONDS = 0.3
+
+
+def normalize_name(model: str) -> str:
+    """Ollama treats a tagless name as :latest (llama3 == llama3:latest); the registry
+    prefix (hf.co/…) may contain ':'-like text only in the last segment."""
+    tail = model.rsplit("/", 1)[-1]
+    return model if ":" in tail else f"{model}:latest"
+
 
 async def pull(endpoints: dict[str, str], model: str, on_progress: ProgressFn | None = None) -> None:
-    """Downloads a model, reporting NDJSON progress lines (completed/total bytes)."""
+    """Downloads a model, reporting NDJSON progress lines (completed/total bytes).
+
+    Progress callbacks are throttled to one call every PROGRESS_THROTTLE_SECONDS;
+    completion and error lines are always forwarded.
+    """
     base = base_of(endpoints)
+    last_emit = 0.0
+
+    async def throttled(event: dict) -> None:
+        nonlocal last_emit
+        now = time.monotonic()
+        terminal = bool(event.get("error")) or event.get("status") == "success"
+        if terminal or now - last_emit >= PROGRESS_THROTTLE_SECONDS:
+            last_emit = now
+            if on_progress is not None:
+                await on_progress(event)
+
     async with httpx.AsyncClient(timeout=PULL_TIMEOUT) as client:
         try:
             async with client.stream("POST", f"{base}/api/pull", json={"model": model, "stream": True}) as resp:
@@ -129,29 +159,77 @@ async def pull(endpoints: dict[str, str], model: str, on_progress: ProgressFn | 
                         continue
                     if event.get("error"):
                         raise HubError(f"pull {model}: {event['error']}")
-                    if on_progress is not None:
-                        await on_progress(
-                            {
-                                "status": event.get("status", ""),
-                                "completed": event.get("completed"),
-                                "total": event.get("total"),
-                            }
-                        )
+                    await throttled(
+                        {
+                            "status": event.get("status", ""),
+                            "completed": event.get("completed"),
+                            "total": event.get("total"),
+                        }
+                    )
         except httpx.HTTPError as exc:
             raise HubError(f"pull {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
 
 
 async def is_installed(endpoints: dict[str, str], model: str) -> bool:
+    """Exact match after :latest normalisation: llama3 is NOT satisfied by llama3:8b."""
+    target = normalize_name(model)
     info = await status(endpoints)
-    return any(m.name == model or m.name.startswith(f"{model}:") for m in info["installed"])
+    return any(normalize_name(m.name) == target for m in info["installed"])
 
 
-async def ensure_pulled(endpoints: dict[str, str], model: str, on_progress: ProgressFn | None = None) -> bool:
-    """Downloads the model only if missing. Returns True when it is available."""
-    if await is_installed(endpoints, model):
-        return True
-    await pull(endpoints, model, on_progress)
-    return await is_installed(endpoints, model)
+# ---------------------------------------------------------------------- deduplicated downloads (Miglioramento #2)
+
+_pull_locks: dict[str, asyncio.Lock] = {}
+_background_pulls: dict[str, asyncio.Task] = {}
+
+
+async def pull_dedup(endpoints: dict[str, str], model: str, on_progress: ProgressFn | None = None) -> None:
+    """Downloads a model once even with concurrent callers: same-model requests
+    serialize on a per-model lock and re-check the registry after waiting, so every
+    caller after the first finds the model already installed."""
+    lock = _pull_locks.setdefault(model, asyncio.Lock())
+    async with lock:
+        if await is_installed(endpoints, model):
+            return
+        await pull(endpoints, model, on_progress)
+
+
+def start_pull(
+    endpoints: dict[str, str],
+    model: str,
+    on_progress: ProgressFn | None = None,
+    on_finished: Callable[[], Awaitable[None]] | None = None,
+    on_error: Callable[[Exception], Awaitable[None]] | None = None,
+) -> bool:
+    """Starts a background download unless one is already running for this model.
+    Returns False when an existing download was joined instead."""
+    task = _background_pulls.get(model)
+    if task is not None and not task.done():
+        return False
+
+    async def run() -> None:
+        try:
+            await pull_dedup(endpoints, model, on_progress)
+        except Exception as exc:  # noqa: BLE001 - reported to the UI via the error callback
+            if on_error is not None:
+                await on_error(exc)
+        else:
+            if on_finished is not None:
+                await on_finished()
+        finally:
+            _background_pulls.pop(model, None)
+
+    _background_pulls[model] = asyncio.create_task(run())
+    return True
+
+
+async def cancel_pulls() -> None:
+    """Cancels in-flight background downloads (engine shutdown)."""
+    tasks = [t for t in _background_pulls.values() if not t.done()]
+    for task in tasks:
+        task.cancel()
+    if tasks:
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 
 def _keep_alive_body(model: str, keep_alive_minutes: int) -> dict:
@@ -162,14 +240,15 @@ def _keep_alive_body(model: str, keep_alive_minutes: int) -> dict:
 async def load(endpoints: dict[str, str], model: str, keep_alive_minutes: int) -> None:
     """Loads the model into memory (RAM or VRAM per the Ollama server defaults).
 
-    Embedding-only models (b.g. bge-m3) reject /api/generate: warm them via /api/embed.
+    Embedding-only models (b.g. bge-m3) reject /api/generate: warm them via /api/embed
+    with the same keep_alive so the residency setting also applies to them.
     """
     base = base_of(endpoints)
     async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=5.0)) as client:
         try:
             resp = await client.post(f"{base}/api/generate", json=_keep_alive_body(model, keep_alive_minutes))
             if resp.status_code == 400 and "does not support generate" in resp.text:
-                resp = await client.post(f"{base}/api/embed", json={"model": model, "input": ""})
+                resp = await client.post(f"{base}/api/embed", json=_keep_alive_body(model, keep_alive_minutes) | {"input": ""})
         except httpx.HTTPError as exc:
             raise HubError(f"caricamento {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
     if resp.status_code != 200:
@@ -201,27 +280,21 @@ async def delete(endpoints: dict[str, str], model: str) -> None:
         raise HubError(f"eliminazione {model}: HTTP {resp.status_code}: {resp.text[:200]}")
 
 
-async def reconcile_loaded(endpoints: dict[str, str], wanted: list[str], keep_alive_minutes: int) -> None:
-    """RAM/VRAM optimisation: unload every running model the app does not need right now."""
-    info = await status(endpoints)
-    for running in info["running"]:
-        if running.name not in wanted and running.name.split(":")[0] not in wanted:
-            await unload(endpoints, running.name)
-
-
 __all__ = [
     "HubError",
     "InstalledModel",
     "LibraryModel",
     "RunningModel",
     "base_of",
+    "cancel_pulls",
     "delete",
-    "ensure_pulled",
     "is_installed",
     "library_search",
     "load",
+    "normalize_name",
     "pull",
-    "reconcile_loaded",
+    "pull_dedup",
+    "start_pull",
     "status",
     "unload",
 ]

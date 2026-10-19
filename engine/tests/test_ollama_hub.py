@@ -93,38 +93,77 @@ def test_pull_surfaces_error(monkeypatch):
         asyncio.run(ollama_hub.pull(ENDPOINTS, "ghost"))
 
 
-def test_ensure_pulled_skips_installed_models(monkeypatch):
-    requests = []
+def test_is_installed_requires_exact_tag_after_normalization(monkeypatch):
+    """Bug #3: llama3 means llama3:latest — llama3:8b alone must NOT satisfy it."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        requests.append(request.url.path)
         if request.url.path == "/api/tags":
-            return httpx.Response(200, json={"models": [{"name": "bge-m3", "size": 1}]})
+            return httpx.Response(200, json={"models": [{"name": "llama3:8b", "size": 1}]})
         return httpx.Response(200, json={"models": []})
 
     mock_http(monkeypatch, handler)
-    assert asyncio.run(ollama_hub.ensure_pulled(ENDPOINTS, "bge-m3")) is True
-    assert "/api/pull" not in requests
+    assert asyncio.run(ollama_hub.is_installed(ENDPOINTS, "llama3")) is False
+    assert asyncio.run(ollama_hub.is_installed(ENDPOINTS, "llama3:8b")) is True
+    assert asyncio.run(ollama_hub.is_installed(ENDPOINTS, "llama3:latest")) is False
 
 
-def test_ensure_pulled_downloads_missing(monkeypatch):
-    pulled = []
+def test_normalize_name_appends_latest_only_to_tagless_tail():
+    assert ollama_hub.normalize_name("llama3") == "llama3:latest"
+    assert ollama_hub.normalize_name("llama3:8b") == "llama3:8b"
+    # Registry prefixes may contain ':' outside the model tag: untouched.
+    assert ollama_hub.normalize_name("hf.co/bartowski/Qwen2") == "hf.co/bartowski/Qwen2:latest"
+    assert ollama_hub.normalize_name("hf.co/bartowski/Qwen2:Q4_K_M") == "hf.co/bartowski/Qwen2:Q4_K_M"
+
+
+def test_pull_dedup_skips_second_caller(monkeypatch):
+    """Miglioramento #2: concurrent same-model downloads serialize and re-check."""
     installed = False
 
     def handler(request: httpx.Request) -> httpx.Response:
         nonlocal installed
         if request.url.path == "/api/tags":
-            models = [{"name": "nomic-embed-text", "size": 1}] if installed else []
+            models = [{"name": "m:latest", "size": 1}] if installed else []
             return httpx.Response(200, json={"models": models})
         if request.url.path == "/api/pull":
-            pulled.append(request.content)
-            installed = True
+            installed = True  # ollama records the model once the pull completes
             return httpx.Response(200, content=json.dumps({"status": "success"}))
         return httpx.Response(200, json={"models": []})
 
     mock_http(monkeypatch, handler)
-    assert asyncio.run(ollama_hub.ensure_pulled(ENDPOINTS, "nomic-embed-text")) is True
-    assert pulled and b"nomic-embed-text" in pulled[0]
+
+    async def scenario():
+        # Both callers race; the lock + re-check must issue ONE pull.
+        await asyncio.gather(ollama_hub.pull_dedup(ENDPOINTS, "m"), ollama_hub.pull_dedup(ENDPOINTS, "m"))
+
+    pulls = []
+    original = ollama_hub.pull
+
+    async def counting_pull(endpoints, model, on_progress=None):
+        pulls.append(model)
+        await original(endpoints, model, on_progress)
+
+    monkeypatch.setattr(ollama_hub, "pull", counting_pull)
+    asyncio.run(scenario())
+    assert pulls == ["m"]
+
+
+def test_pull_throttles_progress_events(monkeypatch):
+    """Miglioramento #3: 10k NDJSON lines must not produce 10k events."""
+    lines = [json.dumps({"status": "pulling", "completed": i, "total": 10000}) for i in range(9999)]
+    lines.append(json.dumps({"status": "success"}))
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content="\n".join(lines))
+
+    mock_http(monkeypatch, handler)
+    seen = []
+
+    async def on_progress(p: dict) -> None:
+        seen.append(p)
+
+    asyncio.run(ollama_hub.pull(ENDPOINTS, "m", on_progress))
+    assert len(seen) < 200, f"troppi eventi: {len(seen)}"
+    assert seen[-1]["status"] == "success"  # terminal state always delivered
 
 
 def test_unload_uses_keep_alive_zero(monkeypatch):
@@ -153,6 +192,8 @@ def test_load_falls_back_to_embed_for_embedding_only_models(monkeypatch):
     assert [c[0] for c in calls] == ["/api/generate", "/api/embed"]
     assert calls[1][1]["model"] == "bge-m3"
     assert calls[0][1]["keep_alive"] == "30m"
+    # Bug #7: the embed fallback must carry the same residency time (Bug #7 regression).
+    assert calls[1][1]["keep_alive"] == "30m"
 
 
 def test_unload_falls_back_to_embed_for_embedding_only_models(monkeypatch):

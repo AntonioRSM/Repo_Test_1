@@ -49,7 +49,9 @@ class AppSettings(BaseModel):
     # Concurrent files processed per vault job.
     ingest_workers: int = 2
     embed_batch_size: int = 32
-    # Ollama model hub.
+    # Ollama model hub. auto_pull stays on by design (automatic model management): a
+    # miss starts the download with visible progress and error events; interactive
+    # requests (search/ask) get a 409 and a background download instead of blocking.
     ollama_auto_pull: bool = True  # download a missing model on demand
     ollama_keep_alive_minutes: int = Field(30, ge=1, le=240)  # resident time before Ollama frees RAM/VRAM
     # Agent loop.

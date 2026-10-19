@@ -69,7 +69,9 @@ export default function ModelsPage() {
   );
 
   const runningNames = new Set((status?.running ?? []).map((m) => m.name));
-  const installedNames = new Set((status?.installed ?? []).map((m) => m.name));
+  // Miglioramento #5: library names carry no tag (llama3.2) while installed ones do
+  // (llama3.2:latest): compare against the tagless form.
+  const installedNames = new Set((status?.installed ?? []).map((m) => m.name.split(":")[0]));
 
   async function search() {
     setSearching(true);
@@ -104,6 +106,17 @@ export default function ModelsPage() {
     } finally {
       setBusy(null);
     }
+  }
+
+  // Bug #2: a failed download must surface the error AND offer a retry; clearing the
+  // progress entry restores the action buttons instead of spinning forever.
+  async function retry(model: string) {
+    setPulls((prev) => {
+      const next = { ...prev };
+      delete next[model];
+      return next;
+    });
+    await pull(model);
   }
 
   const progressOf = (model: string) => {
@@ -166,9 +179,23 @@ export default function ModelsPage() {
                   <span className={styles.meta}>{formatBytes(m.size)} su disco</span>
                   <span className={styles.actions}>
                     {prog ? (
-                      <Caption1 style={{ minWidth: 140 }}>
-                        {prog.error ? `Errore: ${prog.error}` : `${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}
-                      </Caption1>
+                      prog.error ? (
+                        <>
+                          <Caption1
+                            style={{ color: tokens.colorPaletteRedForeground1, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}
+                            title={prog.error}
+                          >
+                            Errore: {prog.error}
+                          </Caption1>
+                          <Button size="small" icon={<ArrowDownloadRegular />} disabled={busy !== null} onClick={() => retry(m.name)}>
+                            Riprova
+                          </Button>
+                        </>
+                      ) : (
+                        <Caption1 style={{ minWidth: 140 }}>
+                          {`${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}
+                        </Caption1>
+                      )
                     ) : (
                       <>
                         {!running && (
@@ -191,6 +218,9 @@ export default function ModelsPage() {
 
       <Card className={styles.card}>
         <Subtitle2>Libreria modelli (ollama.com)</Subtitle2>
+        <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>
+          Attenzione: il testo cercato viene inviato a ollama.com (unica chiamata di rete del programma).
+        </Caption1>
         <div className={styles.search}>
           <Field label="Cerca" style={{ flex: 1 }}>
             <Input
@@ -206,20 +236,31 @@ export default function ModelsPage() {
         </div>
         {library.map((m) => {
           const prog = progressOf(m.name);
-          const installed = installedNames.has(m.name) || installedNames.has(m.name.split(":")[0]);
+          const installed = installedNames.has(m.name.split(":")[0]);
           return (
             <div key={m.name} className={styles.row}>
               <span className={styles.name}>
                 {m.name}
                 {m.label && m.label !== m.name && <Caption1> · {m.label}</Caption1>}
               </span>
-              <span className={styles.meta}>{installed ? "installato" : (m.description ?? "")}</span>
+              <span className={styles.meta}>{installed ? "installato" : ""}</span>
               <span className={styles.actions}>
                 {prog ? (
-                  <span style={{ minWidth: 160, display: "inline-block" }}>
-                    <ProgressBar value={prog.pct !== null ? prog.pct / 100 : undefined} />
-                    <Caption1>{prog.error ?? `${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}</Caption1>
-                  </span>
+                  prog.error ? (
+                    <span style={{ minWidth: 160, display: "inline-block" }}>
+                      <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }} title={prog.error}>
+                        Errore: {prog.error}
+                      </Caption1>{" "}
+                      <Button size="small" icon={<ArrowDownloadRegular />} onClick={() => retry(m.name)}>
+                        Riprova
+                      </Button>
+                    </span>
+                  ) : (
+                    <span style={{ minWidth: 160, display: "inline-block" }}>
+                      <ProgressBar value={prog.pct !== null ? prog.pct / 100 : undefined} />
+                      <Caption1>{`${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}</Caption1>
+                    </span>
+                  )
                 ) : installed ? (
                   <Caption1>✓</Caption1>
                 ) : (

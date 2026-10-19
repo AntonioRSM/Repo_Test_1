@@ -198,6 +198,7 @@ async def ensure_loaded(
     events: Any = None,
     auto_pull: bool = True,
     keep_alive_minutes: int = 30,
+    allow_download: bool = True,
 ) -> None:
     """Loads the given models explicitly so they stay resident together.
 
@@ -206,7 +207,13 @@ async def ensure_loaded(
     each time. Explicitly loaded models are not evicted. Ollama gets a long keep_alive.
     For Ollama, a missing model is downloaded automatically (auto_pull) with progress
     events, so vault jobs and the agent can ask for any model by name.
-    Best effort: older servers without these APIs fall back to on-demand loading."""
+
+    With allow_download=False (interactive requests such as search/ask) a missing model
+    starts a background download and raises ProviderError instead of blocking the HTTP
+    request for the whole download.
+
+    Best effort: a server that does not answer is logged and skipped, so on-demand
+    loading (or a clean 502 from the actual embed/chat call) takes over."""
     targets = dict(DEFAULT_ENDPOINTS) | endpoints
     unique = {(r.provider, r.model): (r, kind) for r, kind in refs}
 
@@ -230,14 +237,36 @@ async def ensure_loaded(
                 else:
                     from . import ollama_hub
 
+                    # Bug #1: with the server offline, status() reports online=False:
+                    # skip the pull (it would raise HubError) and the explicit load;
+                    # the embed/chat call below then fails with a clean ProviderError.
+                    if not (await ollama_hub.status(targets))["online"]:
+                        log.warning("Ollama non raggiungibile: salto il preload di %s", model)
+                        continue
                     if auto_pull and not await ollama_hub.is_installed(targets, model):
-                        await report(model, status="download_avviato", completed=None, total=None)
-                        await ollama_hub.pull(
-                            targets,
-                            model,
-                            on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
-                        )
-                        await report(model, status="download_completato", completed=None, total=None)
+                        if allow_download:
+                            await report(model, status="download_avviato", completed=None, total=None)
+                            try:
+                                await ollama_hub.pull_dedup(
+                                    targets,
+                                    model,
+                                    on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                                )
+                                await report(model, status="download_completato", completed=None, total=None)
+                            except ollama_hub.HubError as exc:
+                                # Bug #2: without this event the Models page spins forever.
+                                log.warning("download di %s fallito: %s", model, exc)
+                                await report(model, status="errore", error=str(exc))
+                                continue  # the explicit load below would fail with "model not found"
+                        else:
+                            ollama_hub.start_pull(
+                                targets,
+                                model,
+                                on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                            )
+                            raise ProviderError(
+                                f"modello '{model}' in download in background: attendi il completamento (pagina Modelli) e riprova"
+                            )
                     route, body = ("/api/embed", {"input": ""}) if kind == "embedding" else ("/api/generate", {})
                     await client.post(
                         f"{base}{route}",
