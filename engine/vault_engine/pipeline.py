@@ -133,7 +133,10 @@ class JobManager:
 
     async def _worker(self, vault_id: str) -> None:
         queue = self._queues[vault_id]
-        while not queue.empty():
+        # Loop on queue.get(): checking queue.empty() before get() is racy — a job submitted
+        # in the window between the check and the task ending would wait for another submit.
+        # The task lives until shutdown() cancels it; a crashed task is replaced by submit().
+        while True:
             job, paths = await queue.get()
             if job.id in self._cancel:
                 job.status = "cancelled"

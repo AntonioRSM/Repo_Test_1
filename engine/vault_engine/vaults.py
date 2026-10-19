@@ -128,6 +128,11 @@ def quote_sql(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
+def escape_like(value: str) -> str:
+    """Escapes the LIKE wildcards so a user query is matched literally."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 class Vault:
     """One vault on disk: vault.json + manifest.sqlite + lancedb/."""
 
@@ -153,8 +158,8 @@ class Vault:
             sql += " AND status = ?"
             args.append(status)
         if query:
-            sql += " AND path LIKE ?"
-            args.append(f"%{query}%")
+            sql += " AND path LIKE ? ESCAPE '\\'"
+            args.append(f"%{escape_like(query)}%")
         sql += " ORDER BY path LIMIT ? OFFSET ?"
         args += [limit, offset]
         with self._lock:

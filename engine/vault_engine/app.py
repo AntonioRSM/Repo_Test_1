@@ -87,9 +87,22 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RAG Vault Studio engine", version="0.1.0", lifespan=lifespan)
+
+
+def _cors_origin_regex() -> str:
+    """Origins allowed to read API responses.
+
+    With the per-launch token (desktop mode) the renderer may be a file:// or null origin.
+    Without a token (manual start on a known port) those origins would let any web page
+    sandboxed in an iframe read the API: keep only explicit http localhost origins.
+    """
+    local = r"http://(localhost|127\.0\.0\.1)(:\d+)?"
+    return rf"^({local}|file://.*|null)$" if os.environ.get("WSOS_TOKEN") else rf"^({local})$"
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^(http://(localhost|127\.0\.0\.1)(:\d+)?|file://.*|null)$",
+    allow_origin_regex=_cors_origin_regex(),
     allow_methods=["*"],
     allow_headers=["*"],
 )

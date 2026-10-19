@@ -5,8 +5,10 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -121,14 +123,17 @@ async def _list_directory(ctx: ToolContext, args: dict) -> dict:
     if not path.is_dir():
         raise ToolError(f"cartella inesistente: {path}")
     pattern = args.get("pattern") or "*"
+    # glob is lazy: cap the scan at 301 matches so a pattern like "**" cannot walk a
+    # whole disk before the limit is applied.
+    found = list(islice(path.glob(pattern), 301))
     entries = []
-    for entry in sorted(path.glob(pattern), key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
+    for entry in sorted(found, key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
         try:
             stat = entry.stat()
         except OSError:
             continue
         entries.append({"name": entry.name, "type": "dir" if entry.is_dir() else "file", "size": None if entry.is_dir() else stat.st_size})
-    return {"path": str(path), "entries": entries, "truncated": len(entries) >= 300}
+    return {"path": str(path), "entries": entries, "truncated": len(found) > 300}
 
 
 async def _read_file(ctx: ToolContext, args: dict) -> dict:
@@ -182,11 +187,28 @@ async def _edit_file(ctx: ToolContext, args: dict) -> dict:
 # ---------------------------------------------------------------------- shell
 
 
+# powershell.exe accepts -EncodedCommand under abbreviated forms: every prefix of the
+# parameter name (-e, -enc, -enco…) and, empirically, the alias -ec. The filter must
+# catch them all. Quoted segments are skipped: they are data, not switches (a quoted
+# "-e" stays visible in the approval card anyway — this guard is a tripwire, not a sandbox).
+_ENCODED_SWITCH = re.compile(r"(?:^|[\s;|&])-([a-z]+)", re.IGNORECASE)
+_QUOTED_SEGMENT = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'')
+
+
+def _uses_encoded_command(command: str) -> bool:
+    bare = _QUOTED_SEGMENT.sub("''", command)
+    for m in _ENCODED_SWITCH.finditer(bare):
+        token = m.group(1).lower()
+        if token == "ec" or "encodedcommand".startswith(token):
+            return True
+    return False
+
+
 async def _run_powershell(ctx: ToolContext, args: dict) -> dict:
     command = (args.get("command") or "").strip()
     if not command:
         raise ToolError("comando mancante")
-    if "-encodedcommand" in command.lower() or " -enc " in command.lower():
+    if _uses_encoded_command(command):
         raise ToolError("comandi codificati non ammessi: scrivi il comando in chiaro")
     cwd = _path(args["cwd"]) if args.get("cwd") else Path.home()
     if not cwd.is_dir():
