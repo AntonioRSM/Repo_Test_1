@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
+import ipaddress
 import re
+import socket
 from html import unescape
 from html.parser import HTMLParser
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, unquote, urljoin, urlparse
 
 import httpx
 from pydantic import BaseModel
@@ -13,6 +16,18 @@ from pydantic import BaseModel
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 TIMEOUT = httpx.Timeout(20.0, connect=8.0)
 MAX_PAGE_BYTES = 3 * 2**20
+MAX_REDIRECTS = 5
+
+# Destinations the fetch agent must never reach: the local machine, LAN hosts and
+# link-local/CGNAT ranges (SSRF). Checked on every resolved IP of every redirect hop.
+_BLOCKED_NETWORKS = tuple(
+    ipaddress.ip_network(cidr)
+    for cidr in (
+        "0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
+        "192.168.0.0/16", "100.64.0.0/10",  # RFC 1918 + loopback + link-local + CGNAT
+        "::/128", "::1/128", "fc00::/7", "fe80::/10",
+    )
+)
 
 
 class WebResult(BaseModel):
@@ -23,6 +38,29 @@ class WebResult(BaseModel):
 
 class WebError(RuntimeError):
     pass
+
+
+async def _validate_url(url: str) -> None:
+    """Resolves the host and rejects private/loopback/link-local destinations (SSRF guard).
+
+    Note: this validates the IPs returned at check time; a hostile DNS could later
+    rebind them (DNS rebinding). For a localhost assistant the residual risk is low,
+    but keep the tool behind user approval."""
+    parsed = httpx.URL(url)
+    host = parsed.host
+    if not host:
+        raise WebError("URL senza host")
+    try:
+        ips = [ipaddress.ip_address(host.strip("[]"))]
+    except ValueError:
+        try:
+            infos = await asyncio.to_thread(socket.getaddrinfo, host, parsed.port or 443, proto=socket.IPPROTO_TCP)
+        except socket.gaierror as exc:
+            raise WebError(f"host non risolvibile: {host}") from exc
+        ips = [ipaddress.ip_address(info[4][0]) for info in infos]
+    blocked = [str(ip) for ip in ips if any(ip in net for net in _BLOCKED_NETWORKS)]
+    if blocked:
+        raise WebError(f"destinazione privata o locale non consentita: {host} ({', '.join(blocked)})")
 
 
 class _DdgParser(HTMLParser):
@@ -136,17 +174,29 @@ def html_to_text(html: str) -> tuple[str, str]:
 
 async def fetch_url(url: str, max_chars: int = 12000) -> dict:
     if not re.match(r"^https?://", url):
-        raise WebError("sono ammessi solo URL http(s)")
-    async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": USER_AGENT}, follow_redirects=True) as client:
+        raise WebError("sono ammesse solo URL http(s)")
+    current = url
+    # Redirects are followed manually so EVERY hop's destination is validated:
+    # a public page must not be able to bounce the agent onto 127.0.0.1 or the LAN.
+    async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": USER_AGENT}) as client:
         try:
-            async with client.stream("GET", url) as resp:
-                body = b""
-                async for chunk in resp.aiter_bytes():
-                    body += chunk
-                    if len(body) > MAX_PAGE_BYTES:
-                        break
-                status, ctype, final_url = resp.status_code, resp.headers.get("content-type", ""), str(resp.url)
-                encoding = resp.encoding or "utf-8"
+            for _ in range(MAX_REDIRECTS + 1):
+                await _validate_url(current)
+                async with client.stream("GET", current, follow_redirects=False) as resp:
+                    body = b""
+                    async for chunk in resp.aiter_bytes():
+                        body += chunk
+                        if len(body) > MAX_PAGE_BYTES:
+                            break
+                    status, ctype = resp.status_code, resp.headers.get("content-type", "")
+                    if status in (301, 302, 303, 307, 308) and resp.headers.get("location"):
+                        current = urljoin(current, resp.headers["location"])
+                        continue
+                    final_url = str(resp.url)
+                    encoding = resp.encoding or "utf-8"
+                    break
+            else:
+                raise WebError(f"troppi redirect (oltre {MAX_REDIRECTS})")
         except httpx.HTTPError as exc:
             raise WebError(f"download non riuscito: {type(exc).__name__}") from exc
     if status >= 400:

@@ -188,8 +188,44 @@ ipcMain.handle("dialog:pick-folders", async () => {
   const result = await dialog.showOpenDialog(mainWindow, { properties: ["openDirectory", "multiSelections"] });
   return result.canceled ? [] : result.filePaths;
 });
-ipcMain.handle("shell:open-path", (_e, target) => shell.openPath(String(target)));
-ipcMain.handle("shell:show-in-folder", (_e, target) => shell.showItemInFolder(String(target)));
+// Only files inside a Vault's source folders may be opened: the renderer can be
+// fed arbitrary paths (prompt injection, corrupted state) and shell.openPath on an
+// executable would run it.
+async function assertOpenableTarget(target) {
+  const resolved = path.resolve(String(target));
+  let stat;
+  try {
+    stat = fs.statSync(resolved);
+  } catch {
+    return null; // must exist
+  }
+  if (!stat.isFile()) return null;
+  let vaults;
+  try {
+    vaults = await engineFetch("/vaults");
+  } catch {
+    return null; // engine unreachable: deny rather than guess
+  }
+  const normalized = resolved.toLowerCase();
+  const inside = (vaults ?? []).some((v) =>
+    (v.sources ?? []).some((s) => {
+      const root = path.resolve(String(s)).toLowerCase();
+      return normalized === root || normalized.startsWith(root + path.sep);
+    }),
+  );
+  return inside ? resolved : null;
+}
+
+ipcMain.handle("shell:open-path", async (_e, target) => {
+  const safe = await assertOpenableTarget(target);
+  if (!safe) throw new Error("apertura consentita solo per i documenti dei Vault");
+  return shell.openPath(safe);
+});
+ipcMain.handle("shell:show-in-folder", async (_e, target) => {
+  const safe = await assertOpenableTarget(target);
+  if (!safe) throw new Error("apertura consentita solo per i documenti dei Vault");
+  shell.showItemInFolder(safe);
+});
 ipcMain.handle("window:theme-overlay", (_e, symbolColor) => {
   try {
     mainWindow?.setTitleBarOverlay({ color: "#00000000", symbolColor: String(symbolColor), height: 40 });

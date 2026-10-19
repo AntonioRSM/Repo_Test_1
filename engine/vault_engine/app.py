@@ -110,11 +110,33 @@ app.add_middleware(
 
 
 def require_token(request: Request) -> None:
-    """When started by the desktop app, every call must carry its per-launch token."""
+    """When started by the desktop app, every call must carry its per-launch token.
+
+    Only the `x-wsos-token` HEADER is accepted here: a token in the URL would end up
+    in logs and browser history. The single exception is the `/events` SSE stream,
+    which cannot set headers (see `require_token_events`)."""
     expected = os.environ.get("WSOS_TOKEN")
     if not expected:
         return
+    supplied = request.headers.get("x-wsos-token")
+    if supplied != expected:
+        raise HTTPException(401, "invalid token")
+
+
+_query_token_warned = False
+
+
+def require_token_events(request: Request) -> None:
+    """SSE (EventSource) cannot send custom headers, so the stream may carry the
+    token as a query parameter. Its use is logged once."""
+    expected = os.environ.get("WSOS_TOKEN")
+    if not expected:
+        return
+    global _query_token_warned
     supplied = request.headers.get("x-wsos-token") or request.query_params.get("token")
+    if supplied == expected and "token" in request.query_params and not _query_token_warned:
+        _query_token_warned = True
+        log.warning("token ricevuto in query string su /events (unica rotta che lo ammette)")
     if supplied != expected:
         raise HTTPException(401, "invalid token")
 
@@ -144,7 +166,7 @@ def hardware():
     return state.hardware.latest()
 
 
-@app.get("/events", dependencies=[api])
+@app.get("/events", dependencies=[Depends(require_token_events)])
 async def events(request: Request):
     queue = state.events.subscribe()
 

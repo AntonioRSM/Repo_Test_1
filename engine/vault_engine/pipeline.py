@@ -179,6 +179,10 @@ class JobManager:
         known = vault.known_paths()
         for path in set(known) - set(found):
             self._remove(job, vault, path)
+        # Files whose size+mtime match are still hash-verified: tools like
+        # `robocopy /COPY:T` or zip extraction can change content while preserving
+        # timestamps, and trusting size+mtime alone would miss those edits.
+        candidates: list[tuple[str, FileRecord, os.stat_result]] = []
         todo = []
         for path, (_source, stat) in found.items():
             record = known.get(path)
@@ -190,6 +194,26 @@ class JobManager:
             )
             if force or not unchanged:
                 todo.append(path)
+            else:
+                candidates.append((path, record, stat))
+        if candidates:
+            semaphore = asyncio.Semaphore(8)
+
+            async def verify(path: str, record: FileRecord) -> tuple[str, bool]:
+                async with semaphore:
+                    sha = await asyncio.to_thread(sha256_file, Path(path))
+                return path, sha == record.sha256
+
+            verified = dict(await asyncio.gather(*(verify(p, r) for p, r, _ in candidates)))
+            for path, record, stat in candidates:
+                if verified[path]:
+                    # Stat refresh only: content identical, just possibly re-touched.
+                    if record.status == "indexed":
+                        vault.upsert_file(record.model_copy(update={"size": stat.st_size, "mtime": stat.st_mtime}))
+                else:
+                    todo.append(path)
+            job.message = f"{len(candidates)} file verificati con SHA-256"
+            self._publish(job)
         job.total = len(todo)
         job.message = f"{len(found)} file nelle sorgenti, {len(todo)} da elaborare"
         self._publish(job)
@@ -262,10 +286,8 @@ class JobManager:
         return models
 
     def _remove(self, job: Job, vault: Vault, path: str) -> None:
-        # Removing a folder removes every file recorded under it.
-        prefix = path.rstrip("\\/") + os.sep
-        targets = [p for p in vault.known_paths() if p == path or p.startswith(prefix)]
-        for target in targets:
+        # Removing a folder removes every file recorded under it (SQL prefix match).
+        for target in vault.matching_paths(path):
             vault.remove_file(target)
             job.removed += 1
             self.events.publish({"type": "file", "vault_id": vault.config.id, "path": target, "status": "removed"})

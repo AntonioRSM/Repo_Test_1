@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+import os
 import shutil
 import sqlite3
 import threading
@@ -187,6 +188,17 @@ class Vault:
 
     def known_paths(self) -> dict[str, FileRecord]:
         return {r.path: r for r in self.files(limit=10**9)}
+
+    def matching_paths(self, path: str) -> list[str]:
+        """Every recorded path equal to `path` or under it as a folder (SQL prefix match,
+        no full manifest scan — used by bulk removals)."""
+        prefix = path.rstrip("\\/") + os.sep
+        with self._lock:
+            rows = self._manifest.execute(
+                "SELECT path FROM files WHERE path = ? OR path LIKE ? ESCAPE '\\'",
+                (path, escape_like(prefix) + "%"),
+            ).fetchall()
+        return [r["path"] for r in rows]
 
     def stats(self) -> dict:
         with self._lock:
