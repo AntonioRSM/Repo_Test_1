@@ -137,3 +137,43 @@ def test_unload_uses_keep_alive_zero(monkeypatch):
     mock_http(monkeypatch, handler)
     asyncio.run(ollama_hub.unload(ENDPOINTS, "m"))
     assert bodies[0]["keep_alive"] == 0
+
+
+def test_load_falls_back_to_embed_for_embedding_only_models(monkeypatch):
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append((request.url.path, json.loads(request.content)))
+        if request.url.path == "/api/generate":
+            return httpx.Response(400, json={"error": '"bge-m3" does not support generate'})
+        return httpx.Response(200, json={"embeddings": [[]]})
+
+    mock_http(monkeypatch, handler)
+    asyncio.run(ollama_hub.load(ENDPOINTS, "bge-m3", 30))
+    assert [c[0] for c in calls] == ["/api/generate", "/api/embed"]
+    assert calls[1][1]["model"] == "bge-m3"
+    assert calls[0][1]["keep_alive"] == "30m"
+
+
+def test_unload_falls_back_to_embed_for_embedding_only_models(monkeypatch):
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append((request.url.path, json.loads(request.content)))
+        if request.url.path == "/api/generate":
+            return httpx.Response(400, json={"error": '"bge-m3" does not support generate'})
+        return httpx.Response(200, json={"embeddings": [[]]})
+
+    mock_http(monkeypatch, handler)
+    asyncio.run(ollama_hub.unload(ENDPOINTS, "bge-m3"))
+    assert [c[0] for c in calls] == ["/api/generate", "/api/embed"]
+    assert calls[1][1]["keep_alive"] == 0
+
+
+def test_unload_real_error_is_not_masked_by_fallback(monkeypatch):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, json={"error": "model 'ghost' not found"})
+
+    mock_http(monkeypatch, handler)
+    with pytest.raises(ollama_hub.HubError, match="404"):
+        asyncio.run(ollama_hub.unload(ENDPOINTS, "ghost"))

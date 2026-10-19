@@ -154,12 +154,22 @@ async def ensure_pulled(endpoints: dict[str, str], model: str, on_progress: Prog
     return await is_installed(endpoints, model)
 
 
+def _keep_alive_body(model: str, keep_alive_minutes: int) -> dict:
+    keep_alive: int | str = keep_alive_minutes if keep_alive_minutes == 0 else f"{keep_alive_minutes}m"
+    return {"model": model, "keep_alive": keep_alive, "stream": False}
+
+
 async def load(endpoints: dict[str, str], model: str, keep_alive_minutes: int) -> None:
-    """Loads the model into memory (RAM or VRAM per the Ollama server defaults)."""
+    """Loads the model into memory (RAM or VRAM per the Ollama server defaults).
+
+    Embedding-only models (b.g. bge-m3) reject /api/generate: warm them via /api/embed.
+    """
     base = base_of(endpoints)
     async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=5.0)) as client:
         try:
-            resp = await client.post(f"{base}/api/generate", json={"model": model, "keep_alive": f"{keep_alive_minutes}m", "stream": False})
+            resp = await client.post(f"{base}/api/generate", json=_keep_alive_body(model, keep_alive_minutes))
+            if resp.status_code == 400 and "does not support generate" in resp.text:
+                resp = await client.post(f"{base}/api/embed", json={"model": model, "input": ""})
         except httpx.HTTPError as exc:
             raise HubError(f"caricamento {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
     if resp.status_code != 200:
@@ -171,7 +181,9 @@ async def unload(endpoints: dict[str, str], model: str) -> None:
     base = base_of(endpoints)
     async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
         try:
-            resp = await client.post(f"{base}/api/generate", json={"model": model, "keep_alive": 0, "stream": False})
+            resp = await client.post(f"{base}/api/generate", json=_keep_alive_body(model, 0))
+            if resp.status_code == 400 and "does not support generate" in resp.text:
+                resp = await client.post(f"{base}/api/embed", json={"model": model, "input": "", "keep_alive": 0})
         except httpx.HTTPError as exc:
             raise HubError(f"scarico {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
     if resp.status_code != 200:
