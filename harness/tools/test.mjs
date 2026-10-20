@@ -34,6 +34,30 @@ check('dizionari italiani aggiornati rispetto a i18n/', () => {
   }
 })
 
+check('package.json del profilo: plugin utente conservati (Bug #23)', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wsos-profilo-test-'))
+  try {
+    const modello = path.join(harness, 'profile', 'package.json')
+    const profilo = path.join(dir, 'package.json')
+    const prepara = () => run(['tools/prepara-profilo.mjs', modello, profilo])
+    const leggi = () => JSON.parse(fs.readFileSync(profilo, 'utf8'))
+    prepara()
+    const iniziale = leggi()
+    if (JSON.stringify(iniziale) !== JSON.stringify(JSON.parse(fs.readFileSync(modello, 'utf8')))) throw new Error('primo avvio: il profilo non è il modello')
+    // what the dsh plugin manager writes when the user adds a plugin; one Workspace bundle lost by hand
+    iniziale.dependencies['@x/plugin'] = '1.0.0'
+    iniziale.dsh.profile.bundles = ['@deepseek-ai/dsh-base', '@x/plugin']
+    fs.writeFileSync(profilo, String.fromCharCode(0xfeff) + JSON.stringify(iniziale))
+    prepara()
+    const dopo = leggi()
+    if (dopo.dependencies['@x/plugin'] !== '1.0.0') throw new Error('dipendenza del plugin utente persa')
+    const attesi = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', '@workspace-sm/dsh-workspace', '@x/plugin']
+    if (JSON.stringify(dopo.dsh.profile.bundles) !== JSON.stringify(attesi)) throw new Error(`bundle: ${dopo.dsh.profile.bundles}`)
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
+})
+
 const dsh = path.join(harness, 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js')
 if (!fs.existsSync(dsh)) {
   console.log('skip profilo composto (runtime non installato: npm install)')

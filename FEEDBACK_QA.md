@@ -5,7 +5,7 @@
 - i commit arrivati sulla PR dopo il ciclo 4: `79acbc3` (README, `start.cmd`), `9d6b2be` (Ollama nell'installatore), `d04bcf3` (Workspace Harness).
 
 **Decisione:** APPROVATO CON RISERVA dal responsabile del progetto il 20/10/2026, nonostante l'esito QA negativo.
-- I Bug #19–#25 sono accettati come problemi noti: restano aperti in questo file e vanno corretti in un ciclo successivo.
+- I Bug #19–#25, accettati come problemi noti, sono stati poi corretti nella fase Developer del ciclo 5 (vedi «Soluzioni applicate (fase Developer, ciclo 5)» in fondo): vanno verificati nel ciclo 6.
 - Restano aperte anche le voci del ciclo 4 (Bug #16, #17, #18 e Miglioramento #13).
 - La PR verso `main` è la #21; anche la #20 resta aperta.
 
@@ -30,7 +30,7 @@
 
 ## Ciclo 5 – Bug
 
-- [ ] **Bug #19 (alta): "Elimina" nella pagina Modelli fallisce sempre con un errore 500**
+- [x] **Bug #19 (alta): "Elimina" nella pagina Modelli fallisce sempre con un errore 500**
   - **File:** `engine/vault_engine/ollama_hub.py` (`delete`) e `engine/vault_engine/app.py` (`ollama_delete`).
   - **Causa:** `client.delete(f"{base}/api/delete", json={"model": model})`. In httpx 0.28.1 (versione installata) `AsyncClient.delete()` **non ha** il parametro `json` (firma: `url, params, headers, cookies, auth, follow_redirects, timeout, extensions`). Ne risulta `TypeError: AsyncClient.delete() got an unexpected keyword argument 'json'` ancora prima di contattare Ollama.
   - **Effetti:**
@@ -45,7 +45,7 @@
     - `await client.request("DELETE", f"{base}/api/delete", json={"model": model})`;
     - aggiungere un test con `httpx.MockTransport` che verifichi metodo, percorso e body della richiesta senza sostituire `ollama_hub.delete`.
 
-- [ ] **Bug #20 (media): l'avanzamento dei download avviati automaticamente non compare da nessuna parte**
+- [x] **Bug #20 (media): l'avanzamento dei download avviati automaticamente non compare da nessuna parte**
   - **File:** `desktop/src/pages/Models.tsx` (`pulls`, `progressOf`).
   - **Causa:**
     - lo stato dei download è indicizzato con il nome **esatto** ricevuto negli eventi;
@@ -61,7 +61,7 @@
     - indicizzare `pulls` con `normalizeName(e.model)` e cercare con `normalizeName(riga)`;
     - aggiungere una sezione "Download in corso" che elenchi le voci di `pulls` non mostrate da nessuna riga, con avanzamento, errore e "Riprova".
 
-- [ ] **Bug #21 (bassa): un errore immediato del download può essere sovrascritto e la riga resta su "download_avviato…" senza "Riprova"**
+- [x] **Bug #21 (bassa): un errore immediato del download può essere sovrascritto e la riga resta su "download_avviato…" senza "Riprova"**
   - **File:** `desktop/src/pages/Models.tsx` (`pull`).
   - **Causa:**
     - `setPulls(... status: "download_avviato")` viene eseguito **dopo** `await api.ollamaPull(model)`;
@@ -74,7 +74,7 @@
     - impostare lo stato "in avvio" **prima** della chiamata;
     - dopo la risposta aggiornarlo solo se nel frattempo non è arrivato un evento (`prev[model]?.status === "in avvio"`).
 
-- [ ] **Bug #22 (media, Workspace Harness): l'avvio si interrompe alla prima riga che dsh scrive su stderr**
+- [x] **Bug #22 (media, Workspace Harness): l'avvio si interrompe alla prima riga che dsh scrive su stderr**
   - **File:** `harness/avvia.ps1` (`d04bcf3`).
   - **Causa:**
     - lo script imposta `$ErrorActionPreference = 'Stop'` e legge l'output con `& node ... 2>&1 | ForEach-Object`;
@@ -94,7 +94,7 @@
     - nel `ForEach-Object`, convertire gli `ErrorRecord` in testo (`if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }`);
     - in alternativa, usare `System.Diagnostics.Process` con lettura asincrona di stdout e stderr, e terminare `node` alla chiusura della finestra.
 
-- [ ] **Bug #23 (media, Workspace Harness): a ogni avvio spariscono i plugin installati dall'utente**
+- [x] **Bug #23 (media, Workspace Harness): a ogni avvio spariscono i plugin installati dall'utente**
   - **File:** `harness/avvia.ps1` (`Copy-Item ... package.json -Force`).
   - **Causa:**
     - il `package.json` del profilo è il file in cui il gestore dei plugin di dsh scrive le dipendenze e l'elenco `dsh.profile.bundles`;
@@ -107,7 +107,7 @@
     - copiare il modello solo se il file manca;
     - altrimenti unire: aggiungere i bundle obbligatori (`dsh-base`, `dsh-web-app`, `@workspace-sm/dsh-workspace`) se assenti e conservare dipendenze e bundle dell'utente.
 
-- [ ] **Bug #24 (media, Workspace Harness): "Aggiungi plugin" fallisce sempre perché pnpm non è installato**
+- [x] **Bug #24 (media, Workspace Harness): "Aggiungi plugin" fallisce sempre perché pnpm non è installato**
   - **File:** `installer/installa.ps1` (passo 5/6) e `harness/README.md`.
   - **Causa:** il gestore dei plugin di dsh esegue `pnpm` (`dsh-plugin-manager`: `execa(options.command ?? "pnpm", …)`). L'installatore installa Node.js e il runtime con `npm`, ma non `pnpm`, che su questo PC infatti non c'è.
   - **Effetti:** pagina "Plugin" → "Aggiungi plugin" → errore `installFailurePnpmMissing` ("pnpm non trovato: non si può installare nulla"). Anche il marketplace "Scopri" non può installare nulla.
@@ -117,7 +117,7 @@
     - verificare con `pnpm --version`;
     - in alternativa, impostare `pnpmCommand` nel livello `dsh-workspace` verso un pnpm locale in `harness/node_modules/.bin`.
 
-- [ ] **Bug #25 (bassa, Workspace Harness): con LM Studio il contesto dei modelli è sovrastimato e il modello predefinito è scelto a caso**
+- [x] **Bug #25 (bassa, Workspace Harness): con LM Studio il contesto dei modelli è sovrastimato e il modello predefinito è scelto a caso**
   - **File:** `harness/avvia.ps1` (blocco LM Studio).
   - **Causa:**
     - per i modelli non caricati lo script dichiara a dsh `max_context_length` (es. `google/gemma-4-e4b`: 131.072, `qwen3.5-4b`: 262.144);
@@ -668,3 +668,19 @@ Tutte le sonde del ciclo 3 sono state trasformate in regressioni con asserzione 
 - **Miglioramento #12 — throttle che nascondeva i cambi di fase.** `ollama_hub.pull`: l'evento è inviato subito anche quando cambia `status` (es. `verifying sha256 digest`, `writing manifest`), non solo a tempo o allo stato finale. Test: `test_pull_emits_phase_changes_despite_throttle` (fasi visibili, flood comunque assente: <50 eventi su ~400 righe).
 
 **Note per il Tester**: la sonda del Bug #15 usava il `TestClient` di default (host `testserver`): con il Miglioramento #11 quell'host è respinto per design — le regressioni usano `base_url="http://127.0.0.1"` e impostano l'header `Host` esplicito dove serve. La sonda del Miglioramento #7 asseriva il vecchio comportamento (40 hash): la regressione corrispondente asserisce 0 hash in sync e copre la verifica completa via `rebuild` (vedi sopra). Il percorso UI del Bug #10 è verificato da `tsc --noEmit` + build; non esistono test unitari del frontend.
+
+---
+
+## Soluzioni applicate (fase Developer, ciclo 5)
+
+Suite su Windows 11: motore **152 passati, 0 falliti** (compresi i test `live`; 5 nuovi in `engine/tests/test_regressions_qa_ciclo5.py`); interfaccia: `tsc --noEmit` e `vite build` vanno a buon fine; Workspace Harness: `npm test` passa (nuovo controllo sul `package.json` del profilo).
+
+- **Bug #19 — "Elimina" sempre in errore 500.** `ollama_hub.delete` usa `client.request("DELETE", …/api/delete, json={"model": …})`. Test **senza sostituire** `ollama_hub.delete`, con `httpx.MockTransport`: metodo, percorso e body della richiesta (`test_hub_delete_sends_delete_with_json_body`), 404 → `HubError` (`test_hub_delete_unknown_model_raises_huberror`), Ollama spento → `HubError` (`test_hub_delete_offline_raises_huberror`), route completa scarico + eliminazione → 200 (`test_delete_route_unloads_then_deletes`) e modello inesistente → 502 (`test_delete_route_unknown_model_answers_502`). Prova reale contro Ollama 0.40.6: un modello inesistente dà `HubError … HTTP 404 … not found` invece del `TypeError`. Copre in parte il Miglioramento #15 (solo `delete`).
+- **Bug #20 — avanzamento dei download automatici invisibile.** `Models.tsx`: `normalizeName` è ora a livello di modulo; lo stato `pulls` è indicizzato con il nome normalizzato (eventi e righe usano la stessa chiave, `bge-m3` ≡ `bge-m3:latest`) e conserva il nome richiesto per "Riprova". Nuova scheda **"Download in corso"** per i download che non corrispondono a nessuna riga (modello non installato e non tra i risultati della libreria), con avanzamento, errore e "Riprova"; la cella di avanzamento è condivisa con la libreria (`progressCell`).
+- **Bug #21 — errore immediato sovrascritto.** `pull()` imposta lo stato "in avvio" **prima** di `api.ollamaPull` e dopo la risposta lo sostituisce con "download_avviato" solo se è ancora lo stesso oggetto (nessun evento arrivato nel frattempo); se la richiesta fallisce toglie solo il proprio segnaposto e mostra la notifica.
+- **Bug #22 — avvio interrotto dalla prima riga stderr.** `harness/avvia.ps1`: `$ErrorActionPreference = 'Continue'` prima di lanciare `node`; nel `ForEach-Object` gli `ErrorRecord` diventano testo (`$_.Exception.Message`). Se dsh termina con un codice diverso da 0 la finestra resta aperta con il messaggio. Verificato in Windows PowerShell 5.1: con la riga stderr `dsh: warning: …` lo script prosegue; avvio completo su cartelle temporanee con un avviso reale di dsh su stderr ("skipping profile bundle …") e poi "Workspace Harness è pronto".
+- **Bug #23 — plugin dell'utente persi a ogni avvio.** Nuovo `harness/tools/prepara-profilo.mjs`, chiamato da `avvia.ps1` al posto di `Copy-Item -Force`: al primo avvio copia il modello; poi aggiunge in testa solo i bundle Workspace mancanti e conserva dipendenze e bundle dell'utente (tollera il BOM; un file illeggibile viene salvato come `package.json.non-valido` e ricreato). Test in `npm test`: «package.json del profilo: plugin utente conservati (Bug #23)»; verificato anche dall'avvio reale.
+- **Bug #24 — pnpm assente.** `pnpm` 10.34.7 è una dipendenza fissata di `harness/package.json` (si installa con il passo 5/6, anche con `--omit=dev`); `avvia.ps1` mette `harness\node_modules\.bin` in testa al `PATH` di dsh e avvisa se pnpm manca; l'installatore mostra la versione di pnpm o un avviso. Verificato: `execa("pnpm")` (come il gestore dei plugin) e `dsh plugin --profile workspace --version` rispondono 10.34.7. Non verificato: l'installazione di un plugin reale dalla pagina "Plugin" (richiede rete e un pacchetto del marketplace).
+- **Bug #25 — contesto LM Studio sovrastimato e predefinito casuale.** `avvia.ps1`: per i modelli caricati usa `loaded_context_length`, per quelli non caricati dichiara 4.096 token (il contesto con cui LM Studio li carica su richiesta), non più `max_context_length`. Il predefinito (se manca `workspace-agent` di Ollama) è nell'ordine: caricato con almeno 12.000 token e tool calling, caricato con almeno 12.000 token, con tool calling (`trained_for_tool_use` da `/api/v1/models`, se disponibile), primo dell'elenco. Se il predefinito non ha contesto sufficiente lo script lo carica con `POST /api/v1/models/load` e `context_length: 16384`, altrimenti avvisa. L'avviso «troppo pochi per l'agente» vale ora anche per LM Studio. **Non verificato dal vivo:** LM Studio non era avviabile su questo PC durante la correzione (`lms server start`: daemon non trovato); lo script si analizza senza errori in PowerShell 5.1.
+
+**Note per il Tester:** le sonde del ciclo 5 per il Bug #19 (`test_hub_delete_raises_typeerror`, `test_delete_route_answers_500`) ora falliscono per costruzione. Restano aperte le voci del ciclo 4 (Bug #16, #17, #18, Miglioramento #13) e i Miglioramenti #14, #16, #17 del ciclo 5; il #15 è coperto solo per `delete`. Da verificare nel ciclo 6: con LM Studio attivo, la scelta del modello predefinito e il caricamento a 16.384 token (Bug #25); un plugin reale installato dalla pagina "Plugin" (Bug #24). `ruff` segnala ancora `typing.Any` inutilizzato in `ollama_hub.py`, già nel Miglioramento #14.

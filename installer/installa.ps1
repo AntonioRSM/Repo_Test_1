@@ -136,7 +136,13 @@ if ($ConHarness) {
     if ($esito -ne 0 -or -not (Test-Path $Dsh)) {
         Avviso 'Installazione di Workspace Harness non riuscita (npm): il resto dell''installazione prosegue.'
         $ConHarness = $false
-    } elseif (-not $SenzaModelli) {
+    } else {
+        # pnpm (fissato in harness/package.json) serve alla pagina Plugin per installare plugin.
+        $Pnpm = Join-Path $DirHarness 'node_modules\.bin\pnpm.cmd'
+        if (Test-Path $Pnpm) { Write-Host "pnpm: $(& $Pnpm --version)" }
+        else { Avviso 'pnpm non installato: in Workspace Harness non si potranno aggiungere plugin.' }
+    }
+    if ($ConHarness -and -not $SenzaModelli) {
         # L'agente ha un prompt di circa 8.500 token: con Ollama serve un modello con contesto più ampio.
         if (-not (Get-Command Crea-ModelloAgente -ErrorAction SilentlyContinue)) { . (Join-Path $PSScriptRoot 'ollama.ps1') -Forza:$Ollama }
         Crea-ModelloAgente | Out-Null

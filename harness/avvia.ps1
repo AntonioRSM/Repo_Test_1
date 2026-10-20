@@ -34,11 +34,17 @@ Write-Host ''
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Esci 'Node.js non trovato. Rilancia INSTALLA.bat.' }
 if (-not (Test-Path $Dsh)) { Esci 'DeepSeek Harness non è installato. Rilancia INSTALLA.bat e rispondi S alla domanda su Workspace Harness.' }
+if (-not (Test-Path (Join-Path $Harness 'node_modules\.bin\pnpm.cmd'))) {
+    Avviso 'pnpm non installato: la pagina Plugin non potrà aggiungere plugin. Rilancia INSTALLA.bat per completare.'
+}
 
 # ── profilo Workspace in una DSH_HOME dedicata (non tocca un eventuale dsh personale) ──────────
 New-Item -ItemType Directory -Force -Path $Profilo, $Lavoro | Out-Null
 $Modello = Join-Path $Harness 'profile'
-Copy-Item (Join-Path $Modello 'package.json') $Profilo -Force          # bundle del profilo: sempre aggiornati
+# Bug #23: package.json è anche il file in cui dsh registra i plugin installati dall'utente:
+# si aggiungono i bundle Workspace mancanti, senza togliere nulla.
+& node (Join-Path $Harness 'tools\prepara-profilo.mjs') (Join-Path $Modello 'package.json') (Join-Path $Profilo 'package.json')
+if ($LASTEXITCODE -ne 0) { Esci 'Preparazione del profilo non riuscita (package.json).' }
 foreach ($f in 'cordis.yml', 'cordis.patch.yml') {                     # livello dell'utente: mai sovrascritto
     if (-not (Test-Path (Join-Path $Profilo $f))) { Copy-Item (Join-Path $Modello $f) $Profilo }
 }
@@ -84,16 +90,47 @@ if ($Ollama) {
 
 $LmStudio = Leggi 'http://127.0.0.1:1234/api/v0/models'
 if ($LmStudio) {
+    # Bug #25: a model that is not loaded is loaded on demand with LM Studio's DEFAULT context
+    # (often 4.096), not with max_context_length: only the loaded length can be trusted.
+    $ContestoNonCaricato = 4096
+    $strumenti = @{}                       # modelli addestrati per il tool calling (API v1, se presente)
+    $v1 = Leggi 'http://127.0.0.1:1234/api/v1/models'
+    if ($v1) { foreach ($m in $v1.models) { if ($m.capabilities.trained_for_tool_use) { $strumenti[$m.key] = $true } } }
     $modelli = @()
     foreach ($m in $LmStudio.data) {
         if ($m.type -eq 'embeddings') { continue }
-        $ctx = if ($m.loaded_context_length) { [int]$m.loaded_context_length } elseif ($m.max_context_length) { [int]$m.max_context_length } else { 8192 }
-        $modelli += [ordered]@{ id = $m.id; name = $m.id; contextWindow = $ctx; reasoningEfforts = $false }
+        $caricato = $m.state -eq 'loaded' -and $m.loaded_context_length
+        $ctx = if ($caricato) { [int]$m.loaded_context_length } else { $ContestoNonCaricato }
+        $modelli += [ordered]@{ id = $m.id; name = $m.id; contextWindow = $ctx; reasoningEfforts = $false
+                                caricato = [bool]$caricato; strumenti = $strumenti.ContainsKey($m.id) -or ($m.capabilities -contains 'tool_use') }
     }
     if ($modelli.Count) {
-        $Rotte['lmstudio-locale'] = [ordered]@{ displayName = 'LM Studio (locale)'; api = 'openai-completions'; baseURL = 'http://127.0.0.1:1234/v1'; apiKeyEnv = 'WSOS_LOCAL_LLM_KEY'; models = $modelli }
         Riga "LM Studio: $($modelli.Count) modelli"
-        if (-not $Predefinito) { $Predefinito = @('lmstudio-locale', $modelli[0].id) }
+        if (-not $Predefinito) {
+            # Preferisce un modello già caricato con contesto sufficiente, poi uno con tool calling.
+            $scelto = @($modelli | Where-Object { $_.caricato -and $_.contextWindow -ge 12000 -and $_.strumenti }) +
+                      @($modelli | Where-Object { $_.caricato -and $_.contextWindow -ge 12000 }) +
+                      @($modelli | Where-Object { $_.strumenti }) + $modelli | Select-Object -First 1
+            if ($scelto.contextWindow -lt 12000) {
+                Riga "Carico $($scelto.id) in LM Studio con un contesto di $ContestoAgente token (può richiedere qualche minuto)..."
+                try {
+                    $corpo = @{ model = $scelto.id; context_length = $ContestoAgente } | ConvertTo-Json
+                    Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/load' -Method Post -Body $corpo -ContentType 'application/json' -TimeoutSec 300 | Out-Null
+                    $scelto.contextWindow = $ContestoAgente
+                } catch {
+                    Avviso "Caricamento non riuscito: in LM Studio carica $($scelto.id) con almeno $ContestoAgente token di contesto."
+                }
+            }
+            $Predefinito = @('lmstudio-locale', $scelto.id)
+        }
+        foreach ($m in $modelli) {
+            if ($m.contextWindow -lt 12000) {
+                $come = if ($m.caricato) { 'caricato con' } else { 'non caricato: LM Studio userà il contesto predefinito, circa' }
+                Write-Host "    $(Grigio "$($m.id): $come $($m.contextWindow) token, troppo pochi per l'agente (serve circa 12.000)")"
+            }
+            $m.Remove('caricato'); $m.Remove('strumenti')     # campi interni, non vanno a dsh
+        }
+        $Rotte['lmstudio-locale'] = [ordered]@{ displayName = 'LM Studio (locale)'; api = 'openai-completions'; baseURL = 'http://127.0.0.1:1234/v1'; apiKeyEnv = 'WSOS_LOCAL_LLM_KEY'; models = $modelli }
     }
 }
 
@@ -102,6 +139,9 @@ if (-not $Predefinito -and $Rotte.Contains('ollama-locale')) { $Predefinito = @(
 if ($Predefinito) { Riga "Modello predefinito: $($Predefinito[1])" }
 
 $env:DSH_HOME = $DshHome
+# Bug #24: il gestore dei plugin di dsh esegue "pnpm"; quello fissato in harness/package.json
+# viene prima di un eventuale pnpm di sistema.
+$env:Path = (Join-Path $Harness 'node_modules\.bin') + ';' + $env:Path
 $env:WSOS_LOCAL_LLM_KEY = 'locale'        # Ollama e LM Studio ignorano la chiave, ma la rotta ne richiede una
 $env:WSOS_DSH_PROVIDERS = ($Rotte | ConvertTo-Json -Depth 6 -Compress)
 if ($Predefinito) { $env:WSOS_DSH_PROVIDER = $Predefinito[0]; $env:WSOS_DSH_MODEL = $Predefinito[1] }
@@ -117,8 +157,11 @@ Write-Host ''
 
 Set-Location $Lavoro
 $aperto = $false
+# Bug #22: in Windows PowerShell 5.1 ogni riga stderr di un programma nativo diventa un
+# ErrorRecord, che con 'Stop' chiuderebbe la finestra al primo avviso di dsh o di Node.
+$ErrorActionPreference = 'Continue'
 & node $Dsh --profile workspace --port $Porta --no-open 2>&1 | ForEach-Object {
-    $riga = "$_"
+    $riga = if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { "$_" }
     if ($riga -match '^dsh web: (http\S+)') {
         Riga "Workspace Harness è pronto: $($Matches[1])"
         if (-not $NonAprire -and -not $aperto) { Start-Process $Matches[1]; $aperto = $true }
@@ -130,5 +173,7 @@ $aperto = $false
         Write-Host "    $(Grigio $riga)"
     }
 }
+$codice = $LASTEXITCODE
 Write-Host ''
+if ($codice -ne 0) { Esci "Workspace Harness si è fermato con un errore (codice $codice): leggi i messaggi qui sopra." }
 Riga 'Workspace Harness si è fermato.'

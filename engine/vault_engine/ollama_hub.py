@@ -310,7 +310,8 @@ async def delete(endpoints: dict[str, str], model: str) -> None:
     base = base_of(endpoints)
     async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
         try:
-            resp = await client.delete(f"{base}/api/delete", json={"model": model})
+            # httpx.AsyncClient.delete() has no json= parameter: DELETE with a body goes through request() (Bug #19)
+            resp = await client.request("DELETE", f"{base}/api/delete", json={"model": model})
         except httpx.HTTPError as exc:
             raise HubError(f"eliminazione {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
     if resp.status_code != 200:

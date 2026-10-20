@@ -10,7 +10,7 @@ profili, livelli di patch, slot dell'interfaccia, pacchetti di lingua e temi.
 
 ```
 harness/
-  package.json              runtime fissato + plugin Workspace (dipendenze file:)
+  package.json              runtime fissato, pnpm per la pagina Plugin, plugin Workspace (dipendenze file:)
   avvia.ps1                 avvio: banner, profilo, modelli locali, porta libera, browser
   profile/                  modello del profilo "workspace" (bundle e livello utente iniziale)
   plugins/
@@ -21,6 +21,7 @@ harness/
     build-plugins.mjs       genera lib/client.js dei plugin (asset del marchio e dizionari)
     extract-strings.mjs     estrae i testi inglesi del runtime installato in i18n/*.json
     check-translations.mjs  verifica traduzioni mancanti e segnaposto {..}
+    prepara-profilo.mjs     aggiorna il package.json del profilo senza perdere i plugin dell'utente
 ```
 
 ## Come funziona
@@ -31,7 +32,7 @@ harness/
 | `dsh-workspace` | Imposta l'italiano e Lexend come predefiniti, disattiva il marchio ufficiale DeepSeek (`ui-brand-official`) e monta i due plugin Workspace; registra le rotte dei modelli locali e il modello predefinito; chiede all'agente di rispondere in italiano |
 | `dsh-workspace-brand` | Occupa gli slot `sidebar.brand.*` e `conversation.hero.brand.mark`, sostituisce favicon e nome nella finestra, sovrascrive i token del tema (`--dsw-alias-*`) con la palette Workspace in chiaro e scuro e carica Lexend |
 | `dsh-workspace-it` | Registra la lingua `it` (ripiego `en`) e i dizionari di tutti i namespace con l'API pubblica `ctx.locale` |
-| `avvia.ps1` | Prepara il profilo, collega i plugin, rileva i modelli di Ollama e LM Studio, sceglie una porta libera, traduce i messaggi di avvio e apre il browser |
+| `avvia.ps1` | Prepara il profilo (aggiunge i bundle Workspace mancanti e conserva i plugin installati dall'utente), collega i plugin, mette in PATH il pnpm fissato, rileva i modelli di Ollama e LM Studio (con LM Studio carica il modello predefinito con 16.384 token di contesto se serve), sceglie una porta libera, traduce i messaggi di avvio e apre il browser |
 
 Tutti i livelli Workspace hanno priorità più bassa delle scelte dell'utente: lingua, carattere,
 modelli e provider cambiati nelle Impostazioni restano validi.

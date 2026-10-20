@@ -26,11 +26,22 @@ const useStyles = makeStyles({
 });
 
 interface PullProgress {
+  model: string; // name as requested, used by "Riprova"
   status: string;
   completed: number | null;
   total: number | null;
   error?: string;
 }
+
+// Bug #10: compare EXACT names after :latest normalisation, like the engine's
+// normalize_name (library names carry no tag): with only qwen2.5:0.5b installed,
+// the library row "qwen2.5" (= qwen2.5:latest) must still offer the download.
+// Bug #20: download progress is keyed by the same normalised name, so an event for
+// "bge-m3:latest" reaches the library row "bge-m3" and vice versa.
+const normalizeName = (name: string) => {
+  const tail = name.split("/").pop() ?? name;
+  return tail.includes(":") ? name : `${name}:latest`;
+};
 
 export default function ModelsPage() {
   const styles = useStyles();
@@ -61,7 +72,7 @@ export default function ModelsPage() {
       store.onOllamaEvent((e) => {
         setPulls((prev) => ({
           ...prev,
-          [e.model]: { status: e.status, completed: e.completed, total: e.total, error: e.error },
+          [normalizeName(e.model)]: { model: e.model, status: e.status, completed: e.completed, total: e.total, error: e.error },
         }));
         if (e.status === "download_completato" || e.status === "errore") refresh();
       }),
@@ -69,13 +80,6 @@ export default function ModelsPage() {
   );
 
   const runningNames = new Set((status?.running ?? []).map((m) => m.name));
-  // Bug #10: compare EXACT names after :latest normalisation, like the engine's
-  // normalize_name (library names carry no tag): with only qwen2.5:0.5b installed,
-  // the library row "qwen2.5" (= qwen2.5:latest) must still offer the download.
-  const normalizeName = (name: string) => {
-    const tail = name.split("/").pop() ?? name;
-    return tail.includes(":") ? name : `${name}:latest`;
-  };
   const taglessTail = (name: string) => (name.split("/").pop() ?? name).split(":")[0];
   const installedNames = new Set((status?.installed ?? []).map((m) => normalizeName(m.name)));
 
@@ -91,11 +95,23 @@ export default function ModelsPage() {
     }
   }
 
+  // Bug #21: the 202 response and the SSE events travel on different connections, so
+  // the row is marked BEFORE the request and the response only replaces that mark:
+  // an early "errore" or "download_completato" event is never overwritten.
   async function pull(model: string) {
+    const key = normalizeName(model);
+    const starting: PullProgress = { model, status: "in avvio", completed: null, total: null };
+    setPulls((prev) => ({ ...prev, [key]: starting }));
     try {
       await api.ollamaPull(model);
-      setPulls((prev) => ({ ...prev, [model]: { status: "download_avviato", completed: null, total: null } }));
+      setPulls((prev) => (prev[key] === starting ? { ...prev, [key]: { ...starting, status: "download_avviato" } } : prev));
     } catch (e) {
+      setPulls((prev) => {
+        if (prev[key] !== starting) return prev;
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
       store.notify((e as Error).message, "error");
     }
   }
@@ -117,20 +133,42 @@ export default function ModelsPage() {
   // Bug #2: a failed download must surface the error AND offer a retry; clearing the
   // progress entry restores the action buttons instead of spinning forever.
   async function retry(model: string) {
-    setPulls((prev) => {
-      const next = { ...prev };
-      delete next[model];
-      return next;
-    });
-    await pull(model);
+    await pull(pulls[normalizeName(model)]?.model ?? model);
   }
 
   const progressOf = (model: string) => {
-    const p = pulls[model];
+    const p = pulls[normalizeName(model)];
     if (!p || p.status === "download_completato") return null;
     const pct = p.total ? Math.min(100, Math.round(((p.completed ?? 0) / p.total) * 100)) : null;
     return { ...p, pct };
   };
+
+  // Bug #20: downloads started by a Vault, the agent or another page may match no row
+  // (model neither installed nor among the search results): list them on their own.
+  const shownKeys = new Set([
+    ...(status?.online ? status.installed.map((m) => normalizeName(m.name)) : []),
+    ...library.map((m) => normalizeName(m.name)),
+  ]);
+  const otherPulls = Object.entries(pulls)
+    .filter(([key, p]) => !shownKeys.has(key) && p.status !== "download_completato")
+    .map(([, p]) => p.model);
+
+  const progressCell = (name: string, prog: NonNullable<ReturnType<typeof progressOf>>) =>
+    prog.error ? (
+      <span style={{ minWidth: 160, display: "inline-block" }}>
+        <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }} title={prog.error}>
+          Errore: {prog.error}
+        </Caption1>{" "}
+        <Button size="small" icon={<ArrowDownloadRegular />} onClick={() => retry(name)}>
+          Riprova
+        </Button>
+      </span>
+    ) : (
+      <span style={{ minWidth: 160, display: "inline-block" }}>
+        <ProgressBar value={prog.pct !== null ? prog.pct / 100 : undefined} />
+        <Caption1>{`${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}</Caption1>
+      </span>
+    );
 
   return (
     <>
@@ -222,6 +260,23 @@ export default function ModelsPage() {
         </>
       )}
 
+      {otherPulls.length > 0 && (
+        <Card className={styles.card}>
+          <Subtitle2>Download in corso</Subtitle2>
+          {otherPulls.map((name) => {
+            const prog = progressOf(name);
+            return (
+              prog && (
+                <div key={name} className={styles.row}>
+                  <span className={styles.name}>{name}</span>
+                  <span className={styles.actions}>{progressCell(name, prog)}</span>
+                </div>
+              )
+            );
+          })}
+        </Card>
+      )}
+
       <Card className={styles.card}>
         <Subtitle2>Libreria modelli (ollama.com)</Subtitle2>
         <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>
@@ -260,21 +315,7 @@ export default function ModelsPage() {
               </span>
               <span className={styles.actions}>
                 {prog ? (
-                  prog.error ? (
-                    <span style={{ minWidth: 160, display: "inline-block" }}>
-                      <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }} title={prog.error}>
-                        Errore: {prog.error}
-                      </Caption1>{" "}
-                      <Button size="small" icon={<ArrowDownloadRegular />} onClick={() => retry(m.name)}>
-                        Riprova
-                      </Button>
-                    </span>
-                  ) : (
-                    <span style={{ minWidth: 160, display: "inline-block" }}>
-                      <ProgressBar value={prog.pct !== null ? prog.pct / 100 : undefined} />
-                      <Caption1>{`${prog.status}${prog.pct !== null ? ` · ${prog.pct}%` : "…"}`}</Caption1>
-                    </span>
-                  )
+                  progressCell(m.name, prog)
                 ) : installed ? (
                   <Caption1>✓</Caption1>
                 ) : (

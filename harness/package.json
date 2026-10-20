@@ -7,7 +7,8 @@
     "@deepseek-ai/dsh": "0.2.1-rc.2",
     "@workspace-sm/dsh-workspace": "file:plugins/dsh-workspace",
     "@workspace-sm/dsh-workspace-brand": "file:plugins/dsh-workspace-brand",
-    "@workspace-sm/dsh-workspace-it": "file:plugins/dsh-workspace-it"
+    "@workspace-sm/dsh-workspace-it": "file:plugins/dsh-workspace-it",
+    "pnpm": "10.34.7"
   },
   "scripts": {
     "build": "node tools/build-plugins.mjs",
