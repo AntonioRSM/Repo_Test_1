@@ -4,7 +4,12 @@
 - di nuovo l'intervallo `dbacb23..7ec57c8` sul branch `claude/workspace-os-installer` (PR #20): `5b64cbe` (correzioni QA) e `7ec57c8` (gestione dei modelli Ollama), con tutto il codice che ne dipende nello stato attuale;
 - i commit arrivati sulla PR dopo il ciclo 4: `79acbc3` (README, `start.cmd`), `9d6b2be` (Ollama nell'installatore), `d04bcf3` (Workspace Harness).
 
-**Esito:** NON APPROVATO.
+**Decisione:** APPROVATO CON RISERVA dal responsabile del progetto il 20/10/2026, nonostante l'esito QA negativo.
+- I Bug #19–#25 sono accettati come problemi noti: restano aperti in questo file e vanno corretti in un ciclo successivo.
+- Restano aperte anche le voci del ciclo 4 (Bug #16, #17, #18 e Miglioramento #13).
+- La PR verso `main` è la #21; anche la #20 resta aperta.
+
+**Esito QA:** NON APPROVATO.
 - Dopo il ciclo 4 non c'è stato nessun commit di correzione, quindi le 4 voci aperte del ciclo 4 lo sono ancora.
 - Il ciclo 5 trova 7 bug nuovi. Il più grave è il Bug #19: "Elimina" nella pagina Modelli non ha mai funzionato.
 - Il ciclo 5 trova anche 4 miglioramenti.
