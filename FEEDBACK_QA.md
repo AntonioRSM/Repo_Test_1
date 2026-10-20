@@ -1,31 +1,128 @@
-# FEEDBACK QA – ciclo 6
+# FEEDBACK QA – ciclo 7
 
-**Ambito:** commit `a6a73a2..b527423` sul branch `claude/workspace-os-installer` (PR #20):
-- `08e3208`: correzioni dei Bug #19–#25 del ciclo 5;
-- `b527423`: la Harness non offre più all'agente i modelli Ollama con contesto troppo piccolo.
-
-Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installatore Ollama (`installer/ollama.ps1`) e alla Workspace Harness (`harness/avvia.ps1`, `harness/tools/*`).
-
-**Storico:** al ciclo 5 il responsabile del progetto ha approvato con riserva (20/10/2026), con i Bug #19–#25 accettati come problemi noti. La PR verso `main` è la #21.
+**Ambito:** PR #21 (`claude/workspace-os-installer` → `main`), commit `1022a7c` "fix: correzioni QA ciclo 6 (Bug #16-18, #26-27; Mgl #13-18)". Ho verificato tutte le voci aperte dei cicli 4, 5 e 6. Su richiesta del responsabile ho trattato per primi: la conferma di `ruff` con lo strumento, il Bug #26 con i passi originali, il Bug #27 e il Miglioramento #18.
 
 **Esito:** NON APPROVATO.
-- I 7 bug del ciclo 5 (#19–#25) sono corretti e verificati.
-- Restano aperte le voci del ciclo 4 (Bug #16, #17, #18 e Miglioramento #13), su cui non è arrivato nessun commit, e i Miglioramenti #14–#17 del ciclo 5 (il #15 solo in parte).
-- Il ciclo 6 trova 2 bug nuovi nel codice di avvio della Harness e 1 miglioramento da verificare.
+- **Verificate e chiuse:** Bug #16, #17 e #18; Miglioramenti #13, #14, #15, #16 e #17.
+- **Da confermare su Windows** (riaperte, perché qui non si possono eseguire): Bug #26, Bug #27 e Miglioramento #18. Le procedure sono più sotto.
+- **Nuove:** 3 bug, cioè #28 (aggiramenti del filtro PowerShell, in parte una regressione), #29 (`fetch_url` non funziona dietro un proxy) e #30 (`avvia.ps1` ha perso il BOM). Inoltre 2 miglioramenti.
 
-**Test eseguiti (Linux):**
-- **Motore:** `uv run pytest`: 150 passati, 1 saltato, 1 fallito. Il test fallito è `test_mcp.py::test_stdio_server_lifecycle_and_secrets` (DPAPI, solo Windows): è atteso.
-- **Interfaccia:** `npm run build` (`tsc --noEmit` + `vite build`) va a buon fine.
-- **Workspace Harness:** `npm ci` e `npm test` passano tutti e 6 i controlli (traduzioni, plugin generati, dizionari, profilo con i plugin dell'utente, `dsh --dump-config`).
-- **Sonde:** quelle del ciclo 5 (2) ora falliscono, quindi il Bug #19 è corretto; quelle del ciclo 4 (6) passano ancora tutte, quindi i Bug #16 e #17 sono ancora presenti.
-- **`ruff check vault_engine tests`:** 5 segnalazioni (Miglioramenti #13 e #14).
-- **Limite:** qui non c'è PowerShell, quindi non ho potuto eseguire gli script `.ps1`. Il Bug #26 va confermato su Windows con i passi indicati.
+**Test eseguiti (Linux, 20/10/2026 21:00):**
+- **`ruff`**, controllo con lo strumento: `ruff 0.15.20` (`/root/.local/bin/ruff`). `ruff check vault_engine tests` → `All checks passed!`, codice d'uscita **0**. Le 5 segnalazioni del ciclo 6 sono risolte.
+- **Motore:** `uv run pytest`: 163 passati, 1 saltato, 1 fallito. Il test fallito è `test_mcp.py::test_stdio_server_lifecycle_and_secrets` (DPAPI, solo Windows): è atteso.
+- **Interfaccia:** `npm ci` e `npm run build` vanno a buon fine; `node --test electron/openable.test.cjs` → 6 su 6.
+- **Workspace Harness:** `npm ci` e `npm test` superano 6 controlli su 6. Il settimo, `testa-junction.ps1`, gira solo su Windows.
+- **Sonde:** quelle del ciclo 4 non trovano più i difetti (5 su 5), e il controllo positivo passa. Quelle nuove del ciclo 7 trovano 8 difetti su 8 (Bug #28).
+- **Limite:** questo ambiente è Linux senza PowerShell, Ollama e LM Studio. Le voci che dipendono da questi strumenti **non** sono dichiarate verificate.
 
 ---
 
-## Ciclo 6 – Bug
+## Ciclo 7 – Bug
 
-- [x] **Bug #26 (media, Workspace Harness, da confermare su Windows): un collegamento ai plugin rimasto orfano blocca l'avvio, e la sua rimozione può cancellare i file di un'altra copia**
+- [ ] **Bug #28 (media, sicurezza, in parte regressione): il filtro su `-EncodedCommand` guarda solo il primo token di ogni comando e si aggira con blocchi e sottoespressioni**
+  - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`, `_segment_tokens`).
+  - **Causa:**
+    - per correggere il Bug #17, `powershell`/`pwsh` vengono riconosciuti solo come **primo token** di un segmento (dopo `;`, `|`, `&`, `&&` o `||`);
+    - ma in PowerShell un comando può iniziare anche dopo `(`, `$(` e `{`, e dentro `if`, `try`, `ForEach-Object` e simili;
+    - inoltre `&"C:\…\pwsh.exe"`, cioè `&` attaccato al percorso tra virgolette, viene spezzato da `_TOKEN` in `&"C:\Program` + `Files\…pwsh.exe"`;
+    - e l'alias `saps` di `Start-Process` non è nell'elenco.
+  - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle7`):
+    - `(powershell -e <b64>)`
+    - `$(powershell -e <b64>)`
+    - `if ($true) { powershell -e <b64> }`
+    - `1 | ForEach-Object { powershell -e <b64> }`
+    - `try { pwsh -enc <b64> } catch { }`
+    - `&"C:\Program Files\PowerShell\7\pwsh.exe" -enc <b64>`
+    - `saps powershell -ArgumentList '-e <b64>'`
+  - **Regressione:** la versione del ciclo 6 (`0d74647`) bloccava `if (…) { powershell -e … }` e `… | ForEach-Object { powershell -e … }`, quella attuale no. Ho controllato caricando entrambe le versioni.
+  - **Correzione proposta:**
+    - considerare inizio di comando anche ciò che segue `(`, `$(`, `{` e `}`: separarli come i separatori, oppure togliere `({$` dall'inizio del token di testa;
+    - riconoscere come testa anche il primo token dopo le parole chiave `if`, `elseif`, `else`, `try`, `catch`, `finally`, `foreach` e `while`;
+    - unire `&` attaccato a un token tra virgolette;
+    - aggiungere `saps` a `_LAUNCHER_NAMES`;
+    - aggiungere i 7 casi alle regressioni.
+
+- [ ] **Bug #29 (media, regressione del Miglioramento #16): dietro un proxy `fetch_url` non riesce più a scaricare nessuna pagina HTTPS**
+  - **File:** `engine/vault_engine/agent/web.py` (`_pinned_target`, `fetch_url`).
+  - **Causa:**
+    - la richiesta viene ora inviata all'**IP** validato (`https://104.20.23.154/`) con `Host`/SNI originali;
+    - se è configurato un proxy, httpx gli chiede `CONNECT 104.20.23.154:443`, e molti proxy aziendali filtrano per nome e rifiutano le connessioni per IP;
+    - httpx usa il proxy delle variabili `HTTPS_PROXY`/`HTTP_PROXY` e, su Windows, anche quello di sistema (letto dal registro tramite `urllib.request.getproxies()`).
+    - Con un proxy in mezzo il pinning è comunque inutile, perché la risoluzione DNS la fa il proxy.
+  - **Come riprodurlo** (in questo ambiente c'è un proxy HTTPS):
+    - `fetch_url("https://example.com/")` con `1022a7c` → `WebError: download non riuscito: ConnectError`;
+    - con `web.py` di `0d74647` → OK ("Example Domain");
+    - isolato con httpx e proxy attivo:
+      - `GET https://104.20.23.154/` + `Host: example.com` + `sni_hostname` → `ConnectError [Errno 104] Connection reset by peer`;
+      - `GET https://example.com/` → 200.
+  - **Non verificato qui:** il pinning senza proxy. In questo ambiente il traffico TLS è ispezionato, quindi la connessione diretta fallisce comunque per il certificato, anche per nome.
+  - **Correzione proposta:**
+    - se per l'URL è attivo un proxy (`httpx._utils.get_environment_proxies()` / `urllib.request.getproxies()` più `proxy_bypass`), non fissare l'IP e inviare il nome host: la protezione SSRF resta sul controllo iniziale e sui redirect;
+    - aggiungere un test con un proxy finto che verifichi che la richiesta `CONNECT` usa il nome host.
+
+- [ ] **Bug #30 (bassa, regressione): `harness/avvia.ps1` ha perso il BOM UTF-8, quindi in Windows PowerShell 5.1 i messaggi in italiano sono storpiati**
+  - **File:** `harness/avvia.ps1`; anche `harness/tools/testa-junction.ps1`, nuovo, è senza BOM.
+  - **Causa:**
+    - `1022a7c` ha tolto i 3 byte `EF BB BF` iniziali (con `0d74647` il file inizia con `ef bb bf`, ora con `23 20 41`);
+    - il collegamento del menu Start lancia `powershell.exe` 5.1, che senza BOM legge il file come ANSI (Windows-1252).
+  - **Effetti:** tutti i messaggi con lettere accentate escono storpiati: `DeepSeek Harness non Ã¨ installato`, `Workspace Harness Ã¨ pronto`, `potrÃ `, `puÃ²`, `Ã¨ giÃ  in uso` (righe 36, 38, 143, 164, 213, 218, 225, 226). Non ho trovato sequenze che diventino virgolette tipografiche nel codice, quindi l'analisi dello script non dovrebbe rompersi.
+  - **Come riprodurlo:** su Windows 11 lancia il collegamento "Workspace Harness" con Node/dsh assenti, oppure leggi i messaggi di avvio.
+  - **Correzione proposta:**
+    - salvare entrambi i file in UTF-8 **con BOM**, come `installer/*.ps1`;
+    - aggiungere a `harness/tools/test.mjs` un controllo che ogni `*.ps1` del repository inizi con `EF BB BF` (`.gitattributes` gestisce già i fine riga CRLF, ma non il BOM).
+
+---
+
+## Ciclo 7 – Miglioramenti
+
+- [ ] **Miglioramento #19: `testa-junction.ps1` prova una copia della logica, non `avvia.ps1`, e non copre il collegamento orfano**
+  - **File:** `harness/tools/testa-junction.ps1`.
+  - **Problema:**
+    - la funzione `Collega` è una copia del blocco di `avvia.ps1`: se uno dei due cambia, il test continua a passare;
+    - nel caso 2 la cartella A viene ripristinata **prima** di `Collega`, quindi il percorso "collegamento orfano → `Directory.Delete` → nuovo collegamento verso un'altra destinazione" (il passo 2 originale del Bug #26) non viene mai eseguito.
+  - **Proposta:**
+    - spostare la logica in `harness/tools/collegamenti.ps1` e richiamarla da `avvia.ps1` e dal test;
+    - aggiungere il caso: collegamento orfano verso `A-spostata`, poi `Collega` verso `B` mentre A è ancora assente.
+
+- [ ] **Miglioramento #20: `fetch_url` prova solo il primo IP validato**
+  - **File:** `engine/vault_engine/agent/web.py`.
+  - **Problema:** `_pinned_target(current, ips[0])` usa solo il primo indirizzo. Se è IPv6 e la rete ha solo IPv4, o se quell'IP non risponde, il download fallisce, mentre httpx per nome proverebbe anche gli altri.
+  - **Proposta:** in caso di `ConnectError` provare in ordine tutti gli IP già validati.
+
+---
+
+## Prove da eseguire su Windows (Bug #26, Bug #27, Miglioramento #18)
+
+Le prove vanno fatte su Windows 11 con il collegamento del menu Start (Windows PowerShell 5.1). Incolla l'output nel ciclo 8 per chiudere le voci.
+
+**Bug #26** (passi originali del ciclo 6):
+1. Prepara due copie del progetto, per esempio `C:\Prove\A` e `C:\Prove\B`. Avvia la Harness da A (`powershell -ExecutionPolicy Bypass -File C:\Prove\A\harness\avvia.ps1 -NonAprire`) e chiudila.
+2. Rinomina `C:\Prove\A` in `C:\Prove\A-spostata`. Il collegamento `%LOCALAPPDATA%\WorkspaceOS\harness\profiles\workspace\node_modules\@workspace-sm\dsh-workspace-brand` resta orfano.
+3. Avvia da B. **Atteso:** la Harness parte, e `(Get-Item -LiteralPath <collegamento> -Force).Target` punta a `C:\Prove\B\harness\plugins\dsh-workspace-brand`.
+4. Rinomina di nuovo `A-spostata` in `A`. Avvia da A, chiudi, poi avvia da B.
+5. **Atteso:** `Get-ChildItem C:\Prove\A\harness\plugins\dsh-workspace-brand` elenca ancora tutti i file (`package.json`, `lib\client.js`, `assets\…`), e lo stesso vale per `dsh-workspace-it`. Prima della correzione la cartella si sarebbe svuotata.
+
+**Bug #27** (Ollama reale):
+1. `[Environment]::SetEnvironmentVariable('OLLAMA_CONTEXT_LENGTH','32768','User')`, poi esci da Ollama dall'icona vicino all'orologio e riaprilo.
+2. Calcola `Get-FileHash "$env:LOCALAPPDATA\WorkspaceOS\harness\profiles\workspace\cordis.patch.yml"` e annota il valore.
+3. Avvia la Harness. **Atteso:** `qwen3:4b-instruct` è nell'elenco "Ollama: N modelli" e **non** in "Non offerti all'agente".
+4. Invia un messaggio con quel modello, poi `(Invoke-RestMethod http://127.0.0.1:11434/api/ps).models | Select name, context_length`. **Atteso:** `context_length` 32768.
+5. Togli la variabile (`…'OLLAMA_CONTEXT_LENGTH',$null,'User'`), riavvia Ollama e la Harness. **Atteso:** il modello è tra i "Non offerti"; se era quello scelto nelle Impostazioni compare l'avviso; `Get-FileHash` di `cordis.patch.yml` è **identico** a quello del punto 2.
+
+**Miglioramento #18** (LM Studio reale, con Ollama chiuso):
+1. In LM Studio carica il modello scelto con contesto 4.096 (`lms load <id> --context-length 4096`).
+2. Avvia la Harness. **Atteso:** compare il messaggio "Carico <id> in LM Studio con un contesto di 16384 token…".
+3. Esegui `lms ps` e `(Invoke-RestMethod http://127.0.0.1:1234/api/v0/models).data | ? state -eq 'loaded' | Select id, loaded_context_length`. **Atteso:** **una sola** istanza del modello, con 16384.
+4. Se compaiono due istanze (per esempio `<id>` e `<id>:2`), lo scarico è fallito senza segnali: annota la versione di LM Studio e la risposta di `Invoke-RestMethod http://127.0.0.1:1234/api/v1/models/unload -Method Post -Body (@{model='<id>'}|ConvertTo-Json) -ContentType application/json`.
+
+---
+
+## Verifica delle voci del ciclo 6
+
+### Bug
+
+- [ ] **Bug #26 (media, Workspace Harness, da confermare su Windows): un collegamento ai plugin rimasto orfano blocca l'avvio, e la sua rimozione può cancellare i file di un'altra copia**
+  - **Verifica QA ciclo 7:** Da confermare su Windows. Nel codice la correzione è corretta: `Get-Item -LiteralPath` non segue il collegamento, la rimozione usa `[System.IO.Directory]::Delete` senza ricorsione, e il confronto avviene su `GetFullPath`. Però qui non c'è PowerShell e non ho potuto eseguire i passi originali. Inoltre `testa-junction.ps1` non copre lo scenario 2 originale: nel caso 2 la cartella A viene rinominata di nuovo **prima** di chiamare `Collega`, quindi il collegamento orfano non viene mai sostituito mentre è orfano (vedi Miglioramento #19). Procedura in «Prove da eseguire su Windows».
   - **File:** `harness/avvia.ps1` (ciclo `foreach ($p in 'dsh-workspace-brand', 'dsh-workspace-it')`).
   - **Causa:**
     - Lo script usa `Test-Path $link` per capire se il collegamento esiste. Per un collegamento orfano (cartella di destinazione spostata o cancellata, per esempio dopo aver spostato o riclonato `WorkspaceOS`) `Test-Path` segue il collegamento e restituisce `$false`.
@@ -40,7 +137,8 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
     - togliere il collegamento senza toccare la destinazione: `[System.IO.Directory]::Delete($link)` (senza ricorsione) oppure `cmd /c rmdir "$link"`, **mai** `Remove-Item -Recurse` su un collegamento;
     - confrontare il `Target` con `[IO.Path]::GetFullPath(...)` per evitare differenze di forma del percorso.
 
-- [x] **Bug #27 (bassa, Workspace Harness): un modello Ollama senza `num_ctx` viene sempre considerato a 4.096 token e nascosto all'agente**
+- [ ] **Bug #27 (bassa, Workspace Harness): un modello Ollama senza `num_ctx` viene sempre considerato a 4.096 token e nascosto all'agente**
+  - **Verifica QA ciclo 7:** Da confermare su Windows con Ollama reale. Nel codice: precedenza `/api/ps` (`context_length`) → `num_ctx` → `OLLAMA_CONTEXT_LENGTH` (utente, poi macchina) → 4.096, e `cordis.patch.yml` non viene più riscritto (solo un avviso). Casi limite rimasti: il contesto impostato dalle Impostazioni dell'app Ollama, che non è una variabile d'ambiente, non viene letto; una variabile impostata senza riavviare Ollama fa offrire un modello che il server carica ancora a 4.096. Procedura in «Prove da eseguire su Windows».
   - **File:** `harness/avvia.ps1` (blocco Ollama, `b527423`).
   - **Causa:**
     - `$ctx = 4096` vale per ogni modello che non ha `num_ctx` nei `parameters` del Modelfile;
@@ -57,9 +155,10 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 ---
 
-## Ciclo 6 – Miglioramenti
+### Miglioramenti
 
-- [x] **Miglioramento #18 (Workspace Harness, da verificare): caricamento in LM Studio di un modello già in memoria con contesto piccolo**
+- [ ] **Miglioramento #18 (Workspace Harness, da verificare): caricamento in LM Studio di un modello già in memoria con contesto piccolo**
+  - **Verifica QA ciclo 7:** Da confermare su Windows con LM Studio reale. Nel codice `unload` viene chiamato prima di `load`, ma con il corpo `{"model": id}` e l'errore scartato da `catch { }`. Se la versione installata di LM Studio richiede `instance_id` per lo scarico, la chiamata fallisce senza alcun segnale e si torna alla doppia istanza. Procedura in «Prove da eseguire su Windows».
   - **File:** `harness/avvia.ps1` (blocco LM Studio).
   - **Problema:**
     - Se il modello scelto è già caricato con meno di 12.000 token, lo script chiama `POST /api/v1/models/load` con `context_length: 16384` senza prima scaricarlo dalla memoria.
@@ -192,6 +291,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 - [x] **Miglioramento #14: completare la configurazione di `ruff`**
   - **Verifica QA ciclo 6:** Ancora aperto: `ruff check vault_engine tests` dà ancora 5 segnalazioni (F401 in `tests/test_agent.py`, `tests/test_regressions_qa_ciclo2.py` e `ollama_hub.py`; F821 `Any` in `providers.py`). `pyproject.toml` non ha `target-version`.
+  - **Verifica QA ciclo 7:** Verificato con lo strumento: `ruff 0.15.20` (`/root/.local/bin/ruff`), `ruff check vault_engine tests` → `All checks passed!`, codice d'uscita 0. `target-version = "py312"` è presente in `engine/pyproject.toml`.
   - Oltre al Miglioramento #13 (ancora aperto), `ruff` segnala:
     - `F821 Undefined name 'BaseExceptionGroup'` in `agent/mcp.py:243`: è un falso positivo, perché `pyproject.toml` non dichiara `requires-python`/`target-version` (il motore usa Python 3.12);
     - due import inutilizzati nei test: `ModelRef` in `tests/test_agent.py` e `json` in `tests/test_regressions_qa_ciclo2.py`.
@@ -199,6 +299,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 - [x] **Miglioramento #15: test delle chiamate HTTP del hub Ollama a livello di trasporto**
   - **Verifica QA ciclo 6:** Aperto solo in parte: `delete` e la route `/ollama/delete` sono ora testati a livello di trasporto. `load`, `unload` (incluso il ripiego su `/api/embed`) e `pull` no.
+  - **Verifica QA ciclo 7:** Verificato: `ollama_hub.set_transport()` è usato da `status`, `pull`, `installed_names`, `load`, `unload` e `delete`, e le regressioni del ciclo 5 passano.
   - **Problema:** i test di `load`, `unload`, `delete` e delle route `/ollama/*` sostituiscono le funzioni di `ollama_hub`. Così il Bug #19 è passato inosservato per tre cicli.
   - **Proposta:**
     - permettere di iniettare il `transport` (o un `AsyncClient`) in `ollama_hub`;
@@ -206,6 +307,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 - [x] **Miglioramento #16 (sicurezza, bassa): `fetch_url` è esposto al DNS rebinding tra controllo e connessione**
   - **Verifica QA ciclo 6:** Ancora aperto: `agent/web.py` non è cambiato.
+  - **Verifica QA ciclo 7:** Verificato nel codice: la connessione viene fissata sull'IP già validato (`_pinned_target`, header `Host` e SNI originali) e il corpo usa un `bytearray`. Però dietro un proxy `fetch_url` non funziona più (vedi Bug #29), e viene provato solo il primo IP validato (vedi Miglioramento #20).
   - **File:** `engine/vault_engine/agent/web.py` (`_validate_url` e `fetch_url`).
   - **Problema:**
     - `_validate_url` risolve il nome e controlla gli IP, ma poi `httpx` risolve di nuovo;
@@ -217,6 +319,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 - [x] **Miglioramento #17 (Workspace Harness): testi residui in inglese**
   - **Verifica QA ciclo 6:** Ancora aperto: nessuna modifica ai testi residui in inglese.
+  - **Verifica QA ciclo 7:** Accettato: lo schema di `session-title-llm` in dsh 0.2.1-rc.2 non ha un campo per il prompt, e il limite è documentato in `harness/README.md`.
   - **Problema:**
     - i titoli delle sessioni generati dal modello sono in inglese (es. "Hello, I'm a language model"), perché il prompt del generatore di titoli è in inglese;
     - le descrizioni dei plugin integrati restano in inglese: dsh le legge da `locale/*.json` dei pacchetti, non dai dizionari.
@@ -228,13 +331,14 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 ## Verifica delle voci del ciclo 4
 
-Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste voci: restano aperte. Al ciclo 6 le sonde del ciclo 4 passano ancora tutte (6 su 6).
+Corrette con `1022a7c` (fase Developer, ciclo 6) e verificate al ciclo 7: le 5 sonde di difetto del ciclo 4 ora falliscono, e il controllo positivo passa ancora.
 
 ### Bug
 
 - [x] **Bug #16 (media, sicurezza): il filtro su `-EncodedCommand` si aggira passando gli argomenti con `Start-Process -ArgumentList`**
   - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_bypass_cycle4` passa su tutti e 3 i casi.
   - **Verifica QA ciclo 6:** ancora presente: `tools.py` non è cambiato e `test_encoded_filter_bypass_cycle4` passa su tutti e 3 i casi.
+  - **Verifica QA ciclo 7:** Verificato: le 3 forme del ciclo 4 sono bloccate (le sonde ora falliscono). Il nuovo filtro, però, guarda solo il primo token di ogni comando, e si aggira in altri 7 modi: vedi Bug #28.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Causa:** per ogni argomento tra virgolette il filtro controlla solo la **prima parola**, e una lista separata da virgole diventa un unico token `\S+` che inizia con `,` o `@(`.
   - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle4`):
@@ -246,6 +350,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
 - [x] **Bug #17 (bassa): il filtro blocca comandi legittimi quando `powershell` o `pwsh` compaiono come argomento**
   - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_false_positive_cycle4` passa su entrambi i casi.
   - **Verifica QA ciclo 6:** ancora presente: `test_encoded_filter_false_positive_cycle4` passa su entrambi i casi.
+  - **Verifica QA ciclo 7:** Verificato: `Get-Process pwsh -ea SilentlyContinue` e `Stop-Process -Name powershell -ea 0` non sono più bloccati (le sonde ora falliscono).
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Causa:** appena trova un token con nome `powershell`/`pwsh`, il filtro esamina **tutti** i token successivi, anche quando quel nome è un argomento di un altro cmdlet. In quel caso `-ea` è l'alias comunissimo di `-ErrorAction`.
   - **Come riprodurlo:** `Get-Process pwsh -ea SilentlyContinue` e `Stop-Process -Name powershell -ea 0` vengono rifiutati come "comandi codificati". Sonda: `test_encoded_filter_false_positive_cycle4`.
@@ -256,6 +361,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
 - [x] **Bug #18 (media): se il primo "Apri documento" fallisce, l'apertura resta bloccata fino al riavvio dell'app**
   - **Verifica QA ciclo 5:** ancora presente: `desktop/electron/main.cjs:199` usa ancora `supportedExtsPromise ??= engineFetch("/health")...` senza azzerare la cache in caso di errore.
   - **Verifica QA ciclo 6:** ancora presente: `main.cjs` non è cambiato dopo il ciclo 4.
+  - **Verifica QA ciclo 7:** Verificato: la logica è spostata in `desktop/electron/openable.cjs` e la cache viene svuotata quando la promessa è rifiutata; `node --test electron/openable.test.cjs` → 6/6.
   - **File:** `desktop/electron/main.cjs` (`supportedExtensions`).
   - **Causa:** `supportedExtsPromise ??= engineFetch("/health")...` memorizza anche una promessa **rifiutata**. Se la prima richiesta capita mentre il motore non è pronto o si sta riavviando, ogni apertura successiva fallisce subito senza riprovare.
   - **Effetti:** il messaggio "apertura consentita solo per i documenti supportati dei Vault" compare per qualunque documento finché non si chiude e riapre l'app.
@@ -267,6 +373,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
 - [x] **Miglioramento #13: segnalazioni di `ruff` e nessun test per la logica di apertura dei file**
   - **Verifica QA ciclo 5:** ancora aperto: `ruff` segnala ancora `F821 Any` in `providers.py` (righe 198 e 220) e `F401 Any` in `ollama_hub.py`. Altre segnalazioni nel Miglioramento #14.
   - **Verifica QA ciclo 6:** ancora aperto: stesse segnalazioni F821/F401 di `ruff`, e nessun test per `assertOpenableTarget`.
+  - **Verifica QA ciclo 7:** Verificato: `ruff` dà 0 segnalazioni (vedi Miglioramento #14) e la logica di apertura è testata con `node --test` (6 test).
   - **`providers.py`:** `F821 Undefined name 'Any'` alle righe 198 e 220, introdotto con `ensure_loaded(events: Any = None)`. Oggi funziona solo grazie a `from __future__ import annotations`; `typing.get_type_hints(ensure_loaded)` solleverebbe `NameError`.
   - **`ollama_hub.py`:** `F401 'typing.Any' imported but unused`.
   - **Proposta:** importare `Any` in `providers.py`, togliere l'import inutile e aggiungere `ruff check` ai controlli che si lanciano prima di ogni push.
@@ -592,52 +699,56 @@ Tutte le voci risultano corrette e verificate. Le sonde corrispondenti sono stat
 
 ---
 
-## Sonde QA del ciclo 4 (riproducibili)
+## Sonde QA del ciclo 7 (riproducibili)
 
-Per eseguirle: salva il codice qui sotto in `engine/tests/_probe_qa4.py` (file temporaneo, da non committare) e lancia `uv run pytest -q tests/_probe_qa4.py` dalla cartella `engine`. Ogni test di difetto passa quando il difetto è presente: al ciclo 4 passano tutti e 5. `test_ipv6_loopback_host_now_accepted` invece è un controllo positivo e deve passare sempre.
+Per eseguirle: salva il codice qui sotto in `engine/tests/_probe_qa7.py` (file temporaneo, da non committare) e lancia `uv run pytest -q tests/_probe_qa7.py` dalla cartella `engine`. Ogni test di difetto passa quando il difetto è presente: al ciclo 7 passano tutti. I `test_cycle6_cases_still_blocked` sono controlli positivi e devono passare sempre.
 
 | Sonda | Voce |
 |---|---|
-| `test_encoded_filter_bypass_cycle4` (3 casi) | Bug #16 |
-| `test_encoded_filter_false_positive_cycle4` (2 casi) | Bug #17 |
-| `test_ipv6_loopback_host_now_accepted` | verifica del Bug #15 (controllo positivo) |
+| `test_encoded_filter_bypass_cycle7` (7 casi) | Bug #28 |
+| `test_cycle5_logic_blocked_scriptblock_case` | Bug #28 (regressione rispetto a `0d74647`) |
+| `test_cycle6_cases_still_blocked` (3 casi) | controllo positivo |
 
-Il Bug #18 riguarda Electron: si riproduce con la simulazione Node descritta nella voce stessa.
+Il Bug #29 si riproduce con lo script nella voce stessa; il Bug #30 confrontando i primi byte del file (`git show 0d74647:harness/avvia.ps1 | head -c 3 | od -An -tx1` → `ef bb bf`; su `1022a7c` → `23 20 41`).
 
-<details><summary>Codice delle sonde del ciclo 4</summary>
+Le sonde del ciclo 4 ora falliscono, quindi quei difetti sono corretti. Il loro codice è stato tolto: lo sostituiscono le regressioni in `engine/tests/test_regressions_qa_ciclo5.py`.
+
+<details><summary>Codice delle sonde del ciclo 7</summary>
 
 ```python
-"""Sonde QA ciclo 4: ciascun test PASSA se il difetto ipotizzato è presente."""
+"""Sonde QA ciclo 7: ciascun test PASSA se il difetto ipotizzato è presente."""
 import pytest
 
 from vault_engine.agent.tools import _uses_encoded_command
 
 
 @pytest.mark.parametrize("cmd", [
-    "Start-Process powershell -ArgumentList '-NoProfile -e SGVsbG8='",   # solo la prima parola è controllata
-    "Start-Process powershell -ArgumentList '-NoProfile','-e','SGVsbG8='",  # lista separata da virgole = un token \S+
-    "Start-Process powershell -ArgumentList @('-e','SGVsbG8=')",
+    "(powershell -e SGVsbG8=)",                                   # sottoespressione
+    "$(powershell -e SGVsbG8=)",
+    "if ($true) { powershell -e SGVsbG8= }",                      # blocco di script
+    "1 | ForEach-Object { powershell -e SGVsbG8= }",
+    "try { pwsh -enc SGVsbG8= } catch { }",
+    '&"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -enc SGVsbG8=',  # & attaccato al percorso tra virgolette
+    "saps powershell -ArgumentList '-e SGVsbG8='",                 # alias di Start-Process
 ])
-def test_encoded_filter_bypass_cycle4(cmd):
+def test_encoded_filter_bypass_cycle7(cmd):
     assert not _uses_encoded_command(cmd)
 
 
 @pytest.mark.parametrize("cmd", [
-    "Get-Process pwsh -ea SilentlyContinue",          # -ea = alias comune di -ErrorAction
-    "Stop-Process -Name powershell -ea 0",
+    "Get-Process pwsh -ea SilentlyContinue; powershell -e SGVsbG8=",
+    "Start-Process powershell -ArgumentList '-NoProfile','-e','SGVsbG8='",
+    'cmd /c "powershell -e SGVsbG8="',
 ])
-def test_encoded_filter_false_positive_cycle4(cmd):
+def test_cycle6_cases_still_blocked(cmd):
+    """Controllo positivo: deve PASSARE anche a difetti corretti."""
     assert _uses_encoded_command(cmd)
 
 
-def test_ipv6_loopback_host_now_accepted(monkeypatch):
-    """Controllo positivo (deve PASSARE anche a difetto corretto): verifica del Bug #15."""
-    from fastapi.testclient import TestClient
-    from vault_engine import app as appmod
-    monkeypatch.delenv("WSOS_TOKEN", raising=False)
-    with TestClient(appmod.app, base_url="http://127.0.0.1") as c:
-        assert c.get("/health", headers={"Host": "[::1]:8765"}).status_code == 200
-        assert c.get("/health", headers={"Host": "attacker.example"}).status_code == 400
+def test_cycle5_logic_blocked_scriptblock_case():
+    """Regressione rispetto al ciclo 6: la versione 0d74647 bloccava i blocchi di script
+    (scansione di ogni token chiamato powershell), quella attuale no."""
+    assert not _uses_encoded_command("if ($true) { powershell -e SGVsbG8= }")
 ```
 
 </details>
