@@ -2,8 +2,12 @@
 
 Applicazione desktop per Windows 11 che trasforma cartelle di documenti in archivi RAG
 (Vault) **interamente in locale**: parsing, OCR, chunking, embedding e vettori non lasciano
-mai il PC. È il primo modulo del clone personalizzato di Perplexity Personal Computer:
-l'agente arriverà dopo e userà i Vault come strumento di retrieval.
+mai il PC. Comprende un **agente** in stile Perplexity Personal Computer che lavora con un
+modello locale e usa come strumenti i Vault, i file del PC, PowerShell, il web e i
+**server MCP** configurati in *Impostazioni → Server MCP*.
+
+Manuale interattivo in italiano: [`docs/Manuale-RAG-Vault-Studio.html`](docs/Manuale-RAG-Vault-Studio.html)
+(funziona offline).
 
 ```
 desktop/   Electron 33 + React 18 + Fluent UI v9 (Mica, tray, drag & drop)
@@ -35,7 +39,9 @@ npm run app            # oppure: start.cmd
 ```
 
 `start.cmd` nella radice avvia l'app; `--hidden` la avvia direttamente nella tray
-(è l'argomento usato dall'opzione "Avvia con Windows").
+(è l'argomento usato dall'opzione "Avvia con Windows"). Prima di avviare ricompila
+l'interfaccia se un file di `desktop/src` è più recente dell'ultima build, così dopo un
+`git pull` non si apre mai una versione vecchia.
 
 Sviluppo dell'interfaccia: `npm run dev` (Vite su :5173) e, in un altro terminale,
 `npm run app:dev`. Per provarla in un browser senza Electron, avvia il motore con
@@ -58,11 +64,22 @@ Sviluppo dell'interfaccia: `npm run dev` (Vite su :5173) e, in un altro terminal
 | Sync incrementale | Un file viene rielaborato solo se cambiano dimensione o data e il nuovo SHA-256 è diverso; i file rimossi escono dall'indice. Il watcher (watchdog, debounce di 3 s) aggiorna in background; all'avvio un sync recupera le modifiche fatte ad app chiusa |
 | Auditor | Elenco dei file con stato ed errori, chunk per documento, proiezione PCA 2D dei vettori, test di Search & Retrieval con cosine, dot product ed euclidea affiancati, re-ranking LLM opzionale e risposta RAG con citazioni |
 
-## Agente (fase 2)
+## Agente
 
 Pagina **Agente**: un ciclo agentico in stile Perplexity Personal Computer che gira
 interamente su un modello locale (LM Studio/Ollama, tool calling compatibile OpenAI) e usa i
 Vault come base di conoscenza.
+
+### Come si usa
+
+1. In *Impostazioni → Model Router* scegli l'**LLM** (serve un modello addestrato per il tool
+   calling, vedi sotto). Senza LLM la casella di testo resta disattivata.
+2. In *Agente* premi **Nuova conversazione**. In alto scegli il modello per questa chat e i
+   Vault da consultare (*Tutti i Vault* o una selezione).
+3. Scrivi la richiesta (Invio invia, Maiusc+Invio va a capo). Ogni passo compare nella chat
+   con strumento, argomenti, risultato e durata. **Interrompi** ferma l'esecuzione.
+4. Quando l'agente vuole agire compare una scheda di approvazione: *Consenti*, *Consenti
+   sempre in questa chat* (revocabile dal badge in alto) o *Nega*.
 
 | Strumento | Cosa fa | Rischio |
 |---|---|---|
@@ -71,23 +88,60 @@ Vault come base di conoscenza.
 | `write_file`, `edit_file` | Crea file di testo o sostituisce un testo esatto | scrittura |
 | `run_powershell` | Esegue PowerShell 5.1 con timeout; i comandi codificati sono rifiutati | esecuzione |
 | `web_search`, `fetch_url` | Ricerca su DuckDuckGo senza chiave e testo leggibile delle pagine | rete |
+| `mcp__<server>__<strumento>` | Strumenti dei server MCP attivi (vedi sotto) | mcp |
 | `task_list` | Piano di lavoro mostrato nella chat | — |
 
-- **Ogni azione richiede approvazione** nella chat: *Consenti*, *Consenti sempre in questa
-  chat* (revocabile dal badge in alto) o *Nega*. Un rifiuto viene comunicato al modello con
-  l'istruzione di non aggirarlo. Fa eccezione solo `task_list`, che aggiorna il piano
-  visibile e non ha effetti sul PC.
-- Risposte in streaming; budget di passi (predefinito 10), poi una risposta finale senza
-  strumenti. Il contesto viene tagliato a un turno utente e privato delle chiamate rimaste
-  senza risposta.
+- **Ogni azione richiede approvazione**, strumenti MCP compresi. Un rifiuto viene comunicato
+  al modello con l'istruzione di non aggirarlo. Fa eccezione solo `task_list`, che aggiorna
+  il piano visibile e non ha effetti sul PC.
+- Risposte in streaming; budget di passi, poi una risposta finale senza strumenti. Il
+  contesto viene tagliato a un turno utente e privato delle chiamate rimaste senza risposta.
 - Conversazioni salvate in `%LOCALAPPDATA%\WorkspaceOS\agent.sqlite`.
 - Prima di ogni esecuzione il motore carica esplicitamente l'LLM e i modelli di embedding dei
   Vault (`/api/v1/models/load` di LM Studio), che restano così in memoria insieme. Su questo
   PC il primo passo è sceso da ~3 minuti a ~22 secondi.
 - Tempi misurati con Gemma 4 E4B su CPU: domanda con PowerShell 44 s; ricerca web +
   scrittura file + risposta 3 min 20 s.
-- Serve un modello addestrato per il tool calling. Fra quelli installati qui, solo
-  `google/gemma-4-e4b` lo è (`trained_for_tool_use` di LM Studio).
+- Serve un modello addestrato per il tool calling (`trained_for_tool_use` di LM Studio, es.
+  `google/gemma-4-e4b`).
+
+### Impostazioni → Agente
+
+| Opzione | Predefinito | Effetto |
+|---|---|---|
+| Passi massimi per richiesta | 10 (1–40) | Ogni passo è una chiamata al modello; esaurito il budget l'agente deve rispondere |
+| Token massimi per risposta | 2048 (256–16384) | Lunghezza massima di ogni risposta del modello |
+| Lascia ragionare i modelli di ragionamento | spento | Piani migliori, ma più volte più lento su CPU. Da spento il motore invia `reasoning_effort: "none"` / `think: false` |
+
+## Server MCP
+
+*Impostazioni → Server MCP* collega l'agente a server
+[Model Context Protocol](https://modelcontextprotocol.io): i loro strumenti diventano
+strumenti dell'agente con il nome `mcp__<nome server>__<strumento>`.
+
+**Aggiungi server** apre il modulo:
+
+| Campo | Note |
+|---|---|
+| Nome | Massimo 40 caratteri; diventa parte del nome degli strumenti |
+| Trasporto | **Locale (stdio)**: il motore avvia il processo. **HTTP**: endpoint Streamable HTTP già in esecuzione |
+| Comando, Argomenti, Cartella di lavoro | Solo stdio. Es. comando `npx`, argomenti `-y @modelcontextprotocol/server-filesystem "C:\Users\me\Documents"`; virgolette per i percorsi con spazi |
+| Variabili d'ambiente | Solo stdio; una per riga, `NOME=valore` |
+| URL, Header | Solo HTTP; es. `http://localhost:8000/mcp` e header `Authorization: Bearer …` |
+| Timeout chiamata | 120 s predefiniti (5–1800) per ogni chiamata a uno strumento |
+| Attivo | Un server spento non viene avviato e non offre strumenti |
+
+Ogni server compare come scheda con stato, nome e versione dichiarati dal server, elenco
+degli strumenti ed eventuali errori. I comandi sono **Attivo**, **Riconnetti**,
+**Modifica**, **Log** (stderr dei server stdio) e **Rimuovi**. Sopra l'elenco è indicato
+quanti strumenti MCP sono attivi in totale.
+
+- Variabili d'ambiente e header sono **cifrati con DPAPI** (legati al tuo utente Windows) e
+  nell'interfaccia appaiono mascherati; lasciare il valore mascherato lo mantiene invariato.
+- Ogni strumento MCP aggiunge la sua descrizione al prompt: con un modello locale tieni
+  attivi solo i server che servono. Misurato qui: con il server filesystem (24 strumenti)
+  una richiesta con Gemma 4 E4B su CPU richiede circa 6 minuti.
+- I server attivi si collegano all'avvio del motore e si chiudono con lui.
 
 ## Sicurezza e privacy
 
