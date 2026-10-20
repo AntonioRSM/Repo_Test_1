@@ -1,0 +1,138 @@
+{
+  "command.close": {
+    "en": "Close current page or window",
+    "it": "Chiudi la pagina o la finestra corrente"
+  },
+  "command.refresh": {
+    "en": "Refresh current page",
+    "it": "Aggiorna la pagina corrente"
+  },
+  "command.noRefresh": {
+    "en": "This page cannot be refreshed",
+    "it": "Questa pagina non si può aggiornare"
+  },
+  "command.toggle": {
+    "en": "Toggle right sidebar",
+    "it": "Mostra/nascondi la barra laterale destra"
+  },
+  "command.fullscreen": {
+    "en": "Toggle panel fullscreen",
+    "it": "Pannello a schermo intero sì/no"
+  },
+  "command.noSession": {
+    "en": "Select a session first",
+    "it": "Seleziona prima una sessione"
+  },
+  "command.noFocus": {
+    "en": "Focus a right sidebar pane first",
+    "it": "Attiva prima un riquadro della barra laterale destra"
+  },
+  "command.stale": {
+    "en": "The page changed; focus it again",
+    "it": "La pagina è cambiata: attivala di nuovo"
+  },
+  "command.collapsed": {
+    "en": "Expand the right sidebar first",
+    "it": "Espandi prima la barra laterale destra"
+  },
+  "command.float": {
+    "en": "This action is unavailable in a floating panel",
+    "it": "Azione non disponibile in un pannello mobile"
+  },
+  "command.empty": {
+    "en": "Open a page first",
+    "it": "Apri prima una pagina"
+  },
+  "command.budget": {
+    "en": "Two panes is the limit",
+    "it": "Il limite è di due riquadri"
+  },
+  "command.width": {
+    "en": "Not enough width to split, widen the sidebar",
+    "it": "Spazio insufficiente per dividere: allarga la barra laterale"
+  },
+  "chrome.expand": {
+    "en": "Open sidebar",
+    "it": "Apri la barra laterale"
+  },
+  "chrome.expandAria": {
+    "en": "Open right sidebar",
+    "it": "Apri la barra laterale destra"
+  },
+  "chrome.collapse": {
+    "en": "Collapse sidebar",
+    "it": "Comprimi la barra laterale"
+  },
+  "chrome.collapseAria": {
+    "en": "Collapse right sidebar",
+    "it": "Comprimi la barra laterale destra"
+  },
+  "chrome.toFullscreen": {
+    "en": "Fullscreen",
+    "it": "Schermo intero"
+  },
+  "chrome.exitFullscreen": {
+    "en": "Exit fullscreen",
+    "it": "Esci dallo schermo intero"
+  },
+  "dock.emptyPane": {
+    "en": "Empty pane",
+    "it": "Riquadro vuoto"
+  },
+  "dock.splitPane": {
+    "en": "Split",
+    "it": "Dividi"
+  },
+  "dock.splitPaneDisabled": {
+    "en": "Two panes is the limit",
+    "it": "Il limite è di due riquadri"
+  },
+  "dock.splitPaneNarrow": {
+    "en": "Not enough width to split, widen the sidebar",
+    "it": "Spazio insufficiente per dividere: allarga la barra laterale"
+  },
+  "dock.closeTab": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "dock.addTab": {
+    "en": "New tab",
+    "it": "Nuova scheda"
+  },
+  "dock.dockFloat": {
+    "en": "Send back to the sidebar",
+    "it": "Riporta nella barra laterale"
+  },
+  "dock.closeFloat": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "dock.drop.center": {
+    "en": "Move here",
+    "it": "Sposta qui"
+  },
+  "dock.drop.left": {
+    "en": "Add left split",
+    "it": "Aggiungi divisione a sinistra"
+  },
+  "dock.drop.right": {
+    "en": "Add right split",
+    "it": "Aggiungi divisione a destra"
+  },
+  "dock.drop.top": {
+    "en": "Add top split",
+    "it": "Aggiungi divisione in alto"
+  },
+  "dock.drop.bottom": {
+    "en": "Add bottom split",
+    "it": "Aggiungi divisione in basso"
+  },
+  "tab.guide.title": {
+    "en": "Start",
+    "it": "Inizio"
+  },
+  "tab.unavailable": {
+    "en": "Nothing here can view this kind of content yet.",
+    "it": "Non c'è ancora niente che possa mostrare questo tipo di contenuto."
+  }
+}

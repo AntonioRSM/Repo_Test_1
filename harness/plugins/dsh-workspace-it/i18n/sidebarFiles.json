@@ -1,0 +1,70 @@
+{
+  "shortcut.noSession": {
+    "en": "Select a session first",
+    "it": "Seleziona prima una sessione"
+  },
+  "type.label": {
+    "en": "Files",
+    "it": "File"
+  },
+  "guide.title": {
+    "en": "Workspace files",
+    "it": "File del workspace"
+  },
+  "guide.description": {
+    "en": "Browse files in this session's workspace",
+    "it": "Sfoglia i file del workspace di questa sessione"
+  },
+  "loading": {
+    "en": "Reading…",
+    "it": "Lettura…"
+  },
+  "empty": {
+    "en": "Empty directory",
+    "it": "Cartella vuota"
+  },
+  "truncated": {
+    "en": "Too many entries, showing only some of them.",
+    "it": "Troppi elementi: ne sono mostrati solo alcuni."
+  },
+  "noWorkspace": {
+    "en": "This session has no workspace directory.",
+    "it": "Questa sessione non ha una cartella di workspace."
+  },
+  "reload": {
+    "en": "Reload",
+    "it": "Ricarica"
+  },
+  "autoRefresh": {
+    "en": "Auto refresh",
+    "it": "Aggiornamento automatico"
+  },
+  "autoRefresh.enable": {
+    "en": "Enable auto refresh",
+    "it": "Attiva l'aggiornamento automatico"
+  },
+  "autoRefresh.disable": {
+    "en": "Disable auto refresh",
+    "it": "Disattiva l'aggiornamento automatico"
+  },
+  "entry.other": {
+    "en": "Not a file or a directory, so it cannot be opened.",
+    "it": "Non è né un file né una cartella e non si può aprire."
+  },
+  "error.notFound": {
+    "en": "That directory is gone. It may have been moved or deleted.",
+    "it": "La cartella non esiste più: potrebbe essere stata spostata o eliminata."
+  },
+  "error.outsideWorkspace": {
+    "en": "That directory is outside the workspace, so the sidebar will not read it.",
+    "it": "La cartella è fuori dal workspace: la barra laterale non la legge."
+  },
+  "error.notDirectory": {
+    "en": "That is not a directory.",
+    "it": "Non è una cartella."
+  },
+  "error.unavailable": {
+    "en": "Read failed: {message}",
+    "it": "Lettura non riuscita: {message}"
+  }
+}

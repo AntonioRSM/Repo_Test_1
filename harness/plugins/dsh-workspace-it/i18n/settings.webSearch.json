@@ -1,0 +1,110 @@
+{
+  "title": {
+    "en": "Web search",
+    "it": "Ricerca web"
+  },
+  "description": {
+    "en": "Set up the DeepSeek search provider.",
+    "it": "Configura il provider di ricerca DeepSeek."
+  },
+  "useSearchApi": {
+    "en": "Use the new Web Search API",
+    "it": "Usa la nuova API Web Search"
+  },
+  "useSearchApiHint": {
+    "en": "Off by default: search runs through DeepSeek Messages. For the new Web Search API's features and pricing, see the ",
+    "it": "Disattivata per impostazione predefinita: la ricerca passa da DeepSeek Messages. Per funzioni e prezzi della nuova API Web Search vedi la "
+  },
+  "searchGuide": {
+    "en": "Search & Fetch guide",
+    "it": "guida Search & Fetch"
+  },
+  "searchGuideUrl": {
+    "en": "https://api-docs.deepseek.com/guides/search",
+    "it": "https://api-docs.deepseek.com/guides/search"
+  },
+  "apiKey": {
+    "en": "API key",
+    "it": "Chiave API"
+  },
+  "apiKeyHint": {
+    "en": "Stored outside the settings file. Leave blank to keep the current key.",
+    "it": "Salvata fuori dal file delle impostazioni. Lascia vuoto per mantenere la chiave attuale."
+  },
+  "apiKeySet": {
+    "en": "A key is configured.",
+    "it": "È configurata una chiave."
+  },
+  "apiKeyUnset": {
+    "en": "No key is configured; only conversations using a DeepSeek Account model can search, through the default endpoint.",
+    "it": "Nessuna chiave configurata: possono cercare solo le conversazioni con un modello dell'account DeepSeek, tramite l'endpoint predefinito."
+  },
+  "baseUrl": {
+    "en": "Messages API base URL",
+    "it": "URL di base dell'API Messages"
+  },
+  "baseUrlHint": {
+    "en": "Include the API prefix, such as https://api.deepseek.com/anthropic/v1. The provider appends /messages. Leave blank to restore the default.",
+    "it": "Includi il prefisso dell'API, ad es. https://api.deepseek.com/anthropic/v1. Il provider aggiunge /messages. Lascia vuoto per ripristinare il predefinito."
+  },
+  "searchApiBaseUrl": {
+    "en": "Search / Fetch API base URL",
+    "it": "URL di base dell'API Search / Fetch"
+  },
+  "searchApiBaseUrlHint": {
+    "en": "Include the API prefix, such as https://api.deepseek.com/v1/tools. The provider appends /search or /fetch. Leave blank to restore the default.",
+    "it": "Includi il prefisso dell'API, ad es. https://api.deepseek.com/v1/tools. Il provider aggiunge /search o /fetch. Lascia vuoto per ripristinare il predefinito."
+  },
+  "maxUses": {
+    "en": "Max searches per request",
+    "it": "Ricerche massime per richiesta"
+  },
+  "maxUsesHint": {
+    "en": "How many searches the auxiliary model may run within one Messages request. Applies only to the Messages API.",
+    "it": "Quante ricerche può fare il modello ausiliario in una richiesta Messages. Vale solo per l'API Messages."
+  },
+  "count": {
+    "en": "Results per search",
+    "it": "Risultati per ricerca"
+  },
+  "countHint": {
+    "en": "Results returned per query: an integer from 1 to 50, default 10. This controls result count, not search calls. web_search keeps no more sources than its own result limit.",
+    "it": "Risultati restituiti per ogni query: un intero da 1 a 50, predefinito 10. Controlla il numero di risultati, non le chiamate di ricerca. web_search non conserva più fonti del proprio limite di risultati."
+  },
+  "overridden": {
+    "en": "Overridden",
+    "it": "Personalizzato"
+  },
+  "reset": {
+    "en": "Reset to default",
+    "it": "Ripristina il predefinito"
+  },
+  "readOnly": {
+    "en": "This deployment stores settings read-only.",
+    "it": "Questa installazione salva le impostazioni in sola lettura."
+  },
+  "unavailable": {
+    "en": "This plugin is not loaded, so it cannot be configured right now.",
+    "it": "Questo plugin non è caricato e ora non si può configurare."
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "saveFailed": {
+    "en": "The deployment did not accept these values; they were left for you to correct.",
+    "it": "L'installazione non ha accettato questi valori: sono rimasti da correggere."
+  },
+  "invalidNumber": {
+    "en": "Enter a number, or leave blank to use the default.",
+    "it": "Inserisci un numero, oppure lascia vuoto per usare il predefinito."
+  },
+  "invalidCount": {
+    "en": "Enter an integer from 1 to 50, or leave blank to use the default.",
+    "it": "Inserisci un intero da 1 a 50, oppure lascia vuoto per usare il predefinito."
+  }
+}

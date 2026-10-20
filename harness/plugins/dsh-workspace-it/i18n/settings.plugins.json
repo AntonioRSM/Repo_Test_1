@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "en": "Built-in plugins",
+    "it": "Plugin integrati"
+  },
+  "title": {
+    "en": "Built-in plugins",
+    "it": "Plugin integrati"
+  },
+  "intro": {
+    "en": "Inspect the plugins this deployment ships.",
+    "it": "Ispeziona i plugin inclusi in questa installazione."
+  },
+  "tabs": {
+    "en": "Plugin views",
+    "it": "Viste dei plugin"
+  },
+  "empty": {
+    "en": "This deployment exposes no plugin views.",
+    "it": "Questa installazione non espone viste dei plugin."
+  }
+}

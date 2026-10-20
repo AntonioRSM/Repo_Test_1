@@ -1,0 +1,282 @@
+{
+  "trigger.label": {
+    "en": "Reminders",
+    "it": "Promemoria"
+  },
+  "list.loading": {
+    "en": "Loading reminders…",
+    "it": "Caricamento dei promemoria…"
+  },
+  "list.error": {
+    "en": "Could not load reminders.",
+    "it": "Impossibile caricare i promemoria."
+  },
+  "list.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "delete.action": {
+    "en": "Delete",
+    "it": "Elimina"
+  },
+  "delete.pending": {
+    "en": "Deleting…",
+    "it": "Eliminazione…"
+  },
+  "delete.label": {
+    "en": "Delete reminder: {title}",
+    "it": "Elimina il promemoria: {title}"
+  },
+  "list.open": {
+    "en": "Open reminder details: {title}",
+    "it": "Apri i dettagli del promemoria: {title}"
+  },
+  "trigger.one": {
+    "en": "{count} reminder",
+    "it": "{count} promemoria"
+  },
+  "trigger.other": {
+    "en": "{count} reminders",
+    "it": "{count} promemoria"
+  },
+  "list.aria": {
+    "en": "Active reminders",
+    "it": "Promemoria attivi"
+  },
+  "list.nextRun": {
+    "en": "Next run",
+    "it": "Prossima esecuzione"
+  },
+  "frequency.once": {
+    "en": "Once",
+    "it": "Una volta"
+  },
+  "frequency.every": {
+    "en": "Every {value} {unit}",
+    "it": "Ogni {value} {unit}"
+  },
+  "time.locale": {
+    "en": "en",
+    "it": "it"
+  },
+  "time.utcPrefix": {
+    "en": "UTC",
+    "it": "UTC"
+  },
+  "frequency.daily": {
+    "en": "Daily at {time} ({timeZone})",
+    "it": "Ogni giorno alle {time} ({timeZone})"
+  },
+  "frequency.dailyLocal": {
+    "en": "Daily at {time}",
+    "it": "Ogni giorno alle {time}"
+  },
+  "frequency.weekly": {
+    "en": "Weekly on {weekdays} at {time} ({timeZone})",
+    "it": "Ogni settimana il {weekdays} alle {time} ({timeZone})"
+  },
+  "frequency.weeklyLocal": {
+    "en": "Weekly on {weekdays} at {time}",
+    "it": "Ogni settimana il {weekdays} alle {time}"
+  },
+  "frequency.cron": {
+    "en": "Cron {expression} ({timeZone})",
+    "it": "Cron {expression} ({timeZone})"
+  },
+  "frequency.cronLocal": {
+    "en": "Cron {expression}",
+    "it": "Cron {expression}"
+  },
+  "frequency.cronRule": {
+    "en": "{rule} ({timeZone})",
+    "it": "{rule} ({timeZone})"
+  },
+  "cron.list.join": {
+    "en": ", ",
+    "it": ", "
+  },
+  "cron.part.join": {
+    "en": " ",
+    "it": " "
+  },
+  "cron.weekday.name": {
+    "en": "{weekday}",
+    "it": "{weekday}"
+  },
+  "cron.weekday.range": {
+    "en": "{from}–{to}",
+    "it": "{from}–{to}"
+  },
+  "cron.months": {
+    "en": " in {months}",
+    "it": " nei mesi di {months}"
+  },
+  "cron.day.every": {
+    "en": "Every day{months}",
+    "it": "Ogni giorno{months}"
+  },
+  "cron.day.weekdays": {
+    "en": "{weekdays}{months}",
+    "it": "{weekdays}{months}"
+  },
+  "cron.day.monthDays": {
+    "en": "Day {days} of every month{months}",
+    "it": "Giorno {days} di ogni mese{months}"
+  },
+  "cron.day.both": {
+    "en": "Day {days} of every month or {weekdays}{months}",
+    "it": "Giorno {days} di ogni mese oppure {weekdays}{months}"
+  },
+  "cron.day.bothStarred": {
+    "en": "Day {days} of every month and {weekdays}{months}",
+    "it": "Giorno {days} di ogni mese e {weekdays}{months}"
+  },
+  "cron.hours.range": {
+    "en": "{from}–{to}",
+    "it": "{from}–{to}"
+  },
+  "cron.hours.list": {
+    "en": "{hours}",
+    "it": "{hours}"
+  },
+  "cron.time.everyMinute": {
+    "en": "Every minute",
+    "it": "Ogni minuto"
+  },
+  "cron.time.everyMinutes": {
+    "en": "Every {step} minutes",
+    "it": "Ogni {step} minuti"
+  },
+  "cron.time.joinedEveryMinute": {
+    "en": "every minute",
+    "it": "ogni minuto"
+  },
+  "cron.time.joinedEveryMinutes": {
+    "en": "every {step} minutes",
+    "it": "ogni {step} minuti"
+  },
+  "cron.time.everyHour": {
+    "en": "Every hour",
+    "it": "Ogni ora"
+  },
+  "cron.time.joinedEveryHour": {
+    "en": "every hour",
+    "it": "ogni ora"
+  },
+  "cron.time.everyNHours": {
+    "en": "Every {count} hours",
+    "it": "Ogni {count} ore"
+  },
+  "cron.time.joinedEveryNHours": {
+    "en": "every {count} hours",
+    "it": "ogni {count} ore"
+  },
+  "cron.time.hourlyAt": {
+    "en": "Every hour at minute {minutes}",
+    "it": "Ogni ora al minuto {minutes}"
+  },
+  "cron.time.joinedHourlyAt": {
+    "en": "every hour at minute {minutes}",
+    "it": "ogni ora al minuto {minutes}"
+  },
+  "cron.time.hoursEveryMinute": {
+    "en": "every minute during hours {hours}",
+    "it": "ogni minuto nelle ore {hours}"
+  },
+  "cron.time.hoursEveryMinutes": {
+    "en": "every {step} minutes during hours {hours}",
+    "it": "ogni {step} minuti nelle ore {hours}"
+  },
+  "cron.time.at": {
+    "en": "at {times}",
+    "it": "alle {times}"
+  },
+  "cron.time.hoursAt": {
+    "en": "at minute {minutes} of hours {hours}",
+    "it": "al minuto {minutes} delle ore {hours}"
+  },
+  "frequency.weekday.join": {
+    "en": ", ",
+    "it": ", "
+  },
+  "frequency.weekday.1": {
+    "en": "Mon",
+    "it": "lun"
+  },
+  "frequency.weekday.2": {
+    "en": "Tue",
+    "it": "mar"
+  },
+  "frequency.weekday.3": {
+    "en": "Wed",
+    "it": "mer"
+  },
+  "frequency.weekday.4": {
+    "en": "Thu",
+    "it": "gio"
+  },
+  "frequency.weekday.5": {
+    "en": "Fri",
+    "it": "ven"
+  },
+  "frequency.weekday.6": {
+    "en": "Sat",
+    "it": "sab"
+  },
+  "frequency.weekday.7": {
+    "en": "Sun",
+    "it": "dom"
+  },
+  "unit.day.one": {
+    "en": "day",
+    "it": "giorno"
+  },
+  "unit.day.other": {
+    "en": "days",
+    "it": "giorni"
+  },
+  "unit.hour.one": {
+    "en": "hour",
+    "it": "ora"
+  },
+  "unit.hour.other": {
+    "en": "hours",
+    "it": "ore"
+  },
+  "unit.minute.one": {
+    "en": "minute",
+    "it": "minuto"
+  },
+  "unit.minute.other": {
+    "en": "minutes",
+    "it": "minuti"
+  },
+  "unit.second.one": {
+    "en": "second",
+    "it": "secondo"
+  },
+  "unit.second.other": {
+    "en": "seconds",
+    "it": "secondi"
+  },
+  "relative.now": {
+    "en": "Due now",
+    "it": "In scadenza ora"
+  },
+  "relative.future": {
+    "en": "in {value} {unit}",
+    "it": "tra {value} {unit}"
+  },
+  "relative.overdue": {
+    "en": "{value} {unit} overdue",
+    "it": "in ritardo di {value} {unit}"
+  },
+  "mark.aria": {
+    "en": "{count} scheduled tasks",
+    "it": "{count} attività pianificate"
+  },
+  "hover.more": {
+    "en": "{count} more",
+    "it": "altri {count}"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "provider.account": {
+    "en": "DeepSeek Account",
+    "it": "Account DeepSeek"
+  },
+  "command.label": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "command.description": {
+    "en": "Select the model for this conversation",
+    "it": "Scegli il modello per questa conversazione"
+  },
+  "option.loadError": {
+    "en": "Catalog failed to load: {message}",
+    "it": "Caricamento del catalogo non riuscito: {message}"
+  },
+  "trigger.fallback": {
+    "en": "Select model",
+    "it": "Scegli il modello"
+  },
+  "trigger.loading": {
+    "en": "Loading models…",
+    "it": "Caricamento dei modelli…"
+  },
+  "trigger.selectAria": {
+    "en": "Select model",
+    "it": "Scegli il modello"
+  },
+  "trigger.aria": {
+    "en": "Select model, current {model}",
+    "it": "Scegli il modello, attuale {model}"
+  },
+  "trigger.ariaEffort": {
+    "en": "Select model, current {model}, reasoning effort {effort}",
+    "it": "Scegli il modello, attuale {model}, livello di ragionamento {effort}"
+  },
+  "menu.aria": {
+    "en": "Model and reasoning effort",
+    "it": "Modello e livello di ragionamento"
+  },
+  "menu.model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "menu.effort": {
+    "en": "Effort",
+    "it": "Ragionamento"
+  },
+  "effort.providerDefault": {
+    "en": "Default",
+    "it": "Predefinito"
+  },
+  "status.loading": {
+    "en": "Refreshing model list…",
+    "it": "Aggiornamento dell'elenco dei modelli…"
+  },
+  "error.action": {
+    "en": "Model operation failed: {message}",
+    "it": "Operazione sul modello non riuscita: {message}"
+  },
+  "error.sessionInUse": {
+    "en": "This session is already in use, possibly by another running DSH instance (such as dsh web or the desktop app). Quit other running DSH instances and try again.",
+    "it": "Questa sessione è già in uso, forse da un'altra istanza DSH in esecuzione (come dsh web o l'app desktop). Chiudi le altre istanze DSH e riprova."
+  },
+  "action.reload": {
+    "en": "Reload",
+    "it": "Ricarica"
+  },
+  "warning.groupLoad": {
+    "en": "{name} failed to load: {message}",
+    "it": "Caricamento di {name} non riuscito: {message}"
+  },
+  "search.placeholder": {
+    "en": "Search models…",
+    "it": "Cerca modelli…"
+  },
+  "search.clear": {
+    "en": "Clear search",
+    "it": "Cancella la ricerca"
+  },
+  "search.empty": {
+    "en": "No matching models.",
+    "it": "Nessun modello corrispondente."
+  },
+  "empty.models": {
+    "en": "No models available.",
+    "it": "Nessun modello disponibile."
+  },
+  "empty.efforts": {
+    "en": "This model provides no reasoning effort levels.",
+    "it": "Questo modello non offre livelli di ragionamento."
+  }
+}

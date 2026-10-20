@@ -1,0 +1,42 @@
+{
+  "header.more": {
+    "en": "More actions",
+    "it": "Altre azioni"
+  },
+  "menu.download": {
+    "en": "Download session log",
+    "it": "Scarica il log della sessione"
+  },
+  "menu.feedback": {
+    "en": "Feedback",
+    "it": "Feedback"
+  },
+  "dialog.preparingTitle": {
+    "en": "Exporting Session",
+    "it": "Esportazione della sessione"
+  },
+  "dialog.preparingDescription": {
+    "en": "Preparing a ZIP containing this Session, its sub-Sessions, and attachments.",
+    "it": "Preparazione di uno ZIP con questa sessione, le sue sotto-sessioni e gli allegati."
+  },
+  "dialog.successTitle": {
+    "en": "Session download started",
+    "it": "Download della sessione avviato"
+  },
+  "dialog.successDescription": {
+    "en": "The browser is downloading the Session ZIP.",
+    "it": "Il browser sta scaricando lo ZIP della sessione."
+  },
+  "dialog.errorTitle": {
+    "en": "Session export failed",
+    "it": "Esportazione della sessione non riuscita"
+  },
+  "dialog.close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "dialog.commandFailed": {
+    "en": "Could not start the Session export.",
+    "it": "Impossibile avviare l'esportazione della sessione."
+  }
+}

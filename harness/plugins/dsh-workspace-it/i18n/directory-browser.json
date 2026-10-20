@@ -1,0 +1,54 @@
+{
+  "browser.title": {
+    "en": "Select Workspace Directory",
+    "it": "Seleziona la cartella di lavoro"
+  },
+  "browser.home": {
+    "en": "Home",
+    "it": "Home"
+  },
+  "browser.newFolder": {
+    "en": "New folder",
+    "it": "Nuova cartella"
+  },
+  "browser.folderName": {
+    "en": "Folder name",
+    "it": "Nome della cartella"
+  },
+  "browser.createIn": {
+    "en": "New folder in \"{name}\"",
+    "it": "Nuova cartella in \"{name}\""
+  },
+  "browser.untitledFolder": {
+    "en": "Untitled folder",
+    "it": "Cartella senza nome"
+  },
+  "browser.create": {
+    "en": "Create",
+    "it": "Crea"
+  },
+  "browser.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "browser.open": {
+    "en": "Open",
+    "it": "Apri"
+  },
+  "browser.editPath": {
+    "en": "Edit path",
+    "it": "Modifica percorso"
+  },
+  "browser.loading": {
+    "en": "Loading…",
+    "it": "Caricamento…"
+  },
+  "browser.truncated": {
+    "en": "Too many folders to list; only the beginning is shown.",
+    "it": "Troppe cartelle da elencare: è mostrata solo la parte iniziale."
+  },
+  "browser.showHidden": {
+    "en": "Show hidden files",
+    "it": "Mostra i file nascosti"
+  }
+}

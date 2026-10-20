@@ -1,0 +1,166 @@
+{
+  "ok": {
+    "en": "OK",
+    "it": "OK"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "copy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "codeBlock.title": {
+    "en": "Code block",
+    "it": "Blocco di codice"
+  },
+  "codeBlock.wrap": {
+    "en": "Wrap lines",
+    "it": "A capo automatico"
+  },
+  "codeBlock.unwrap": {
+    "en": "Do not wrap lines",
+    "it": "Senza a capo automatico"
+  },
+  "copy.failed": {
+    "en": "Copy failed",
+    "it": "Copia non riuscita"
+  },
+  "copy.value": {
+    "en": "Copy value",
+    "it": "Copia il valore"
+  },
+  "copy.json": {
+    "en": "Copy JSON",
+    "it": "Copia JSON"
+  },
+  "copy.path": {
+    "en": "Copy property path",
+    "it": "Copia il percorso della proprietà"
+  },
+  "copy.prettyJson": {
+    "en": "Copy pretty JSON",
+    "it": "Copia JSON formattato"
+  },
+  "copy.compactJson": {
+    "en": "Copy compact JSON",
+    "it": "Copia JSON compatto"
+  },
+  "copy.optionsHint": {
+    "en": "{action}; right-click for copy options",
+    "it": "{action}; clic destro per le opzioni di copia"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "loading": {
+    "en": "Loading…",
+    "it": "Caricamento…"
+  },
+  "load.failed": {
+    "en": "Failed to load",
+    "it": "Caricamento non riuscito"
+  },
+  "submit": {
+    "en": "Submit",
+    "it": "Invia"
+  },
+  "submitting": {
+    "en": "Submitting…",
+    "it": "Invio in corso…"
+  },
+  "next": {
+    "en": "Next",
+    "it": "Avanti"
+  },
+  "previous": {
+    "en": "Previous",
+    "it": "Indietro"
+  },
+  "skip": {
+    "en": "Skip",
+    "it": "Salta"
+  },
+  "delete": {
+    "en": "Delete",
+    "it": "Elimina"
+  },
+  "edit": {
+    "en": "Edit",
+    "it": "Modifica"
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "search": {
+    "en": "Search",
+    "it": "Cerca"
+  },
+  "more": {
+    "en": "More",
+    "it": "Altro"
+  },
+  "collapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "expand": {
+    "en": "Expand",
+    "it": "Espandi"
+  },
+  "back": {
+    "en": "Back",
+    "it": "Indietro"
+  },
+  "brand.localBuild": {
+    "en": "DSH Local Build",
+    "it": "Build locale DSH"
+  },
+  "workspace.defaultName": {
+    "en": "Default workspace",
+    "it": "Workspace predefinito"
+  },
+  "unknown": {
+    "en": "Unknown",
+    "it": "Sconosciuto"
+  },
+  "none": {
+    "en": "None",
+    "it": "Nessuno"
+  },
+  "truncated": {
+    "en": "Truncated",
+    "it": "Troncato"
+  },
+  "json.label": {
+    "en": "JSON",
+    "it": "JSON"
+  },
+  "markdown.footnotes": {
+    "en": "Footnotes",
+    "it": "Note"
+  },
+  "markdown.truncatedCharacters": {
+    "en": "… truncated at {total} characters",
+    "it": "… troncato a {total} caratteri"
+  },
+  "number.thousand": {
+    "en": "{value}K",
+    "it": "{value}K"
+  },
+  "number.million": {
+    "en": "{value}M",
+    "it": "{value}M"
+  }
+}

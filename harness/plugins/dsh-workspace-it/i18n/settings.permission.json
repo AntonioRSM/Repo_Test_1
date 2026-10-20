@@ -1,0 +1,50 @@
+{
+  "title": {
+    "en": "Permission",
+    "it": "Permessi"
+  },
+  "description": {
+    "en": "Choose the default permission mode for new sessions",
+    "it": "Scegli la modalità di permessi predefinita per le nuove sessioni"
+  },
+  "loading": {
+    "en": "Loading",
+    "it": "Caricamento"
+  },
+  "unavailable": {
+    "en": "Unavailable",
+    "it": "Non disponibile"
+  },
+  "preset.readOnly": {
+    "en": "Read Only",
+    "it": "Sola lettura"
+  },
+  "preset.workspaceWrite": {
+    "en": "Workspace Write",
+    "it": "Scrittura nel workspace"
+  },
+  "preset.fullAccess": {
+    "en": "Full access",
+    "it": "Accesso completo"
+  },
+  "confirm.title": {
+    "en": "Enable Full access?",
+    "it": "Attivare l'accesso completo?"
+  },
+  "confirm.description": {
+    "en": "Full access lets new sessions reduce confirmation steps and perform more actions directly, including sensitive operations, file changes, or external commands. Only use it when you trust subsequent tasks.",
+    "it": "Con l'accesso completo le nuove sessioni chiedono meno conferme ed eseguono direttamente più azioni, comprese operazioni sensibili, modifiche ai file o comandi esterni. Usalo solo se ti fidi delle attività che seguiranno."
+  },
+  "confirm.acknowledge": {
+    "en": "I understand the risks and want to continue",
+    "it": "Ho compreso i rischi e voglio continuare"
+  },
+  "confirm.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "confirm.enable": {
+    "en": "Enable Full access",
+    "it": "Attiva l'accesso completo"
+  }
+}

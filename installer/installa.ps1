@@ -3,7 +3,9 @@
 # Con -Aggiorna (usato dal collegamento "Aggiorna RAG Vault Studio") scarica prima l'ultima versione con git.
 # Senza LM Studio installa Ollama e scarica i modelli predefiniti; -Ollama lo fa anche se LM Studio c'è,
 # -SenzaModelli salta del tutto il passo dei modelli locali.
-param([switch]$Aggiorna, [switch]$Ollama, [switch]$SenzaModelli)
+# Workspace Harness (DeepSeek Harness in italiano con il marchio Workspace) è facoltativo: l'installer
+# lo chiede; -Harness lo installa senza chiedere, -SenzaHarness lo salta.
+param([switch]$Aggiorna, [switch]$Ollama, [switch]$SenzaModelli, [switch]$Harness, [switch]$SenzaHarness)
 
 $ErrorActionPreference = 'Continue'   # gli errori gravi sono gestiti esplicitamente
 
@@ -11,9 +13,15 @@ $Radice    = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path
 $Engine    = Join-Path $Radice 'engine'
 $Desktop   = Join-Path $Radice 'desktop'
 $Electron  = Join-Path $Desktop 'node_modules\electron\dist\electron.exe'
+$DirHarness = Join-Path $Radice 'harness'
 $MenuStart = Join-Path ([Environment]::GetFolderPath('Programs')) 'RAG Vault Studio'
 
-function Passo($t)  { Write-Host "`n==> $t" -ForegroundColor Cyan }
+# Stile Workspace: chevron e cursore "sm" in azzurro #2E6BD6 (colori a 24 bit dove la console li supporta).
+$Vt = $Host.UI.SupportsVirtualTerminal
+$E = [char]27
+function Azzurro($t) { if ($Vt) { "$E[38;2;46;107;214m$t$E[0m" } else { $t } }
+function Cursore($t) { if ($Vt) { "$E[48;2;46;107;214m$E[38;2;244;242;236m$t$E[0m" } else { "[$t]" } }
+function Passo($t)  { Write-Host "`n$(Azzurro '>') $t" }
 function Avviso($t) { Write-Host "[!] $t" -ForegroundColor Yellow }
 function Esci($t)   { Write-Host "`n[X] $t" -ForegroundColor Red; Read-Host 'Premi Invio per chiudere'; exit 1 }
 
@@ -40,9 +48,9 @@ if (-not (Test-Path (Join-Path $Engine 'pyproject.toml')) -or -not (Test-Path (J
     Esci "Cartelle 'engine' e 'desktop' non trovate accanto a INSTALLA.bat ($Radice)."
 }
 
-Write-Host '==========================================' -ForegroundColor Green
-Write-Host '  RAG Vault Studio - installazione' -ForegroundColor Green
-Write-Host '==========================================' -ForegroundColor Green
+Write-Host ''
+Write-Host "  $(Azzurro '>') workspace $(Cursore 'sm')   RAG Vault Studio - installazione"
+Write-Host ''
 Write-Host "Cartella: $Radice"
 
 # con l'app aperta Windows blocca electron.exe e i file del motore: l'installazione fallirebbe a metà
@@ -61,7 +69,7 @@ if ($Aggiorna) {
 }
 
 # ---------------------------------------------------------------- 1. prerequisiti
-Passo '1/5 Prerequisiti: uv (gestisce Python 3.12) e Node.js'
+Passo '1/6 Prerequisiti: uv (gestisce Python 3.12) e Node.js'
 Aggiorna-Path
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) { Installa-Winget 'astral-sh.uv' 'uv' }
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) { Esci 'uv non trovato dopo l''installazione. Chiudi questa finestra e rilancia INSTALLA.bat.' }
@@ -72,7 +80,7 @@ if ((Versione-Node) -lt 22) { Esci 'Serve Node.js 22 o successivo. Chiudi questa
 Write-Host "Node.js: $(& node --version)"
 
 # ---------------------------------------------------------------- 2. motore Python
-Passo '2/5 Motore Python (scarica Python 3.12 se manca)'
+Passo '2/6 Motore Python (scarica Python 3.12 se manca)'
 Push-Location $Engine
 & uv sync --no-build
 $esito = $LASTEXITCODE
@@ -80,7 +88,7 @@ Pop-Location
 if ($esito -ne 0 -or -not (Test-Path (Join-Path $Engine '.venv\Scripts\python.exe'))) { Esci 'Installazione del motore non riuscita (uv sync).' }
 
 # ---------------------------------------------------------------- 3. interfaccia desktop
-Passo '3/5 Interfaccia desktop (Electron + React)'
+Passo '3/6 Interfaccia desktop (Electron + React)'
 Push-Location $Desktop
 & npm.cmd install --no-audit --no-fund
 $esito = $LASTEXITCODE
@@ -90,7 +98,7 @@ if ($esito -ne 0) { Esci 'Installazione o compilazione dell''interfaccia non riu
 if (-not (Test-Path $Electron)) { Esci "Electron non trovato in $Electron." }
 
 # ---------------------------------------------------------------- 4. modelli locali
-Passo '4/5 Modelli locali (LM Studio oppure Ollama)'
+Passo '4/6 Modelli locali (LM Studio oppure Ollama)'
 $ModelliOllama = $null
 if ($SenzaModelli) {
     Write-Host 'Saltato (-SenzaModelli).'
@@ -107,8 +115,36 @@ if ($SenzaModelli) {
     }
 }
 
-# ---------------------------------------------------------------- 5. menu Start
-Passo '5/5 Collegamenti nel menu Start'
+# ---------------------------------------------------------------- 5. Workspace Harness
+Passo '5/6 Workspace Harness (agente basato su DeepSeek Harness, facoltativo)'
+$Dsh = Join-Path $DirHarness 'node_modules\@deepseek-ai\dsh\lib\bin.js'
+$ConHarness = $false
+if ($SenzaHarness) {
+    Write-Host 'Saltato (-SenzaHarness).'
+} elseif ($Harness -or (Test-Path $Dsh)) {
+    $ConHarness = $true          # richiesto, oppure già installato: lo aggiorna
+} else {
+    Write-Host 'Workspace Harness è un agente locale in italiano (DeepSeek Harness, licenza MIT) che lavora su file,'
+    Write-Host 'terminale e web con i modelli di Ollama o LM Studio. Occupa circa 830 MB.'
+    $ConHarness = (Read-Host 'Installare Workspace Harness? (S/N)') -match '^[sS]'
+}
+if ($ConHarness) {
+    Push-Location $DirHarness
+    & npm.cmd install --omit=dev --no-audit --no-fund
+    $esito = $LASTEXITCODE
+    Pop-Location
+    if ($esito -ne 0 -or -not (Test-Path $Dsh)) {
+        Avviso 'Installazione di Workspace Harness non riuscita (npm): il resto dell''installazione prosegue.'
+        $ConHarness = $false
+    } elseif (-not $SenzaModelli) {
+        # L'agente ha un prompt di circa 8.500 token: con Ollama serve un modello con contesto più ampio.
+        if (-not (Get-Command Crea-ModelloAgente -ErrorAction SilentlyContinue)) { . (Join-Path $PSScriptRoot 'ollama.ps1') -Forza:$Ollama }
+        Crea-ModelloAgente | Out-Null
+    }
+}
+
+# ---------------------------------------------------------------- 6. menu Start
+Passo '6/6 Collegamenti nel menu Start'
 New-Item -ItemType Directory -Force -Path $MenuStart | Out-Null
 $Shell = New-Object -ComObject WScript.Shell
 function Collegamento($nome, $target, $argomenti, $cartella, $icona, $descr) {
@@ -123,6 +159,12 @@ function Collegamento($nome, $target, $argomenti, $cartella, $icona, $descr) {
 $Icona = Join-Path $Desktop 'assets\icon.ico'
 Collegamento 'RAG Vault Studio' $Electron "`"$Desktop`"" $Desktop $Icona 'Archivi RAG locali e agente'
 
+if ($ConHarness) {
+    $Ps = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+    Collegamento 'Workspace Harness' $Ps "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $DirHarness 'avvia.ps1')`"" `
+        $DirHarness $Icona 'Agente locale in italiano basato su DeepSeek Harness'
+}
+
 $Manuale = Join-Path $Radice 'docs\Manuale-RAG-Vault-Studio.html'
 if (Test-Path $Manuale) {
     Collegamento 'Manuale RAG Vault Studio' $Manuale '' (Split-Path $Manuale) "$env:SystemRoot\System32\imageres.dll,97" 'Manuale d''uso'
@@ -135,6 +177,7 @@ if (Test-Path (Join-Path $Radice '.git')) {
 
 Write-Host "`nInstallazione completata." -ForegroundColor Green
 Write-Host 'Apri il menu Start e cerca:  RAG Vault Studio'
+if ($ConHarness) { Write-Host 'Agente in italiano:          Workspace Harness' }
 if ($ModelliOllama -and $ModelliOllama.Pronto) {
     Write-Host "Modelli locali con Ollama: embedding $($ModelliOllama.Embedding), LLM $($ModelliOllama.Llm)."
     Write-Host 'Ollama parte con Windows; altri modelli si scaricano dalla pagina Modelli dell''app.'

@@ -1,0 +1,114 @@
+{
+  "shortcut.noSession": {
+    "en": "Select a session first",
+    "it": "Seleziona prima una sessione"
+  },
+  "recoveryFailed": {
+    "en": "Terminal recovery failed: {message}",
+    "it": "Ripristino del terminale non riuscito: {message}"
+  },
+  "retryRecovery": {
+    "en": "Retry terminal recovery",
+    "it": "Riprova il ripristino del terminale"
+  },
+  "shell": {
+    "en": "Choose shell",
+    "it": "Scegli la shell"
+  },
+  "shellLoading": {
+    "en": "Loading shells…",
+    "it": "Caricamento delle shell…"
+  },
+  "shellEmpty": {
+    "en": "No shells available",
+    "it": "Nessuna shell disponibile"
+  },
+  "description": {
+    "en": "Run commands in the Session workspace",
+    "it": "Esegui comandi nel workspace della sessione"
+  },
+  "title": {
+    "en": "Terminal",
+    "it": "Terminale"
+  },
+  "new": {
+    "en": "New terminal",
+    "it": "Nuovo terminale"
+  },
+  "loading": {
+    "en": "Reading terminal environment…",
+    "it": "Lettura dell'ambiente del terminale…"
+  },
+  "creating": {
+    "en": "Starting…",
+    "it": "Avvio…"
+  },
+  "connecting": {
+    "en": "Connecting…",
+    "it": "Connessione…"
+  },
+  "disconnected": {
+    "en": "Disconnected.",
+    "it": "Disconnesso."
+  },
+  "reconnect": {
+    "en": "Reconnect",
+    "it": "Riconnetti"
+  },
+  "readonly": {
+    "en": "This view is read-only.",
+    "it": "Questa vista è in sola lettura."
+  },
+  "control": {
+    "en": "Take control",
+    "it": "Prendi il controllo"
+  },
+  "closed": {
+    "en": "Terminal closed.",
+    "it": "Terminale chiuso."
+  },
+  "exited": {
+    "en": "Process exited ({code})",
+    "it": "Processo terminato ({code})"
+  },
+  "failed": {
+    "en": "Terminal error: {message}",
+    "it": "Errore del terminale: {message}"
+  },
+  "rename": {
+    "en": "Terminal name",
+    "it": "Nome del terminale"
+  },
+  "unavailable": {
+    "en": "Unavailable",
+    "it": "Non disponibile"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "cleanupFailed": {
+    "en": "Terminal “{title}” could not be ended: {message}",
+    "it": "Impossibile chiudere il terminale “{title}”: {message}"
+  },
+  "missingTerminal": {
+    "en": "This terminal no longer exists. Open a new terminal.",
+    "it": "Questo terminale non esiste più. Aprine uno nuovo."
+  },
+  "inputFull": {
+    "en": "The input buffer is full. Reconnect and try again.",
+    "it": "Il buffer di input è pieno. Riconnetti e riprova."
+  },
+  "attachmentEnded": {
+    "en": "The terminal connection ended. Reconnect to continue.",
+    "it": "La connessione al terminale è terminata. Riconnetti per continuare."
+  },
+  "invalidOutput": {
+    "en": "The terminal screen could not be received. Reconnect to recover it.",
+    "it": "Impossibile ricevere lo schermo del terminale. Riconnetti per recuperarlo."
+  },
+  "terminalLimit": {
+    "en": "The terminal limit has been reached. Close unused terminals and try again. Exited terminals also count toward the limit.",
+    "it": "È stato raggiunto il limite di terminali. Chiudi quelli inutilizzati e riprova. Anche i terminali terminati contano nel limite."
+  }
+}

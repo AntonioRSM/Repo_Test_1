@@ -1,0 +1,142 @@
+{
+  "overridden": {
+    "en": "Overridden",
+    "it": "Personalizzato"
+  },
+  "reset": {
+    "en": "Reset to default",
+    "it": "Ripristina il predefinito"
+  },
+  "readOnly": {
+    "en": "This deployment stores settings read-only.",
+    "it": "Questa installazione salva le impostazioni in sola lettura."
+  },
+  "unavailable": {
+    "en": "This plugin is not loaded, so it cannot be configured right now.",
+    "it": "Questo plugin non è caricato e ora non si può configurare."
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "saveFailed": {
+    "en": "The deployment did not accept these values; they were left for you to correct.",
+    "it": "L'installazione non ha accettato questi valori: sono rimasti da correggere."
+  },
+  "subagentTitle": {
+    "en": "Subagent",
+    "it": "Subagenti"
+  },
+  "subagentDescription": {
+    "en": "Set Subagent recursion depth, count, and models.",
+    "it": "Imposta profondità di ricorsione, numero e modelli dei subagenti."
+  },
+  "subagentLimitsTitle": {
+    "en": "Limits",
+    "it": "Limiti"
+  },
+  "subagentMaxDepth": {
+    "en": "Maximum recursion depth",
+    "it": "Profondità massima di ricorsione"
+  },
+  "subagentDepthHelpLabel": {
+    "en": "About maximum recursion depth",
+    "it": "Informazioni sulla profondità massima di ricorsione"
+  },
+  "subagentDepthHelp": {
+    "en": "Limits how many levels of Subagents an Agent can create.",
+    "it": "Limita quanti livelli di subagenti può creare un agente."
+  },
+  "subagentDepthZero": {
+    "en": "Disable Subagents",
+    "it": "Disattiva i subagenti"
+  },
+  "subagentDepthOne": {
+    "en": "Only the main Agent can create Subagents",
+    "it": "Solo l'agente principale può creare subagenti"
+  },
+  "subagentDepthOverride": {
+    "en": "If a tool defines its own maximum recursion depth, that setting takes precedence.",
+    "it": "Se uno strumento definisce una propria profondità massima di ricorsione, prevale quella."
+  },
+  "subagentMaxActive": {
+    "en": "Subagent parallelism limit",
+    "it": "Limite di subagenti in parallelo"
+  },
+  "subagentCapacityHelpLabel": {
+    "en": "About the Subagent parallelism limit",
+    "it": "Informazioni sul limite di subagenti in parallelo"
+  },
+  "subagentCapacityHelp": {
+    "en": "Total live Subagents under the same main Agent, across all recursion levels. The main Agent is excluded. New start requests are rejected when the limit is reached.",
+    "it": "Totale dei subagenti attivi sotto lo stesso agente principale, su tutti i livelli di ricorsione (l'agente principale escluso). Raggiunto il limite, le nuove richieste di avvio vengono rifiutate."
+  },
+  "subagentDepthInvalid": {
+    "en": "Enter a whole number of 0 or more.",
+    "it": "Inserisci un numero intero uguale o maggiore di 0."
+  },
+  "subagentCapacityInvalid": {
+    "en": "Enter a whole number of 1 or more.",
+    "it": "Inserisci un numero intero uguale o maggiore di 1."
+  },
+  "subagentModelSelectionTitle": {
+    "en": "Model selection",
+    "it": "Scelta del modello"
+  },
+  "subagentModelSelectionToggle": {
+    "en": "Allow agents to choose models for Subagents",
+    "it": "Consenti agli agenti di scegliere i modelli dei subagenti"
+  },
+  "subagentModelSelectionChoose": {
+    "en": "When enabled, agents can choose a provider, model, and reasoning effort for each Subagent from the authorized models below. Applies only to new sessions.",
+    "it": "Se attivo, gli agenti possono scegliere provider, modello e livello di ragionamento di ogni subagente tra i modelli autorizzati qui sotto. Vale solo per le nuove sessioni."
+  },
+  "subagentModelSelectionAllowed": {
+    "en": "Models agents may choose",
+    "it": "Modelli che gli agenti possono scegliere"
+  },
+  "subagentModelSelectionLoading": {
+    "en": "Loading models…",
+    "it": "Caricamento dei modelli…"
+  },
+  "subagentModelSelectionLoadFailed": {
+    "en": "Models could not be loaded.",
+    "it": "Impossibile caricare i modelli."
+  },
+  "subagentModelSelectionRetry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "subagentModelSelectionPartial": {
+    "en": "Some model providers could not be loaded; saved choices remain removable.",
+    "it": "Alcuni provider di modelli non si sono caricati; le scelte salvate restano rimovibili."
+  },
+  "subagentModelSelectionUnavailable": {
+    "en": "Currently unavailable",
+    "it": "Al momento non disponibile"
+  },
+  "subagentModelSelectionUnavailableGroup": {
+    "en": "Saved but currently unavailable",
+    "it": "Salvati ma al momento non disponibili"
+  },
+  "subagentModelSelectionEmpty": {
+    "en": "No model provider currently advertises a model.",
+    "it": "Nessun provider offre al momento un modello."
+  },
+  "subagentModelSelectionRequired": {
+    "en": "Select at least one model before saving.",
+    "it": "Scegli almeno un modello prima di salvare."
+  },
+  "subagentModelSelectionConflict": {
+    "en": "Settings changed elsewhere. Discard your draft and try again.",
+    "it": "Le impostazioni sono cambiate altrove. Scarta la bozza e riprova."
+  },
+  "subagentModelSelectionOff": {
+    "en": "Subagents use configured defaults or inherit the parent agent's model. Saved model choices are retained.",
+    "it": "I subagenti usano i valori predefiniti configurati o ereditano il modello dell'agente padre. Le scelte di modello salvate vengono mantenute."
+  }
+}

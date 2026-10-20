@@ -1,0 +1,114 @@
+{
+  "section.add": {
+    "en": "Add",
+    "it": "Aggiungi"
+  },
+  "section.commands": {
+    "en": "Commands",
+    "it": "Comandi"
+  },
+  "label.goal": {
+    "en": "Goal",
+    "it": "Obiettivo"
+  },
+  "label.plan": {
+    "en": "Plan",
+    "it": "Piano"
+  },
+  "label.feedback": {
+    "en": "Feedback",
+    "it": "Feedback"
+  },
+  "label.compact": {
+    "en": "Compact",
+    "it": "Compatta"
+  },
+  "label.permission": {
+    "en": "Permission",
+    "it": "Permessi"
+  },
+  "label.export": {
+    "en": "Export",
+    "it": "Esporta"
+  },
+  "description.goal": {
+    "en": "Set or view the goal for a long-running task",
+    "it": "Imposta o visualizza l'obiettivo di un'attività lunga"
+  },
+  "description.plan": {
+    "en": "Enter or leave plan mode",
+    "it": "Entra o esci dalla modalità piano"
+  },
+  "description.feedback": {
+    "en": "Record feedback about this session",
+    "it": "Registra un feedback su questa sessione"
+  },
+  "description.compact": {
+    "en": "Compact older conversation history",
+    "it": "Compatta la cronologia meno recente della conversazione"
+  },
+  "description.permission": {
+    "en": "Switch the permission preset (sandbox mode + approval policy)",
+    "it": "Cambia il preset dei permessi (modalità sandbox + criterio di approvazione)"
+  },
+  "description.export": {
+    "en": "Download this Session log as a ZIP archive",
+    "it": "Scarica il log di questa sessione come archivio ZIP"
+  },
+  "token.goal": {
+    "en": "goal",
+    "it": "goal"
+  },
+  "token.plan": {
+    "en": "plan",
+    "it": "plan"
+  },
+  "token.feedback": {
+    "en": "feedback",
+    "it": "feedback"
+  },
+  "token.compact": {
+    "en": "compact",
+    "it": "compact"
+  },
+  "token.permission": {
+    "en": "permission",
+    "it": "permission"
+  },
+  "token.export": {
+    "en": "export",
+    "it": "export"
+  },
+  "search.placeholder": {
+    "en": "Search…",
+    "it": "Cerca…"
+  },
+  "search.aria": {
+    "en": "Filter options",
+    "it": "Filtra le opzioni"
+  },
+  "status.loading": {
+    "en": "Loading options…",
+    "it": "Caricamento delle opzioni…"
+  },
+  "status.applying": {
+    "en": "Applying…",
+    "it": "Applicazione…"
+  },
+  "status.empty": {
+    "en": "No options",
+    "it": "Nessuna opzione"
+  },
+  "overlay.aria": {
+    "en": "/{command} options",
+    "it": "Opzioni di /{command}"
+  },
+  "listbox.aria": {
+    "en": "/{command} matches",
+    "it": "Risultati per /{command}"
+  },
+  "notice.attachmentsUnsupported": {
+    "en": "/{command} does not accept attachments; remove them first",
+    "it": "/{command} non accetta allegati: rimuovili prima"
+  }
+}

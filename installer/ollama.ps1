@@ -111,6 +111,30 @@ function Prepara-Ollama {
     return $esito
 }
 
+# Workspace Harness invia un prompt di circa 8.500 token, oltre il contesto predefinito di Ollama
+# (4.096). Crea "workspace-agent": lo stesso LLM con un contesto di 16.384 token. Riusa i pesi già
+# scaricati, quindi non scarica nulla; restituisce $true se il modello è disponibile.
+function Crea-ModelloAgente {
+    $exe = Trova-Ollama
+    if (-not $exe -or -not (Ollama-Risponde)) {
+        Write-Host 'Ollama non è attivo: salto il modello per Workspace Harness (con LM Studio imposta un contesto di almeno 16.384 token).'
+        return $false
+    }
+    $base = Nome-Completo $ModelloLlm
+    if (-not ((Modelli-Installati) -contains $base)) {
+        Avviso "Il modello $base non è installato: Workspace Harness userà i modelli disponibili."
+        return $false
+    }
+    $file = Join-Path $env:TEMP 'workspace-agent.Modelfile'
+    Set-Content -Path $file -Encoding ASCII -Value @("FROM $base", 'PARAMETER num_ctx 16384')
+    Write-Host "Creo workspace-agent ($base con contesto di 16.384 token)..."
+    & $exe create workspace-agent -f $file
+    $ok = $LASTEXITCODE -eq 0
+    Remove-Item $file -ErrorAction SilentlyContinue
+    if (-not $ok) { Avviso 'Creazione di workspace-agent non riuscita: Workspace Harness userà i modelli disponibili.' }
+    return $ok
+}
+
 # Lanciato da solo (non incluso da installa.ps1): esegue subito.
 if ($MyInvocation.InvocationName -ne '.') {
     $r = Prepara-Ollama

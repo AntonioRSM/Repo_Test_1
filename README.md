@@ -9,9 +9,14 @@ modello locale e usa come strumenti i Vault, i file del PC, PowerShell, il web e
 Manuale interattivo in italiano: [`docs/Manuale-RAG-Vault-Studio.html`](docs/Manuale-RAG-Vault-Studio.html)
 (funziona offline).
 
+Facoltativo: **Workspace Harness**, un agente locale per programmazione, file, terminale e web basato
+su [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (MIT), interamente in italiano e
+con il marchio Workspace S.r.l. (vedi [`harness/README.md`](harness/README.md)).
+
 ```
 desktop/   Electron 33 + React 18 + Fluent UI v9 (Mica, tray, drag & drop)
 engine/    Python 3.12: FastAPI su 127.0.0.1, LanceDB, PyMuPDF, RapidOCR-ONNX, watchdog
+harness/   Workspace Harness: runtime DeepSeek Harness fissato + plugin Workspace (italiano, marchio, profilo)
 ```
 
 ## Installazione rapida (Windows 11)
@@ -27,8 +32,12 @@ engine/    Python 3.12: FastAPI su 127.0.0.1, LanceDB, PyMuPDF, RapidOCR-ONNX, w
    pagina **Modelli**.
    - `INSTALLA.bat -Ollama` installa Ollama anche se LM Studio è presente;
    - `INSTALLA.bat -SenzaModelli` salta questo passo.
-4. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
+4. **Workspace Harness (facoltativo, ~830 MB).** L'installer chiede se installarlo; `INSTALLA.bat -Harness`
+   lo installa senza chiedere, `-SenzaHarness` lo salta. Con Ollama crea anche `workspace-agent`, lo stesso
+   LLM con un contesto di 16.384 token (il prompt dell'agente ne occupa circa 8.500).
+5. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
    - **RAG Vault Studio**: avvia l'app;
+   - **Workspace Harness** (se installato): avvia l'agente nel browser;
    - **Manuale RAG Vault Studio**: il manuale d'uso;
    - **Aggiorna RAG Vault Studio** (solo se la cartella è un clone git): `git pull` e reinstallazione.
 
@@ -188,4 +197,6 @@ quanti strumenti MCP sono attivi in totale.
 cd engine
 uv run pytest -m "not live"   # parser, OCR, chunking, pipeline con embedding finti
 uv run pytest -m live         # embedding reali da LM Studio/Ollama
+cd ..\harness
+npm test                      # traduzioni, plugin generati e profilo composto da dsh
 ```

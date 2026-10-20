@@ -1,0 +1,58 @@
+{
+  "title": {
+    "en": "Shell",
+    "it": "Shell"
+  },
+  "description": {
+    "en": "Limit how long each command may run and how much it may output.",
+    "it": "Limita quanto può durare ogni comando e quanto output può produrre."
+  },
+  "timeoutMs": {
+    "en": "Command timeout (ms)",
+    "it": "Timeout dei comandi (ms)"
+  },
+  "timeoutMsHint": {
+    "en": "How long one command may run before it is terminated.",
+    "it": "Per quanto tempo un comando può girare prima di essere terminato."
+  },
+  "maxOutputBytes": {
+    "en": "Output cap per stream (bytes)",
+    "it": "Limite di output per flusso (byte)"
+  },
+  "maxOutputBytesHint": {
+    "en": "Output beyond this spills to a temporary file rather than being lost.",
+    "it": "L'output oltre il limite viene salvato in un file temporaneo invece di andare perso."
+  },
+  "overridden": {
+    "en": "Overridden",
+    "it": "Personalizzato"
+  },
+  "reset": {
+    "en": "Reset to default",
+    "it": "Ripristina il predefinito"
+  },
+  "readOnly": {
+    "en": "This deployment stores settings read-only.",
+    "it": "Questa installazione salva le impostazioni in sola lettura."
+  },
+  "unavailable": {
+    "en": "This plugin is not loaded, so it cannot be configured right now.",
+    "it": "Questo plugin non è caricato e ora non si può configurare."
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "saveFailed": {
+    "en": "The deployment did not accept these values; they were left for you to correct.",
+    "it": "L'installazione non ha accettato questi valori: sono rimasti da correggere."
+  },
+  "invalidNumber": {
+    "en": "Enter a number, or leave blank to use the default.",
+    "it": "Inserisci un numero, oppure lascia vuoto per usare il predefinito."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "title": {
+    "en": "Spreadsheet",
+    "it": "Foglio di calcolo"
+  },
+  "language": {
+    "en": "en",
+    "it": "en"
+  },
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "invalid": {
+    "en": "This spreadsheet could not be opened. Check its format, contents, or password protection.",
+    "it": "Impossibile aprire questo foglio di calcolo. Controlla formato, contenuto o protezione con password."
+  },
+  "tooLarge": {
+    "en": "This workbook exceeds the preview size limit.",
+    "it": "Questa cartella di lavoro supera il limite di dimensione dell'anteprima."
+  },
+  "timeout": {
+    "en": "Opening this workbook timed out. Try a smaller file.",
+    "it": "L'apertura di questa cartella di lavoro ha superato il tempo massimo. Prova con un file più piccolo."
+  },
+  "encoding": {
+    "en": "This text encoding could not be read. Save the file as UTF-8 or UTF-16 with a BOM and retry.",
+    "it": "Impossibile leggere questa codifica del testo. Salva il file come UTF-8 o UTF-16 con BOM e riprova."
+  },
+  "formulaWarning": {
+    "en": "This workbook contains formulas. Displayed results may be missing or inaccurate.",
+    "it": "Questa cartella di lavoro contiene formule: i risultati mostrati potrebbero mancare o non essere esatti."
+  },
+  "unsupportedNotice": {
+    "en": "This preview does not support {features} in this workbook. Open it in a system application for the full experience.",
+    "it": "Questa anteprima non supporta {features} presenti nella cartella di lavoro. Aprila con un'applicazione di sistema per vederla per intero."
+  },
+  "charts": {
+    "en": "charts",
+    "it": "grafici"
+  },
+  "images": {
+    "en": "images",
+    "it": "immagini"
+  },
+  "shapes": {
+    "en": "shapes",
+    "it": "forme"
+  },
+  "conditionalFormatting": {
+    "en": "conditional formatting",
+    "it": "formattazione condizionale"
+  },
+  "featureSeparator": {
+    "en": ", ",
+    "it": ", "
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  }
+}

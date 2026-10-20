@@ -1,0 +1,18 @@
+{
+  "title": {
+    "en": "HTML",
+    "it": "HTML"
+  },
+  "frame": {
+    "en": "HTML document preview",
+    "it": "Anteprima del documento HTML"
+  },
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "failed": {
+    "en": "This HTML document could not be previewed.",
+    "it": "Impossibile mostrare l'anteprima di questo documento HTML."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "zoomControls": {
+    "en": "Zoom controls",
+    "it": "Controlli zoom"
+  },
+  "zoomMenu": {
+    "en": "Choose zoom",
+    "it": "Scegli lo zoom"
+  },
+  "zoomOut": {
+    "en": "Zoom out",
+    "it": "Riduci"
+  },
+  "zoomIn": {
+    "en": "Zoom in",
+    "it": "Ingrandisci"
+  },
+  "zoomFitWidth": {
+    "en": "Fit width",
+    "it": "Adatta alla larghezza"
+  },
+  "zoomValue": {
+    "en": "{percent}%",
+    "it": "{percent}%"
+  },
+  "title": {
+    "en": "Image",
+    "it": "Immagine"
+  },
+  "preview": {
+    "en": "Image preview: {name}",
+    "it": "Anteprima immagine: {name}"
+  },
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "failed": {
+    "en": "This image could not be displayed.",
+    "it": "Impossibile mostrare questa immagine."
+  },
+  "unsupported": {
+    "en": "Image preview requires the complete file contents.",
+    "it": "L'anteprima dell'immagine richiede il contenuto completo del file."
+  }
+}

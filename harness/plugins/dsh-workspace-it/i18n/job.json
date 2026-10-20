@@ -1,0 +1,162 @@
+{
+  "count.live.one": {
+    "en": "{count} background job running",
+    "it": "{count} processo in background in esecuzione"
+  },
+  "count.live.other": {
+    "en": "{count} background jobs running",
+    "it": "{count} processi in background in esecuzione"
+  },
+  "count.idle.one": {
+    "en": "{count} background job",
+    "it": "{count} processo in background"
+  },
+  "count.idle.other": {
+    "en": "{count} background jobs",
+    "it": "{count} processi in background"
+  },
+  "list.aria": {
+    "en": "Background jobs",
+    "it": "Processi in background"
+  },
+  "section.live": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "section.settledCount": {
+    "en": "Finished {count}",
+    "it": "Terminati {count}"
+  },
+  "section.clear": {
+    "en": "Clear",
+    "it": "Cancella"
+  },
+  "row.expandAria": {
+    "en": "Show live output of {label}",
+    "it": "Mostra l'output dal vivo di {label}"
+  },
+  "row.collapseAria": {
+    "en": "Hide live output of {label}",
+    "it": "Nascondi l'output dal vivo di {label}"
+  },
+  "kill.stop": {
+    "en": "Stop task {label}",
+    "it": "Ferma l'attività {label}"
+  },
+  "kill.confirm": {
+    "en": "Click again to confirm",
+    "it": "Fai clic di nuovo per confermare"
+  },
+  "kill.confirmAction": {
+    "en": "Confirm stop",
+    "it": "Conferma l'arresto"
+  },
+  "kill.failed": {
+    "en": "Stop failed",
+    "it": "Arresto non riuscito"
+  },
+  "status.running": {
+    "en": "running",
+    "it": "in esecuzione"
+  },
+  "status.stopping": {
+    "en": "stopping",
+    "it": "in arresto"
+  },
+  "status.completed": {
+    "en": "completed",
+    "it": "completato"
+  },
+  "status.killed": {
+    "en": "cancelled",
+    "it": "annullato"
+  },
+  "status.failed": {
+    "en": "failed",
+    "it": "non riuscito"
+  },
+  "duration.seconds": {
+    "en": "{seconds}s",
+    "it": "{seconds} s"
+  },
+  "duration.minutes": {
+    "en": "{minutes}m {seconds}s",
+    "it": "{minutes} min {seconds} s"
+  },
+  "duration.hours": {
+    "en": "{hours}h {minutes}m",
+    "it": "{hours} h {minutes} min"
+  },
+  "duration.title.live": {
+    "en": "Running for {duration}",
+    "it": "In esecuzione da {duration}"
+  },
+  "duration.title.done": {
+    "en": "Took {duration}",
+    "it": "Durata {duration}"
+  },
+  "output.gap": {
+    "en": "… earlier output dropped …",
+    "it": "… output precedente scartato …"
+  },
+  "output.error": {
+    "en": "live output stream interrupted: {error}",
+    "it": "flusso di output dal vivo interrotto: {error}"
+  },
+  "terminal.signal": {
+    "en": "signal {signal}",
+    "it": "segnale {signal}"
+  },
+  "terminal.exitCode": {
+    "en": "exit {code}",
+    "it": "uscita {code}"
+  },
+  "terminal.noExitCode": {
+    "en": "no exit code",
+    "it": "nessun codice di uscita"
+  },
+  "terminal.commandLine": {
+    "en": "Command line {n}",
+    "it": "Riga di comando {n}"
+  },
+  "terminal.running": {
+    "en": "running",
+    "it": "in esecuzione"
+  },
+  "terminal.failed": {
+    "en": "failed",
+    "it": "non riuscito"
+  },
+  "terminal.done": {
+    "en": "done",
+    "it": "fatto"
+  },
+  "terminal.copy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "terminal.copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "terminal.noOutput": {
+    "en": "(no output)",
+    "it": "(nessun output)"
+  },
+  "terminal.collapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "terminal.collapseAria": {
+    "en": "Collapse output",
+    "it": "Comprimi l'output"
+  },
+  "terminal.expand": {
+    "en": "Show {n} more lines",
+    "it": "Mostra altre {n} righe"
+  },
+  "terminal.expandAria": {
+    "en": "Expand {n} collapsed output lines",
+    "it": "Espandi {n} righe di output compresse"
+  }
+}

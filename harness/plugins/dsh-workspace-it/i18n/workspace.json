@@ -1,0 +1,478 @@
+{
+  "defaultWorkspace.failed": {
+    "en": "Unable to create default workspace. Use Choose workspace to select a folder.",
+    "it": "Impossibile creare il workspace predefinito. Usa Scegli workspace per selezionare una cartella."
+  },
+  "draft.workspaceRequired": {
+    "en": "Choose a workspace first.",
+    "it": "Scegli prima un workspace."
+  },
+  "draft.initializationFailed": {
+    "en": "Could not fill the draft. Please try again shortly.",
+    "it": "Impossibile compilare la bozza. Riprova tra poco."
+  },
+  "group.ungrouped": {
+    "en": "Ungrouped",
+    "it": "Senza gruppo"
+  },
+  "session.new": {
+    "en": "New Session",
+    "it": "Nuova sessione"
+  },
+  "session.untitled": {
+    "en": "Untitled",
+    "it": "Senza titolo"
+  },
+  "shortcut.noSession": {
+    "en": "Select a session first",
+    "it": "Seleziona prima una sessione"
+  },
+  "shortcut.noPicker": {
+    "en": "Directory picker unavailable",
+    "it": "Selettore di cartelle non disponibile"
+  },
+  "shortcut.directoryBusy": {
+    "en": "Selecting or adding a workspace",
+    "it": "Selezione o aggiunta di un workspace in corso"
+  },
+  "shortcut.noCompletedTurn": {
+    "en": "This session has no completed turn",
+    "it": "Questa sessione non ha turni completati"
+  },
+  "shortcut.forkFailed": {
+    "en": "Could not fork the session. Try again.",
+    "it": "Impossibile duplicare la sessione. Riprova."
+  },
+  "section.workspaces": {
+    "en": "Workspaces",
+    "it": "Workspace"
+  },
+  "section.sessions": {
+    "en": "Sessions",
+    "it": "Sessioni"
+  },
+  "viewOptions.label": {
+    "en": "View options",
+    "it": "Opzioni di visualizzazione"
+  },
+  "groupBy.label": {
+    "en": "Group by",
+    "it": "Raggruppa per"
+  },
+  "groupBy.workspace": {
+    "en": "WorkSpace",
+    "it": "Workspace"
+  },
+  "groupBy.workspaceTree": {
+    "en": "Workspace Tree",
+    "it": "Albero dei workspace"
+  },
+  "groupBy.flat": {
+    "en": "In one list",
+    "it": "In un unico elenco"
+  },
+  "orderBy.label": {
+    "en": "Order by",
+    "it": "Ordina per"
+  },
+  "orderBy.manual": {
+    "en": "Manual",
+    "it": "Manuale"
+  },
+  "orderBy.updated": {
+    "en": "Last updated",
+    "it": "Ultimo aggiornamento"
+  },
+  "filterBy.label": {
+    "en": "Filter sessions",
+    "it": "Filtra le sessioni"
+  },
+  "viewOptions.hideArchived": {
+    "en": "Hide archived",
+    "it": "Nascondi le archiviate"
+  },
+  "viewOptions.showArchived": {
+    "en": "All conversations (show archived)",
+    "it": "Tutte le conversazioni (mostra le archiviate)"
+  },
+  "viewOptions.onlyArchived": {
+    "en": "Archived only",
+    "it": "Solo archiviate"
+  },
+  "sessions.expand": {
+    "en": "Show {n} more sessions",
+    "it": "Mostra altre {n} sessioni"
+  },
+  "sessions.collapse": {
+    "en": "Show less",
+    "it": "Mostra meno"
+  },
+  "empty.none": {
+    "en": "No sessions yet",
+    "it": "Ancora nessuna sessione"
+  },
+  "empty.noneArchived": {
+    "en": "No archived sessions yet",
+    "it": "Ancora nessuna sessione archiviata"
+  },
+  "empty.viewOthers": {
+    "en": "View other sessions",
+    "it": "Vedi le altre sessioni"
+  },
+  "empty.noMatches": {
+    "en": "No matches",
+    "it": "Nessun risultato"
+  },
+  "workspace.add": {
+    "en": "Add workspace",
+    "it": "Aggiungi workspace"
+  },
+  "search.sessions.aria": {
+    "en": "Search sessions",
+    "it": "Cerca sessioni"
+  },
+  "search.placeholder": {
+    "en": "Search session names",
+    "it": "Cerca nei nomi delle sessioni"
+  },
+  "search.clear": {
+    "en": "Clear search",
+    "it": "Cancella la ricerca"
+  },
+  "search.results.aria": {
+    "en": "Search results",
+    "it": "Risultati della ricerca"
+  },
+  "search.pending": {
+    "en": "Searching session history…",
+    "it": "Ricerca nella cronologia delle sessioni…"
+  },
+  "search.noMatches": {
+    "en": "No matching sessions",
+    "it": "Nessuna sessione corrispondente"
+  },
+  "search.hasMore": {
+    "en": "Showing the first {n} results. Narrow your search.",
+    "it": "Sono mostrati i primi {n} risultati. Restringi la ricerca."
+  },
+  "menu.addWorkspace": {
+    "en": "Add workspace…",
+    "it": "Aggiungi workspace…"
+  },
+  "picker.loading": {
+    "en": "Loading workspaces…",
+    "it": "Caricamento dei workspace…"
+  },
+  "conflict.named": {
+    "en": "A workspace named “{name}” already exists.",
+    "it": "Esiste già un workspace chiamato “{name}”."
+  },
+  "folderError.title": {
+    "en": "Couldn’t open folder",
+    "it": "Impossibile aprire la cartella"
+  },
+  "folderError.retry": {
+    "en": "Choose again",
+    "it": "Scegli di nuovo"
+  },
+  "rename": {
+    "en": "Rename",
+    "it": "Rinomina"
+  },
+  "rename.workspace.title": {
+    "en": "Rename workspace",
+    "it": "Rinomina workspace"
+  },
+  "rename.session.title": {
+    "en": "Rename session",
+    "it": "Rinomina sessione"
+  },
+  "field.workspaceName": {
+    "en": "Workspace name",
+    "it": "Nome del workspace"
+  },
+  "field.sessionName": {
+    "en": "Session name",
+    "it": "Nome della sessione"
+  },
+  "delete.workspace": {
+    "en": "Delete workspace",
+    "it": "Elimina workspace"
+  },
+  "delete.desc": {
+    "en": "This removes “{name}” from the workspace list. The folder and session logs will be kept. Its sessions will appear under Ungrouped.",
+    "it": "“{name}” verrà tolto dall'elenco dei workspace. La cartella e i log delle sessioni restano; le sue sessioni compariranno in Senza gruppo."
+  },
+  "delete.pending": {
+    "en": "Deleting workspace…",
+    "it": "Eliminazione del workspace…"
+  },
+  "menu.fork": {
+    "en": "Fork session",
+    "it": "Duplica sessione"
+  },
+  "menu.archiveSession": {
+    "en": "Archive session",
+    "it": "Archivia sessione"
+  },
+  "menu.unarchiveSession": {
+    "en": "Unarchive session",
+    "it": "Ripristina sessione dall'archivio"
+  },
+  "menu.pinSession": {
+    "en": "Pin session",
+    "it": "Fissa sessione"
+  },
+  "menu.unpinSession": {
+    "en": "Unpin session",
+    "it": "Sblocca sessione"
+  },
+  "menu.sessionId": {
+    "en": "Copy Session ID",
+    "it": "Copia l'ID della sessione"
+  },
+  "toast.sessionIdCopied": {
+    "en": "Session ID copied",
+    "it": "ID della sessione copiato"
+  },
+  "toast.sessionIdCopyFailed": {
+    "en": "Copy failed. Try again.",
+    "it": "Copia non riuscita. Riprova."
+  },
+  "row.archived": {
+    "en": "Archived",
+    "it": "Archiviata"
+  },
+  "row.pinned": {
+    "en": "Pinned",
+    "it": "Fissata"
+  },
+  "toast.archivedNotOpenable": {
+    "en": "Archived sessions cannot be opened. Unarchive it to view.",
+    "it": "Le sessioni archiviate non si possono aprire. Ripristinala dall'archivio per vederla."
+  },
+  "toast.archived": {
+    "en": "Session archived. You can ",
+    "it": "Sessione archiviata. Puoi "
+  },
+  "toast.stoppedAndArchived": {
+    "en": "Session stopped and archived. You can ",
+    "it": "Sessione fermata e archiviata. Puoi "
+  },
+  "archive.confirm.title": {
+    "en": "Stop and archive this session?",
+    "it": "Fermare e archiviare questa sessione?"
+  },
+  "archive.confirm.desc": {
+    "en": "“{title}” still has work in progress. Archiving stops it first; you can restore the session later from the “All conversations (show archived)” filter in the sidebar, and the stopped work will not resume on its own.",
+    "it": "“{title}” ha ancora lavoro in corso. L'archiviazione prima lo ferma; potrai ripristinare la sessione dal filtro “Tutte le conversazioni (mostra le archiviate)” nella barra laterale, e il lavoro fermato non riprenderà da solo."
+  },
+  "archive.confirm.activity": {
+    "en": "Work that will be stopped",
+    "it": "Lavoro che verrà fermato"
+  },
+  "archive.confirm.turn": {
+    "en": "The turn in progress",
+    "it": "Il turno in corso"
+  },
+  "archive.confirm.subagents.one": {
+    "en": "{n} running subagent: {names}",
+    "it": "{n} subagente in esecuzione: {names}"
+  },
+  "archive.confirm.subagents.other": {
+    "en": "{n} running subagents: {names}",
+    "it": "{n} subagenti in esecuzione: {names}"
+  },
+  "archive.confirm.jobs.one": {
+    "en": "{n} background job: {names}",
+    "it": "{n} processo in background: {names}"
+  },
+  "archive.confirm.jobs.other": {
+    "en": "{n} background jobs: {names}",
+    "it": "{n} processi in background: {names}"
+  },
+  "archive.confirm.schedules.one": {
+    "en": "{n} scheduled reminder: {names}",
+    "it": "{n} promemoria pianificato: {names}"
+  },
+  "archive.confirm.schedules.other": {
+    "en": "{n} scheduled reminders: {names}",
+    "it": "{n} promemoria pianificati: {names}"
+  },
+  "archive.confirm.other.one": {
+    "en": "{n} other item of work ({kind})",
+    "it": "{n} altra attività ({kind})"
+  },
+  "archive.confirm.other.other": {
+    "en": "{n} other items of work ({kind})",
+    "it": "{n} altre attività ({kind})"
+  },
+  "archive.confirm.listSeparator": {
+    "en": ", ",
+    "it": ", "
+  },
+  "archive.confirm.action": {
+    "en": "Stop and archive",
+    "it": "Ferma e archivia"
+  },
+  "archive.confirm.pending": {
+    "en": "Stopping and archiving…",
+    "it": "Arresto e archiviazione…"
+  },
+  "toast.archivedUndo": {
+    "en": "undo",
+    "it": "annullare"
+  },
+  "toast.archivedOr": {
+    "en": " or ",
+    "it": " oppure "
+  },
+  "toast.archivedFilter": {
+    "en": "filter archived sessions",
+    "it": "filtrare le sessioni archiviate"
+  },
+  "toast.pinFailed": {
+    "en": "Pin failed. Try again later.",
+    "it": "Impossibile fissare. Riprova più tardi."
+  },
+  "toast.unpinFailed": {
+    "en": "Unpin failed. Try again later.",
+    "it": "Impossibile sbloccare. Riprova più tardi."
+  },
+  "toast.createFailed": {
+    "en": "New session failed: {message}",
+    "it": "Creazione della sessione non riuscita: {message}"
+  },
+  "toast.forkRequiresOpen": {
+    "en": "Open the original session to complete migration before creating a branch.",
+    "it": "Apri la sessione originale per completare la migrazione prima di creare un ramo."
+  },
+  "toast.openForkSource": {
+    "en": "Open original session",
+    "it": "Apri la sessione originale"
+  },
+  "sessions.count.one": {
+    "en": "{n} session",
+    "it": "{n} sessione"
+  },
+  "sessions.count.other": {
+    "en": "{n} sessions",
+    "it": "{n} sessioni"
+  },
+  "actions.workspace.aria": {
+    "en": "Workspace actions for {name}",
+    "it": "Azioni sul workspace {name}"
+  },
+  "actions.session.aria": {
+    "en": "Session actions for {name}",
+    "it": "Azioni sulla sessione {name}"
+  },
+  "actions.archive": {
+    "en": "Archive",
+    "it": "Archivia"
+  },
+  "actions.unarchive": {
+    "en": "Unarchive",
+    "it": "Ripristina"
+  },
+  "actions.pin": {
+    "en": "Pin",
+    "it": "Fissa"
+  },
+  "actions.unpin": {
+    "en": "Unpin",
+    "it": "Sblocca"
+  },
+  "actions.newSession": {
+    "en": "New session",
+    "it": "Nuova sessione"
+  },
+  "actions.newSession.aria": {
+    "en": "New session in {name}",
+    "it": "Nuova sessione in {name}"
+  },
+  "status.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "status.subagentsRunning.one": {
+    "en": "{n} subagent running",
+    "it": "{n} subagente in esecuzione"
+  },
+  "status.subagentsRunning.other": {
+    "en": "{n} subagents running",
+    "it": "{n} subagenti in esecuzione"
+  },
+  "status.idle": {
+    "en": "Idle",
+    "it": "Inattiva"
+  },
+  "status.waitingApproval": {
+    "en": "Waiting for approval",
+    "it": "In attesa di approvazione"
+  },
+  "status.planReview": {
+    "en": "Plan awaiting review",
+    "it": "Piano in attesa di revisione"
+  },
+  "status.waitingAnswer": {
+    "en": "Waiting for answer",
+    "it": "In attesa di risposta"
+  },
+  "status.compact.approval": {
+    "en": "Approval",
+    "it": "Approvazione"
+  },
+  "status.compact.planReview": {
+    "en": "Plan review",
+    "it": "Revisione piano"
+  },
+  "status.compact.answer": {
+    "en": "Answer",
+    "it": "Risposta"
+  },
+  "status.completed": {
+    "en": "Completed",
+    "it": "Completata"
+  },
+  "hover.created": {
+    "en": "Created {time}",
+    "it": "Creata {time}"
+  },
+  "hover.copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "date.ymd": {
+    "en": "{y}-{m}-{d}",
+    "it": "{d}/{m}/{y}"
+  },
+  "time.now": {
+    "en": "now",
+    "it": "ora"
+  },
+  "time.minutes": {
+    "en": "{n}min",
+    "it": "{n} min"
+  },
+  "time.hours": {
+    "en": "{n}h",
+    "it": "{n} h"
+  },
+  "time.days": {
+    "en": "{n}d",
+    "it": "{n} g"
+  },
+  "time.months": {
+    "en": "{n}mo",
+    "it": "{n} mesi"
+  },
+  "time.years": {
+    "en": "{n}y",
+    "it": "{n} a"
+  },
+  "time.ago": {
+    "en": "{t} ago",
+    "it": "{t} fa"
+  }
+}

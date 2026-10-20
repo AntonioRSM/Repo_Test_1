@@ -1,0 +1,314 @@
+{
+  "title": {
+    "en": "Discover",
+    "it": "Scopri"
+  },
+  "refresh": {
+    "en": "Refresh",
+    "it": "Aggiorna"
+  },
+  "loading": {
+    "en": "Reading the index",
+    "it": "Lettura dell'indice"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "emptyTitle": {
+    "en": "No plugin markets yet",
+    "it": "Ancora nessun marketplace di plugin"
+  },
+  "emptyDescription": {
+    "en": "Add a plugin market index to browse and install its plugins here.",
+    "it": "Aggiungi l'indice di un marketplace di plugin per sfogliarne e installarne i plugin da qui."
+  },
+  "addFirstSource": {
+    "en": "Add index source",
+    "it": "Aggiungi una fonte di indice"
+  },
+  "sourcesFailed": {
+    "en": "Could not read the index sources.",
+    "it": "Impossibile leggere le fonti di indice."
+  },
+  "manageSources": {
+    "en": "Manage index sources…",
+    "it": "Gestisci le fonti di indice…"
+  },
+  "marketMenu": {
+    "en": "Switch plugin market, currently {market}",
+    "it": "Cambia marketplace di plugin, attuale {market}"
+  },
+  "sourcesTitle": {
+    "en": "Index sources",
+    "it": "Fonti di indice"
+  },
+  "sourcesDescription": {
+    "en": "A plugin market is published as the URL of one index file. Discover browses the indexes listed here.",
+    "it": "Un marketplace di plugin si pubblica come URL di un file di indice. Scopri sfoglia gli indici elencati qui."
+  },
+  "sourcesLabel": {
+    "en": "Added index sources",
+    "it": "Fonti di indice aggiunte"
+  },
+  "sourceUrl": {
+    "en": "Index URL",
+    "it": "URL dell'indice"
+  },
+  "sourcePlaceholder": {
+    "en": "https://example.com/index.json",
+    "it": "https://example.com/index.json"
+  },
+  "addSource": {
+    "en": "Add",
+    "it": "Aggiungi"
+  },
+  "removeSource": {
+    "en": "Remove",
+    "it": "Rimuovi"
+  },
+  "removeSourceNamed": {
+    "en": "Remove {url}",
+    "it": "Rimuovi {url}"
+  },
+  "sourcesTrust": {
+    "en": "Indexes come from third parties. Add only sources you trust: their plugins run with your permissions once installed.",
+    "it": "Gli indici provengono da terzi. Aggiungi solo fonti di cui ti fidi: una volta installati, i loro plugin girano con i tuoi permessi."
+  },
+  "sourceInvalid": {
+    "en": "Use an http or https address without a user name, password, or # fragment.",
+    "it": "Usa un indirizzo http o https senza nome utente, password o frammento #."
+  },
+  "sourceDuplicate": {
+    "en": "This index source is already added.",
+    "it": "Questa fonte di indice è già stata aggiunta."
+  },
+  "sourceUnavailable": {
+    "en": "Index sources cannot be saved here.",
+    "it": "Qui non si possono salvare fonti di indice."
+  },
+  "sourceFailed": {
+    "en": "Could not save the index sources.",
+    "it": "Impossibile salvare le fonti di indice."
+  },
+  "readFailed": {
+    "en": "Could not read this index.",
+    "it": "Impossibile leggere questo indice."
+  },
+  "readInvalid": {
+    "en": "This index is not in a valid format.",
+    "it": "Il formato di questo indice non è valido."
+  },
+  "readChanged": {
+    "en": "This index changed while loading.",
+    "it": "L'indice è cambiato durante il caricamento."
+  },
+  "search": {
+    "en": "Search plugins",
+    "it": "Cerca plugin"
+  },
+  "filter": {
+    "en": "Labels",
+    "it": "Etichette"
+  },
+  "filterCount": {
+    "en": "Labels · {count}",
+    "it": "Etichette · {count}"
+  },
+  "sortBy": {
+    "en": "Sort: {sort}",
+    "it": "Ordina: {sort}"
+  },
+  "sortRelevance": {
+    "en": "Best match",
+    "it": "Pertinenza"
+  },
+  "sortDefault": {
+    "en": "Default order",
+    "it": "Ordine predefinito"
+  },
+  "sortPublished": {
+    "en": "Publish date",
+    "it": "Data di pubblicazione"
+  },
+  "switchToAscending": {
+    "en": "Sort ascending",
+    "it": "Ordine crescente"
+  },
+  "switchToDescending": {
+    "en": "Sort descending",
+    "it": "Ordine decrescente"
+  },
+  "categoriesLabel": {
+    "en": "Categories",
+    "it": "Categorie"
+  },
+  "allCategories": {
+    "en": "All",
+    "it": "Tutte"
+  },
+  "emptyIndex": {
+    "en": "This index lists no plugins.",
+    "it": "Questo indice non elenca plugin."
+  },
+  "noMatches": {
+    "en": "No plugins match.",
+    "it": "Nessun plugin corrispondente."
+  },
+  "showMore": {
+    "en": "Show more",
+    "it": "Mostra di più"
+  },
+  "entryMeta": {
+    "en": "{version} · {date}",
+    "it": "{version} · {date}"
+  },
+  "entryMetaAuthor": {
+    "en": "{version} · {author} · {date}",
+    "it": "{version} · {author} · {date}"
+  },
+  "openEntry": {
+    "en": "View {name}",
+    "it": "Vedi {name}"
+  },
+  "install": {
+    "en": "Install",
+    "it": "Installa"
+  },
+  "installTitle": {
+    "en": "Install {name}",
+    "it": "Installa {name}"
+  },
+  "installVersionTitle": {
+    "en": "Install {name} {version}",
+    "it": "Installa {name} {version}"
+  },
+  "openInstalled": {
+    "en": "View {name} in Installed",
+    "it": "Vedi {name} tra gli installati"
+  },
+  "statusInstalled": {
+    "en": "Installed",
+    "it": "Installato"
+  },
+  "statusUpdate": {
+    "en": "Update available",
+    "it": "Aggiornamento disponibile"
+  },
+  "statusProvided": {
+    "en": "Provided by DSH",
+    "it": "Fornito da DSH"
+  },
+  "incompatible": {
+    "en": "This version is not compatible with the running DSH {runtime}; it requires DSH {range}.",
+    "it": "Questa versione non è compatibile con DSH {runtime} in esecuzione: richiede DSH {range}."
+  },
+  "noCompatibleVersion": {
+    "en": "No version is compatible with DSH {runtime}",
+    "it": "Nessuna versione compatibile con DSH {runtime}"
+  },
+  "exempted": {
+    "en": "This version is not compatible with the running DSH, but you set a compatibility exemption for it.",
+    "it": "Questa versione non è compatibile con il DSH in esecuzione, ma hai impostato un'eccezione di compatibilità."
+  },
+  "backToList": {
+    "en": "Discover",
+    "it": "Scopri"
+  },
+  "factSource": {
+    "en": "Source",
+    "it": "Fonte"
+  },
+  "factPackage": {
+    "en": "Package",
+    "it": "Pacchetto"
+  },
+  "factRegistry": {
+    "en": "Registry",
+    "it": "Registro"
+  },
+  "factRepository": {
+    "en": "Repository",
+    "it": "Repository"
+  },
+  "factCommit": {
+    "en": "Commit",
+    "it": "Commit"
+  },
+  "factDirectory": {
+    "en": "Directory",
+    "it": "Cartella"
+  },
+  "factPublished": {
+    "en": "Published",
+    "it": "Pubblicato"
+  },
+  "factAuthor": {
+    "en": "Author",
+    "it": "Autore"
+  },
+  "factHomepage": {
+    "en": "Homepage",
+    "it": "Sito web"
+  },
+  "factSourceCode": {
+    "en": "Source code",
+    "it": "Codice sorgente"
+  },
+  "factCategory": {
+    "en": "Category",
+    "it": "Categoria"
+  },
+  "factLabels": {
+    "en": "Labels",
+    "it": "Etichette"
+  },
+  "factMarket": {
+    "en": "Plugin market",
+    "it": "Marketplace di plugin"
+  },
+  "versionsTitle": {
+    "en": "Versions",
+    "it": "Versioni"
+  },
+  "versionsLabel": {
+    "en": "Versions of {name}",
+    "it": "Versioni di {name}"
+  },
+  "versionDefault": {
+    "en": "Recommended",
+    "it": "Consigliata"
+  },
+  "versionInstalled": {
+    "en": "Installed",
+    "it": "Installata"
+  },
+  "versionIncompatible": {
+    "en": "Incompatible",
+    "it": "Incompatibile"
+  },
+  "versionExempted": {
+    "en": "Exempted",
+    "it": "Con eccezione"
+  },
+  "versionPrerelease": {
+    "en": "Prerelease",
+    "it": "Pre-release"
+  },
+  "confirmTitle": {
+    "en": "Install \"{name}\"?",
+    "it": "Installare \"{name}\"?"
+  },
+  "installTrust": {
+    "en": "Plugins run on this machine with your permissions. Make sure you trust where this one comes from.",
+    "it": "I plugin girano su questo computer con i tuoi permessi. Assicurati di fidarti della loro provenienza."
+  }
+}

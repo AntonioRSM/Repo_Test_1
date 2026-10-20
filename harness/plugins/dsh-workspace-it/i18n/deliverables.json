@@ -1,0 +1,242 @@
+{
+  "presented.nativeUnavailable": {
+    "en": "This file has no available Host path. Preview it in the sidebar.",
+    "it": "Questo file non ha un percorso disponibile sull'host. Visualizzalo nella barra laterale."
+  },
+  "presented.revealError": {
+    "en": "Could not show in file manager. Try again.",
+    "it": "Impossibile mostrarlo nel gestore file. Riprova."
+  },
+  "presented.directoryError": {
+    "en": "Could not open containing folder. Try again.",
+    "it": "Impossibile aprire la cartella che lo contiene. Riprova."
+  },
+  "presented.directoryOpening": {
+    "en": "Opening containing folder…",
+    "it": "Apertura della cartella che lo contiene…"
+  },
+  "presented.directoryOpened": {
+    "en": "Requested opening containing folder",
+    "it": "Richiesta apertura della cartella che lo contiene"
+  },
+  "presented.revealed": {
+    "en": "Requested display in file manager",
+    "it": "Richiesta visualizzazione nel gestore file"
+  },
+  "presented.revealing": {
+    "en": "Showing in file manager…",
+    "it": "Visualizzazione nel gestore file…"
+  },
+  "presented.unavailable": {
+    "en": "This Host has no desktop available to open files or folders in external apps. Files can still be previewed in the sidebar.",
+    "it": "Questo host non ha un desktop per aprire file o cartelle in app esterne. Puoi comunque visualizzare i file nella barra laterale."
+  },
+  "presented.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "presented.hostError": {
+    "en": "Could not read the Host desktop information",
+    "it": "Impossibile leggere le informazioni del desktop dell'host"
+  },
+  "presented.preview": {
+    "en": "Preview in sidebar",
+    "it": "Anteprima nella barra laterale"
+  },
+  "presented.previewButton": {
+    "en": "Open {name} in sidebar",
+    "it": "Apri {name} nella barra laterale"
+  },
+  "presented.previewCard": {
+    "en": "Preview {name} in sidebar",
+    "it": "Anteprima di {name} nella barra laterale"
+  },
+  "presented.all": {
+    "en": "All {count} files",
+    "it": "Tutti i {count} file"
+  },
+  "presented.expandAria": {
+    "en": "Show all {count} delivered files",
+    "it": "Mostra tutti i {count} file consegnati"
+  },
+  "presented.collapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "presented.collapseAria": {
+    "en": "Collapse delivered files",
+    "it": "Comprimi i file consegnati"
+  },
+  "presented.opening": {
+    "en": "Opening…",
+    "it": "Apertura…"
+  },
+  "presented.opened": {
+    "en": "Open requested",
+    "it": "Apertura richiesta"
+  },
+  "presented.error": {
+    "en": "Could not open. Click to retry.",
+    "it": "Impossibile aprire. Fai clic per riprovare."
+  },
+  "presented.file": {
+    "en": "File",
+    "it": "File"
+  },
+  "row.title": {
+    "en": "Present files",
+    "it": "Presenta i file"
+  },
+  "row.running": {
+    "en": "Delivering",
+    "it": "Consegna in corso"
+  },
+  "row.preparing": {
+    "en": "Preparing deliverables",
+    "it": "Preparazione dei file da consegnare"
+  },
+  "row.ok": {
+    "en": "Delivered",
+    "it": "Consegnati"
+  },
+  "row.error": {
+    "en": "Delivery failed",
+    "it": "Consegna non riuscita"
+  },
+  "row.stopped": {
+    "en": "Interrupted",
+    "it": "Interrotta"
+  },
+  "row.inspect": {
+    "en": "Inspect call",
+    "it": "Ispeziona la chiamata"
+  },
+  "changes.title": {
+    "en": "Edited {count} files",
+    "it": "Modificati {count} file"
+  },
+  "changes.singleTitle": {
+    "en": "Edited {name}",
+    "it": "Modificato {name}"
+  },
+  "changes.added": {
+    "en": "+{count}",
+    "it": "+{count}"
+  },
+  "changes.deleted": {
+    "en": "-{count}",
+    "it": "-{count}"
+  },
+  "changes.binary": {
+    "en": "binary",
+    "it": "binario"
+  },
+  "changes.openReview": {
+    "en": "Review this turn’s changes in the sidebar",
+    "it": "Rivedi le modifiche di questo turno nella barra laterale"
+  },
+  "changes.all": {
+    "en": "All {count} files",
+    "it": "Tutti i {count} file"
+  },
+  "changes.expandAria": {
+    "en": "Show all {count} changed files",
+    "it": "Mostra tutti i {count} file modificati"
+  },
+  "changes.collapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "changes.collapseAria": {
+    "en": "Collapse changed files",
+    "it": "Comprimi i file modificati"
+  },
+  "changes.oversized": {
+    "en": "too large",
+    "it": "troppo grande"
+  },
+  "changes.viewDiff": {
+    "en": "View changes to {name}",
+    "it": "Vedi le modifiche a {name}"
+  },
+  "review.title": {
+    "en": "Review · turn {turn}",
+    "it": "Revisione · turno {turn}"
+  },
+  "review.selectFile": {
+    "en": "Choose the file to review",
+    "it": "Scegli il file da rivedere"
+  },
+  "review.split": {
+    "en": "Switch to split view",
+    "it": "Passa alla vista affiancata"
+  },
+  "review.unified": {
+    "en": "Switch to unified view",
+    "it": "Passa alla vista unificata"
+  },
+  "review.splitAria": {
+    "en": "Split view",
+    "it": "Vista affiancata"
+  },
+  "review.wrap": {
+    "en": "Enable line wrap",
+    "it": "Attiva l'a capo automatico"
+  },
+  "review.nowrap": {
+    "en": "Disable line wrap",
+    "it": "Disattiva l'a capo automatico"
+  },
+  "review.wrapAria": {
+    "en": "Line wrap",
+    "it": "A capo automatico"
+  },
+  "review.openFile": {
+    "en": "Open the whole file in the sidebar",
+    "it": "Apri il file intero nella barra laterale"
+  },
+  "review.openFileAria": {
+    "en": "Open {name} in sidebar",
+    "it": "Apri {name} nella barra laterale"
+  },
+  "diff.loading": {
+    "en": "Reading changes…",
+    "it": "Lettura delle modifiche…"
+  },
+  "diff.missing": {
+    "en": "The contents of this turn’s changes are no longer available",
+    "it": "Il contenuto delle modifiche di questo turno non è più disponibile"
+  },
+  "diff.error": {
+    "en": "Could not read the changes",
+    "it": "Impossibile leggere le modifiche"
+  },
+  "diff.binary": {
+    "en": "Binary file; changes cannot be shown",
+    "it": "File binario: le modifiche non si possono mostrare"
+  },
+  "diff.oversized": {
+    "en": "File too large; changes cannot be shown",
+    "it": "File troppo grande: le modifiche non si possono mostrare"
+  },
+  "diff.created": {
+    "en": "Created in this turn",
+    "it": "Creato in questo turno"
+  },
+  "diff.deleted": {
+    "en": "Deleted in this turn",
+    "it": "Eliminato in questo turno"
+  },
+  "diff.unchanged": {
+    "en": "Both sides hold the same lines",
+    "it": "Le due versioni hanno le stesse righe"
+  },
+  "diff.coarse": {
+    "en": "Line comparison timed out; shown as a whole-file replacement",
+    "it": "Il confronto per righe ha superato il tempo massimo: è mostrato come sostituzione dell'intero file"
+  },
+  "diff.truncated": {
+    "en": "Showing the first {count} lines",
+    "it": "Sono mostrate le prime {count} righe"
+  }
+}
