@@ -223,6 +223,8 @@ async def ensure_loaded(
 
     async with httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=3.0)) as client:
         lms_loaded: set[str] | None = None
+        ollama_online: bool | None = None
+        ollama_installed: set[str] = set()
         for (provider, model), (ref, kind) in unique.items():
             base = targets[provider].rstrip("/")
             try:
@@ -237,13 +239,20 @@ async def ensure_loaded(
                 else:
                     from . import ollama_hub
 
-                    # Bug #1: with the server offline, status() reports online=False:
+                    # Miglioramento #10: ONE /api/tags fetch per ensure_loaded call,
+                    # reused for the online check and the installed-model lookup —
+                    # status()+is_installed() used to cost 4 HTTP requests per model.
+                    if ollama_online is None:
+                        fetched = await ollama_hub.installed_names(targets)
+                        ollama_online = fetched is not None
+                        ollama_installed = fetched or set()
+                    # Bug #1: with the server offline, installed_names() is None:
                     # skip the pull (it would raise HubError) and the explicit load;
                     # the embed/chat call below then fails with a clean ProviderError.
-                    if not (await ollama_hub.status(targets))["online"]:
+                    if not ollama_online:
                         log.warning("Ollama non raggiungibile: salto il preload di %s", model)
                         continue
-                    if auto_pull and not await ollama_hub.is_installed(targets, model):
+                    if auto_pull and ollama_hub.normalize_name(model) not in ollama_installed:
                         if allow_download:
                             await report(model, status="download_avviato", completed=None, total=None)
                             try:
@@ -252,6 +261,7 @@ async def ensure_loaded(
                                     model,
                                     on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
                                 )
+                                ollama_installed.add(ollama_hub.normalize_name(model))
                                 await report(model, status="download_completato", completed=None, total=None)
                             except ollama_hub.HubError as exc:
                                 # Bug #2: without this event the Models page spins forever.
@@ -259,10 +269,14 @@ async def ensure_loaded(
                                 await report(model, status="errore", error=str(exc))
                                 continue  # the explicit load below would fail with "model not found"
                         else:
+                            # Bug #9: a download started from search/ask must publish its
+                            # outcome too, or the Models page stays stuck on the last %.
                             ollama_hub.start_pull(
                                 targets,
                                 model,
                                 on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                                on_finished=lambda m=model: report(m, status="download_completato", completed=None, total=None),
+                                on_error=lambda exc, m=model: report(m, status="errore", error=str(exc)),
                             )
                             raise ProviderError(
                                 f"modello '{model}' in download in background: attendi il completamento (pagina Modelli) e riprova"

@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Awaitable, Callable
 
 from ..config import SettingsStore
@@ -154,19 +154,40 @@ def _glob_match(rel: str, pattern: str) -> bool:
         else:
             out.append(re.escape(char))
             i += 1
-    return re.fullmatch("".join(out), rel) is not None
+    # Bug #14: on Windows the file system is case-insensitive and Path.glob (used up
+    # to ciclo 2) matched *.pdf → Contratto.PDF; keep that behavior.
+    flags = re.IGNORECASE if os.name == "nt" else 0
+    return re.fullmatch("".join(out), rel, flags=flags) is not None
+
+
+def _pattern_max_depth(pattern: str) -> int | None:
+    """How deep (in path segments) a pattern can match: `*` or `*.pdf` only reach the
+    top level, `sub/*.txt` two levels; `**` means unlimited (Bug #13)."""
+    segments = [s for s in pattern.split("/") if s not in ("", ".")]
+    if any("**" in s for s in segments):
+        return None
+    return max(1, len(segments))
 
 
 def _scan_directory(path: Path, pattern: str) -> dict:
     """Sync scan executed in a worker thread (asyncio.to_thread). Visits at most
     SCAN_VISITED_LIMIT entries; `truncated` is True when either the visit budget or
-    the 300-entry result budget is exhausted."""
+    the 300-entry result budget is exhausted. Subtrees deeper than the pattern can
+    reach are pruned away instead of walked and budgeted (Bug #13): with `*` a
+    20.000-file subfolder must neither be traversed nor mark the list truncated."""
     rel_pattern = pattern.replace("\\", "/")
+    max_depth = _pattern_max_depth(rel_pattern)
     matches: list[Path] = []
     visited = 0
     budget_exhausted = False
     for dirpath, dirnames, filenames in os.walk(path):
-        for name in (*dirnames, *filenames):
+        names = (*dirnames, *filenames)
+        if max_depth is not None:
+            depth = len(Path(dirpath).relative_to(path).parts)
+            if depth >= max_depth - 1:
+                # Entries here sit at max_depth; their children cannot match.
+                dirnames[:] = []
+        for name in names:
             visited += 1
             if visited > SCAN_VISITED_LIMIT:
                 budget_exhausted = True
@@ -262,16 +283,28 @@ def _uses_encoded_command(command: str) -> bool:
     tokens = _TOKEN.findall(command)
     # Scan from every powershell/pwsh invocation: nested calls are the dangerous ones.
     for i, token in enumerate(tokens):
-        if token.strip('"\'').lower() not in _PWSH_NAMES:
-            continue
-        for arg in tokens[i + 1 :]:
-            inner = arg.strip('"\'')  # PowerShell re-parses quoted switches as switches
-            if not inner.startswith(_PWSH_DASHES):
-                continue
-            name = inner.lstrip("".join(_PWSH_DASHES)).lower()
-            # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
-            if name and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM)):
-                return True
+        quoted = token[:1] in "\"'"
+        inner = token.strip('"\'').lstrip("&").strip()
+        # Bug #11: compare the invoked executable by FILE NAME, so a full path
+        # (C:\...\powershell.exe) or an &-call ("C:\Program Files\...\pwsh.exe")
+        # names the same binary as the bare alias.
+        if inner and PureWindowsPath(inner).name.lower() in _PWSH_NAMES:
+            for arg in tokens[i + 1 :]:
+                # Bug #11: '-e <b64>' (Start-Process -ArgumentList) arrives as ONE
+                # quoted token containing a space — the effective switch is its
+                # first word.
+                words = arg.strip('"\'').split()
+                word = words[0] if words else ""
+                if not word.startswith(_PWSH_DASHES):
+                    continue
+                name = word.lstrip("".join(_PWSH_DASHES)).lower()
+                # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
+                if name and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM)):
+                    return True
+        elif quoted and " " in inner and _uses_encoded_command(inner):
+            # Bug #11: cmd /c "powershell -e …" hides a whole command line inside one
+            # quoted token — re-examine its contents as a command.
+            return True
     return False
 
 

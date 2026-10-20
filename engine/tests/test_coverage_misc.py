@@ -110,7 +110,7 @@ def test_fetch_url_blocks_redirect_to_private_ip(monkeypatch):
 
     mock_http(monkeypatch, handler)
     with pytest.raises(web_mod.WebError, match="non consentita"):
-        asyncio.run(web_mod.fetch_url("http://203.0.113.10/start"))
+        asyncio.run(web_mod.fetch_url("http://93.184.216.34/start"))
 
 
 def test_fetch_url_blocks_unresolvable_host(monkeypatch):
@@ -144,8 +144,10 @@ def test_fetch_url_follows_safe_redirect_and_reads_html(monkeypatch):
         return httpx.Response(404)
 
     mock_http(monkeypatch, handler)
-    # 203.0.113.0/24 is TEST-NET-3: literal, routable-looking, definitely not private.
-    result = asyncio.run(web_mod.fetch_url("http://203.0.113.10/a"))
+    # 93.184.216.34 is a globally routable literal: with Bug #12 the guard also blocks
+    # documentation ranges via is_private, so TEST-NET-3 (203.0.113.0/24) no longer
+    # works as a stand-in for a public host.
+    result = asyncio.run(web_mod.fetch_url("http://93.184.216.34/a"))
     assert result["url"].endswith("/b")
     assert result["title"] == "T"
     assert "corpo" in result["text"]
@@ -157,7 +159,7 @@ def test_fetch_url_gives_up_after_redirect_loop(monkeypatch):
 
     mock_http(monkeypatch, handler)
     with pytest.raises(web_mod.WebError, match="redirect"):
-        asyncio.run(web_mod.fetch_url("http://203.0.113.10/loop"))
+        asyncio.run(web_mod.fetch_url("http://93.184.216.34/loop"))
 
 
 # ---------------------------------------------------------------------- watcher.py
@@ -412,12 +414,14 @@ class _FakeRequest:
         self.query_params = query
 
 
-# ---------------------------------------------------------------------- Miglioramento #8 (SHA-256 change detection)
+# ---------------------------------------------------------------------- change detection (sync vs rebuild)
 
 
-def test_sync_rehashes_files_with_preserved_timestamps(tmp_path, monkeypatch):
+def test_rebuild_catches_files_with_preserved_timestamps(tmp_path, monkeypatch):
     """A file whose content changed but size+mtime were preserved (robocopy /COPY:T,
-    zip extraction) must still be re-processed — that was the change-detection hole."""
+    zip extraction) is caught by an explicit REBUILD (full content check). A routine
+    sync trusts size+mtime instead (Miglioramento #7, ciclo 3): re-hashing the whole
+    archive at every app start is what that improvement removed."""
     from vault_engine.config import SettingsStore
     from vault_engine.events import EventBus
     from vault_engine.parsers import Block, ParsedDocument
@@ -456,20 +460,28 @@ def test_sync_rehashes_files_with_preserved_timestamps(tmp_path, monkeypatch):
 
     fake_doc = ParsedDocument(blocks=[Block(text="testo finto")])
 
-    async def scenario():
-        monkeypatch.setattr("vault_engine.pipeline.parse_file", lambda *a, **k: fake_doc)
-        events = EventBus()
-        events.bind(asyncio.get_running_loop())
-        jobs = JobManager(registry, SettingsStore(path=tmp_path / "settings.json"), events)
-        job = jobs.submit(vault.config.id, "sync")
+    async def run_job(jobs, vault_id, kind):
+        job = jobs.submit(vault_id, kind)
         for _ in range(500):
             if jobs.jobs[job.id].status in ("done", "failed"):
                 break
             await asyncio.sleep(0.01)
         finished = jobs.jobs[job.id]
         assert finished.status == "done", finished.message
-        # Only the tampered file may be re-processed: the hole is closed, no full re-index.
-        assert finished.total == 1
+        return finished
+
+    async def scenario():
+        monkeypatch.setattr("vault_engine.pipeline.parse_file", lambda *a, **k: fake_doc)
+        events = EventBus()
+        events.bind(asyncio.get_running_loop())
+        jobs = JobManager(registry, SettingsStore(path=tmp_path / "settings.json"), events)
+
+        # Routine sync: nothing to re-read, the tampered file included.
+        sync = await run_job(jobs, vault.config.id, "sync")
+        assert sync.total == 0
+        # Explicit rebuild: every file is re-processed, tampering included.
+        rebuild = await run_job(jobs, vault.config.id, "rebuild")
+        assert rebuild.total == 2
         await jobs.shutdown()
 
     asyncio.run(scenario())

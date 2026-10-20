@@ -131,17 +131,23 @@ async def pull(endpoints: dict[str, str], model: str, on_progress: ProgressFn | 
     """Downloads a model, reporting NDJSON progress lines (completed/total bytes).
 
     Progress callbacks are throttled to one call every PROGRESS_THROTTLE_SECONDS;
-    completion and error lines are always forwarded.
-    """
+    completion and error lines are always forwarded, and so is every phase change
+    (Miglioramento #12: 'verifying sha256 digest', 'writing manifest'… would
+    otherwise never reach the UI)."""
     base = base_of(endpoints)
     last_emit = 0.0
+    last_status: str | None = None
 
     async def throttled(event: dict) -> None:
-        nonlocal last_emit
+        nonlocal last_emit, last_status
         now = time.monotonic()
-        terminal = bool(event.get("error")) or event.get("status") == "success"
-        if terminal or now - last_emit >= PROGRESS_THROTTLE_SECONDS:
+        status = event.get("status") or ""
+        terminal = bool(event.get("error")) or status == "success"
+        status_changed = bool(status) and status != last_status
+        if terminal or status_changed or now - last_emit >= PROGRESS_THROTTLE_SECONDS:
             last_emit = now
+            if status:
+                last_status = status
             if on_progress is not None:
                 await on_progress(event)
 
@@ -170,16 +176,31 @@ async def pull(endpoints: dict[str, str], model: str, on_progress: ProgressFn | 
             raise HubError(f"pull {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
 
 
+async def installed_names(endpoints: dict[str, str]) -> set[str] | None:
+    """Normalized (:latest-completed) names of installed models with a single /api/tags
+    call; None when the server is offline. status() would cost a second call to /api/ps
+    (Miglioramento #10)."""
+    base = base_of(endpoints)
+    async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
+        try:
+            resp = await client.get(f"{base}/api/tags")
+        except httpx.HTTPError:
+            return None
+    if resp.status_code != 200:
+        return None
+    return {normalize_name(m.get("name", "")) for m in resp.json().get("models", [])}
+
+
 async def is_installed(endpoints: dict[str, str], model: str) -> bool:
     """Exact match after :latest normalisation: llama3 is NOT satisfied by llama3:8b."""
-    target = normalize_name(model)
-    info = await status(endpoints)
-    return any(normalize_name(m.name) == target for m in info["installed"])
+    names = await installed_names(endpoints)
+    return names is not None and normalize_name(model) in names
 
 
 # ---------------------------------------------------------------------- deduplicated downloads (Miglioramento #2)
 
 _pull_locks: dict[str, asyncio.Lock] = {}
+_pull_users: dict[str, int] = {}
 _background_pulls: dict[str, asyncio.Task] = {}
 
 
@@ -187,11 +208,22 @@ async def pull_dedup(endpoints: dict[str, str], model: str, on_progress: Progres
     """Downloads a model once even with concurrent callers: same-model requests
     serialize on a per-model lock and re-check the registry after waiting, so every
     caller after the first finds the model already installed."""
-    lock = _pull_locks.setdefault(model, asyncio.Lock())
-    async with lock:
-        if await is_installed(endpoints, model):
-            return
-        await pull(endpoints, model, on_progress)
+    # Miglioramento #9: llama3 and llama3:latest are the same model — the key must be
+    # the normalized name, or the two spellings could download in parallel.
+    key = normalize_name(model)
+    lock = _pull_locks.setdefault(key, asyncio.Lock())
+    _pull_users[key] = _pull_users.get(key, 0) + 1
+    try:
+        async with lock:
+            if await is_installed(endpoints, model):
+                return
+            await pull(endpoints, model, on_progress)
+    finally:
+        # Bound the registry size: drop the lock once nobody holds or awaits it.
+        _pull_users[key] -= 1
+        if _pull_users[key] <= 0:
+            _pull_users.pop(key, None)
+            _pull_locks.pop(key, None)
 
 
 def start_pull(
@@ -203,7 +235,8 @@ def start_pull(
 ) -> bool:
     """Starts a background download unless one is already running for this model.
     Returns False when an existing download was joined instead."""
-    task = _background_pulls.get(model)
+    key = normalize_name(model)
+    task = _background_pulls.get(key)
     if task is not None and not task.done():
         return False
 
@@ -213,13 +246,17 @@ def start_pull(
         except Exception as exc:  # noqa: BLE001 - reported to the UI via the error callback
             if on_error is not None:
                 await on_error(exc)
+            else:
+                # Bug #9: without a callback the failure must at least hit the log,
+                # not vanish silently.
+                log.error("download in background di %s fallito: %s", model, exc)
         else:
             if on_finished is not None:
                 await on_finished()
         finally:
-            _background_pulls.pop(model, None)
+            _background_pulls.pop(key, None)
 
-    _background_pulls[model] = asyncio.create_task(run())
+    _background_pulls[key] = asyncio.create_task(run())
     return True
 
 
@@ -288,6 +325,7 @@ __all__ = [
     "base_of",
     "cancel_pulls",
     "delete",
+    "installed_names",
     "is_installed",
     "library_search",
     "load",

@@ -69,9 +69,15 @@ export default function ModelsPage() {
   );
 
   const runningNames = new Set((status?.running ?? []).map((m) => m.name));
-  // Miglioramento #5: library names carry no tag (llama3.2) while installed ones do
-  // (llama3.2:latest): compare against the tagless form.
-  const installedNames = new Set((status?.installed ?? []).map((m) => m.name.split(":")[0]));
+  // Bug #10: compare EXACT names after :latest normalisation, like the engine's
+  // normalize_name (library names carry no tag): with only qwen2.5:0.5b installed,
+  // the library row "qwen2.5" (= qwen2.5:latest) must still offer the download.
+  const normalizeName = (name: string) => {
+    const tail = name.split("/").pop() ?? name;
+    return tail.includes(":") ? name : `${name}:latest`;
+  };
+  const taglessTail = (name: string) => (name.split("/").pop() ?? name).split(":")[0];
+  const installedNames = new Set((status?.installed ?? []).map((m) => normalizeName(m.name)));
 
   async function search() {
     setSearching(true);
@@ -219,7 +225,8 @@ export default function ModelsPage() {
       <Card className={styles.card}>
         <Subtitle2>Libreria modelli (ollama.com)</Subtitle2>
         <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>
-          Attenzione: il testo cercato viene inviato a ollama.com (unica chiamata di rete del programma).
+          Attenzione: la ricerca viene inviata a ollama.com. Anche l'agente può accedere alla rete (ricerca web e apertura di
+          pagine), ma solo dopo la tua approvazione.
         </Caption1>
         <div className={styles.search}>
           <Field label="Cerca" style={{ flex: 1 }}>
@@ -236,14 +243,21 @@ export default function ModelsPage() {
         </div>
         {library.map((m) => {
           const prog = progressOf(m.name);
-          const installed = installedNames.has(m.name.split(":")[0]);
+          const installed = installedNames.has(normalizeName(m.name));
+          // Other variants of the same model (qwen2.5:0.5b when the row is qwen2.5):
+          // informative only, the default-tag download stays available (Bug #10).
+          const variants = installed
+            ? []
+            : (status?.installed ?? []).map((v) => v.name).filter((n) => taglessTail(n) === m.name);
           return (
             <div key={m.name} className={styles.row}>
               <span className={styles.name}>
                 {m.name}
                 {m.label && m.label !== m.name && <Caption1> · {m.label}</Caption1>}
               </span>
-              <span className={styles.meta}>{installed ? "installato" : ""}</span>
+              <span className={styles.meta}>
+                {installed ? "installato" : variants.length > 0 ? `altre varianti installate: ${variants.join(", ")}` : ""}
+              </span>
               <span className={styles.actions}>
                 {prog ? (
                   prog.error ? (

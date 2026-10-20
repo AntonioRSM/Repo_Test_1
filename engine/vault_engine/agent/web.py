@@ -25,9 +25,32 @@ _BLOCKED_NETWORKS = tuple(
     for cidr in (
         "0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
         "192.168.0.0/16", "100.64.0.0/10",  # RFC 1918 + loopback + link-local + CGNAT
+        "198.18.0.0/15",  # benchmarking range (RFC 2544): not routable
         "::/128", "::1/128", "fc00::/7", "fe80::/10",
+        "64:ff9b::/96",  # NAT64 embeds arbitrary IPv4, loopback/LAN included (Bug #12)
     )
 )
+
+
+def _is_blocked(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    # Bug #12: an IPv4-mapped IPv6 literal (::ffff:127.0.0.1) belongs to no IPv4
+    # network object, but on dual-stack hosts (Windows is one) it reaches the same
+    # local services — judge it by the embedded IPv4 address.
+    mapped = ip.ipv4_mapped if isinstance(ip, ipaddress.IPv6Address) else None
+    if mapped is not None:
+        ip = mapped
+    if any(ip in net for net in _BLOCKED_NETWORKS):
+        return True
+    # Belt and braces beyond the explicit list: the ipaddress registry properties
+    # cover documentation ranges, 240/4 and future special-purpose assignments.
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_unspecified
+        or ip.is_multicast
+    )
 
 
 class WebResult(BaseModel):
@@ -58,7 +81,7 @@ async def _validate_url(url: str) -> None:
         except socket.gaierror as exc:
             raise WebError(f"host non risolvibile: {host}") from exc
         ips = [ipaddress.ip_address(info[4][0]) for info in infos]
-    blocked = [str(ip) for ip in ips if any(ip in net for net in _BLOCKED_NETWORKS)]
+    blocked = [str(ip) for ip in ips if _is_blocked(ip)]
     if blocked:
         raise WebError(f"destinazione privata o locale non consentita: {host} ({', '.join(blocked)})")
 

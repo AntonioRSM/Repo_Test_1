@@ -17,14 +17,14 @@
 
 ## Ciclo 3 – Bug
 
-- [ ] **Bug #8 (alta): il pulsante "Scarica" della pagina Modelli fallisce sempre**
+- [x] **Bug #8 (alta): il pulsante "Scarica" della pagina Modelli fallisce sempre**
   - **File:** `engine/vault_engine/app.py` (`ollama_pull`) e `engine/vault_engine/ollama_hub.py` (`pull`).
   - **Causa:** `ollama_pull` passa a `start_pull` una `lambda` sincrona come `on_progress`: restituisce il risultato di `state.events.publish(...)`, cioè `None`. Ma `pull()` esegue `await on_progress(event)`, quindi alla prima riga di avanzamento solleva `TypeError: object NoneType can't be used in 'await' expression`.
   - **Effetti:** ogni download avviato dalla pagina Modelli finisce subito in "Errore". Il test di regressione `test_regressions_qa_ciclo2.py` sostituisce `start_pull` con un finto, quindi non se ne accorge.
   - **Come riprodurlo:** `POST /ollama/pull {"model":"bge-m3"}` con Ollama attivo: arriva l'evento `{"status":"errore","error":"object NoneType can't be used in 'await' expression"}`. Sonda: `test_ollama_pull_route_fails_on_first_progress_event`.
   - **Correzione proposta:** trasformare `on_progress` in una `async def`, come `_report_pull_done`, e aggiungere un test end-to-end di `/ollama/pull` che non sostituisca `start_pull`.
 
-- [ ] **Bug #9 (media): il download avviato da una ricerca o domanda (risposta 409) non segnala mai l'esito**
+- [x] **Bug #9 (media): il download avviato da una ricerca o domanda (risposta 409) non segnala mai l'esito**
   - **File:** `engine/vault_engine/providers.py` (`ensure_loaded`, ramo `allow_download=False`) e `engine/vault_engine/ollama_hub.py` (`start_pull`).
   - **Causa:** `start_pull` viene chiamata senza `on_finished` né `on_error`.
   - **Effetti:**
@@ -33,14 +33,14 @@
   - **Come riprodurlo:** Vault con embedding Ollama non installato; chiama `POST /vaults/{id}/search`: risponde 409, ma non arriva nessun evento finale. Sonda: `test_background_pull_from_search_reports_no_outcome`.
   - **Correzione proposta:** passare `on_finished`/`on_error` che pubblichino `download_completato`/`errore` (lo stesso `report`) e, in `start_pull`, scrivere nel log l'eccezione quando `on_error` manca.
 
-- [ ] **Bug #10 (media): la libreria segna come "installato" un modello di cui è presente solo un'altra variante**
+- [x] **Bug #10 (media): la libreria segna come "installato" un modello di cui è presente solo un'altra variante**
   - **File:** `desktop/src/pages/Models.tsx` (`installedNames`).
   - **Causa:** dopo il Miglioramento #5 il confronto avviene senza tag da entrambe le parti: con solo `qwen2.5:0.5b` installato, la riga `qwen2.5` della libreria mostra ✓ e "installato". È l'equivalente nell'interfaccia del Bug #3, appena corretto nel motore.
   - **Effetti:** dalla libreria non si può più scaricare la versione predefinita (`:latest`) di un modello di cui si ha un'altra variante.
   - **Come riprodurlo:** installa `qwen2.5:0.5b`, apri Modelli e cerca `qwen2.5`: compare ✓ e non c'è il pulsante "Scarica".
   - **Correzione proposta:** normalizzare come nel motore: il nome della libreria diventa `nome:latest` e va confrontato esattamente con i nomi installati. Eventualmente mostrare "altre varianti installate: …".
 
-- [ ] **Bug #11 (media, sicurezza): il filtro su `-EncodedCommand` si aggira ancora**
+- [x] **Bug #11 (media, sicurezza): il filtro su `-EncodedCommand` si aggira ancora**
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle3`):
     - percorso completo: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -e <b64>`, perché il token non è uguale a `powershell.exe`;
@@ -52,7 +52,7 @@
     - riesaminare in modo ricorsivo il contenuto dei token tra virgolette;
     - dividere sugli spazi gli argomenti tra virgolette prima di controllarne il prefisso.
 
-- [ ] **Bug #12 (media, sicurezza): la protezione SSRF di `fetch_url` si aggira con indirizzi IPv6 che rappresentano indirizzi IPv4**
+- [x] **Bug #12 (media, sicurezza): la protezione SSRF di `fetch_url` si aggira con indirizzi IPv6 che rappresentano indirizzi IPv4**
   - **File:** `engine/vault_engine/agent/web.py` (`_BLOCKED_NETWORKS` e `_validate_url`).
   - **Causa:** `::ffff:127.0.0.1` è un `IPv6Address`, che non risulta contenuto in nessuna rete IPv4 dell'elenco, quindi non viene bloccato. Lo stesso vale per `::ffff:192.168.x.x` e `::ffff:10.x.x.x`. Mancano anche `64:ff9b::/96` (NAT64) e `198.18.0.0/15`.
   - **Effetti:** su sistemi dual-stack (Windows lo è) l'agente può raggiungere servizi locali, per esempio `http://[::ffff:127.0.0.1]:11434/api/delete` di Ollama, o host della rete locale.
@@ -61,7 +61,7 @@
     - se `ip.ipv4_mapped` è valorizzato, valutare l'indirizzo IPv4 contenuto;
     - in più usare le proprietà `ip.is_private`, `is_loopback`, `is_link_local`, `is_reserved`, `is_unspecified` e `is_multicast` invece del solo elenco manuale.
 
-- [ ] **Bug #13 (media, regressione): `list_directory` con il pattern predefinito `*` percorre tutto il sottoalbero e segnala `truncated: true` a torto**
+- [x] **Bug #13 (media, regressione): `list_directory` con il pattern predefinito `*` percorre tutto il sottoalbero e segnala `truncated: true` a torto**
   - **File:** `engine/vault_engine/agent/tools.py` (`_scan_directory`).
   - **Causa:** `os.walk` scende sempre in profondità, anche quando il pattern (es. `*` o `*.pdf`) può corrispondere solo al primo livello.
   - **Effetti:**
@@ -73,13 +73,13 @@
     - svuotare `dirnames[:]` oltre quella profondità;
     - contare nel budget solo le voci entro la profondità utile.
 
-- [ ] **Bug #14 (bassa, regressione su Windows): `list_directory` distingue tra maiuscole e minuscole**
+- [x] **Bug #14 (bassa, regressione su Windows): `list_directory` distingue tra maiuscole e minuscole**
   - **File:** `engine/vault_engine/agent/tools.py` (`_glob_match`).
   - **Causa:** l'espressione regolare costruita è sensibile a maiuscole e minuscole. Su Windows `Path.glob`, usato fino al ciclo 2, non lo era: `*.pdf` trovava anche `Contratto.PDF`.
   - **Come riprodurlo:** file `Contratto.PDF`; `_scan_directory(path, "*.pdf")` non restituisce nulla. Sonda: `test_scan_is_case_sensitive`.
   - **Correzione proposta:** usare `re.fullmatch(..., flags=re.IGNORECASE)` quando `os.name == "nt"`.
 
-- [ ] **Bug #15 (bassa): con `--host ::1` il motore rifiuta tutte le richieste**
+- [x] **Bug #15 (bassa): con `--host ::1` il motore rifiuta tutte le richieste**
   - **File:** `engine/vault_engine/app.py` (`TrustedHostMiddleware`) e `engine/vault_engine/__main__.py` (`LOCALHOST`).
   - **Causa:**
     - `__main__` considera `::1` un indirizzo locale e non avvisa.
@@ -91,7 +91,7 @@
 
 ## Ciclo 3 – Miglioramenti
 
-- [ ] **Miglioramento #7 (alta, prestazioni): ogni sincronizzazione rilegge e ricalcola lo SHA-256 di tutto l'archivio**
+- [x] **Miglioramento #7 (alta, prestazioni): ogni sincronizzazione rilegge e ricalcola lo SHA-256 di tutto l'archivio**
   - **File:** `engine/vault_engine/pipeline.py` (`_sync`, introdotto da `eafcb1a`).
   - **Problema:**
     - Anche i file con dimensione e data di modifica invariate vengono riletti per intero e ne viene ricalcolato lo SHA-256.
@@ -103,7 +103,7 @@
     - in alternativa, verificare un campione a rotazione;
     - in ogni caso non riscrivere il manifest quando dimensione e data di modifica coincidono già.
 
-- [ ] **Miglioramento #8 (sicurezza): `shell:open-path` limita la cartella ma non il tipo di file**
+- [x] **Miglioramento #8 (sicurezza): `shell:open-path` limita la cartella ma non il tipo di file**
   - **File:** `desktop/electron/main.cjs` (`assertOpenableTarget`).
   - **Problema:**
     - Dentro le cartelle sorgenti di un Vault (es. una cartella "Download" o una condivisione di rete) un `.exe`, `.bat`, `.cmd`, `.js`, `.lnk` o `.url` viene comunque aperto, e quindi eseguito, da `shell.openPath`.
@@ -113,23 +113,23 @@
     - usare `fs.realpathSync` sia sul file sia sulle radici prima del confronto;
     - per i tipi non ammessi lasciare solo "mostra nella cartella".
 
-- [ ] **Miglioramento #9: le chiavi della deduplica dei download non sono normalizzate**
+- [x] **Miglioramento #9: le chiavi della deduplica dei download non sono normalizzate**
   - **File:** `engine/vault_engine/ollama_hub.py` (`pull_dedup`, `start_pull`).
   - **Problema:**
     - `llama3` e `llama3:latest` usano chiavi diverse in `_pull_locks` e `_background_pulls`, quindi lo stesso modello può essere scaricato due volte in parallelo.
     - `_pull_locks` cresce senza limite.
   - **Proposta:** usare `normalize_name(model)` come chiave e rimuovere il lock quando non ci sono più chiamanti in attesa.
 
-- [ ] **Miglioramento #10 (prestazioni): troppe chiamate a Ollama per ogni ricerca**
+- [x] **Miglioramento #10 (prestazioni): troppe chiamate a Ollama per ogni ricerca**
   - **File:** `engine/vault_engine/providers.py` (`ensure_loaded`).
   - **Problema:** per ogni modello Ollama vengono chiamati `status()` (controllo online) e `is_installed()`, che richiama `status()`: sono 4 richieste HTTP (`/api/tags` e `/api/ps` due volte) prima del preload, a ogni ricerca o domanda.
   - **Proposta:** una sola chiamata a `status()` per ogni `ensure_loaded`, riutilizzata per il controllo online e per l'elenco dei modelli installati (servirebbe solo `/api/tags`).
 
-- [ ] **Miglioramento #11: testi e configurazione**
+- [x] **Miglioramento #11: testi e configurazione**
   - **Testo della pagina Modelli:** dice che la ricerca in libreria è l'"unica chiamata di rete del programma", ma l'agente ha anche `web_search` (DuckDuckGo) e `fetch_url`. Correggere, per esempio in "la ricerca viene inviata a ollama.com".
   - **`testserver` tra gli host consentiti in produzione:** è il valore predefinito di TestClient. Meglio configurare i test con `TestClient(app, base_url="http://127.0.0.1")` e togliere `testserver` dall'elenco.
 
-- [ ] **Miglioramento #12: la limitazione degli eventi di avanzamento nasconde i cambi di fase**
+- [x] **Miglioramento #12: la limitazione degli eventi di avanzamento nasconde i cambi di fase**
   - **File:** `engine/vault_engine/ollama_hub.py` (`pull`, `throttled`).
   - **Problema:** la limitazione è solo a tempo, quindi fasi come `verifying sha256 digest` o `writing manifest` possono non comparire mai nell'interfaccia.
   - **Proposta:** inviare subito l'evento anche quando cambia `status`, non solo per lo stato finale.
@@ -493,3 +493,26 @@ Tutte le sonde del ciclo 2 sono state trasformate in regressioni con asserzione 
 - **Miglioramento #6 — pulizia.** `ensure_pulled` e `reconcile_loaded` rimosse (senza chiamanti in produzione); docstring di `ollama_hub` corretta (la ricerca libreria invia la query a ollama.com) con nota visibile nella pagina Modelli; download attivi annullati nello shutdown; `_cors_origin_regex` documentata come valutata a import; `ollama_auto_pull` resta `True` per scelta di prodotto (gestione automatica dei modelli richiesta), con mitigazioni: eventi di errore visibili, dedup, 409 nelle richieste interattive.
 
 **Note per il Tester**: le sonde `_probe_qa.py` che passavano "col difetto" ora falliscono per costruzione (asserzioni invertite nelle regressioni). Il test `test_ensure_loaded_raises_when_ollama_offline` della sonda era atteso come `HubError`: il comportamento corretto è **non** sollevare (best effort), quindi la regressione corrispondente asserisce il completamento senza eccezioni. La sonda `test_delete_route_rejects_namespaced_models` resta valida (la vecchia route DELETE risponde 404 anche dopo la fix, per design).
+
+---
+
+## Soluzioni applicate (fase Developer, ciclo 3)
+
+Tutte le sonde del ciclo 3 sono state trasformate in regressioni con asserzione invertita in `engine/tests/test_regressions_qa_ciclo3.py` (più aggiornamenti a `test_regressions_qa_ciclo2.py` e `test_coverage_misc.py`). Suite completa su Windows: **146 passati, 0 falliti** (`pytest -m "not live"`); frontend: `tsc --noEmit` e `vite build` vanno a buon fine.
+
+- **Bug #8 — download dalla pagina Modelli sempre in errore.** In `app.py` la route `/ollama/pull` passava una lambda sincrona come `on_progress` (restituiva `None`, che `pull()` poi attendeva). Ora il callback è la nuova `async def _report_pull_progress(model, p)`, come già `_report_pull_done`/`_report_pull_error`. Test end-to-end **senza stub** di `start_pull`: `test_ollama_pull_route_reports_progress_and_completes` (transport HTTP finto, evento finale = `download_completato`).
+- **Bug #9 — download da ricerca/domanda (409) senza esito.** In `providers.ensure_loaded` il ramo `allow_download=False` passa ora `on_finished`/`on_error` che pubblicano `download_completato`/`errore` con lo stesso `report`; in `ollama_hub.start_pull`, se manca `on_error`, l'eccezione viene comunque scritta nel log (`log.error`). Test: `test_background_pull_from_search_reports_error`, `test_background_pull_from_search_reports_completion`, `test_start_pull_logs_error_when_no_callback`.
+- **Bug #10 — libreria segna "installato" con solo un'altra variante.** `Models.tsx`: nuova `normalizeName` identica a `ollama_hub.normalize_name` (nome senza tag → `:latest`, attento al prefisso `hf.co/…`); il confronto è esatto sui nomi normalizzati. Se esistono solo altre varianti (es. `qwen2.5:0.5b` per la riga `qwen2.5`) la riga mostra "altre varianti installate: …" e il pulsante "Scarica" resta disponibile.
+- **Bug #11 — filtro `-EncodedCommand` aggirabile.** `_uses_encoded_command` riscritto di nuovo: (1) l'eseguibile è riconosciuto per **nome file** (`PureWindowsPath(tok).name`) dopo aver tolto virgolette e `&` — quindi anche `C:\…\powershell.exe` e `& "C:\Program Files\…\pwsh.exe"`; (2) il contenuto dei token tra virgolette che contiene spazi è riesaminato ricorsivamente come comando (`cmd /c "powershell -e …"`); (3) gli argomenti tra virgolette con spazi (`'-e <b64>'` da `Start-Process -ArgumentList`) sono valutati sulla prima parola. Nessun nuovo falso positivo sui 9 comandi legittimi del ciclo 2, verificati + 2 aggiunti (`Test-Path "…\pwsh.exe"`, `Get-Item …\powershell.exe | …`). Test: `test_encoded_filter_bypass_cycle3_blocked` (4 casi), `test_encoded_filter_cycle3_no_new_false_positives`.
+- **Bug #12 — SSRF con IPv4-mapped IPv6.** `agent/web.py`: nuova `_is_blocked(ip)` — se `ip.ipv4_mapped` è valorizzato si valuta l'IPv4 contenuto; in più si usano `is_private`/`is_loopback`/`is_link_local`/`is_reserved`/`is_unspecified`/`is_multicast` oltre all'elenco manuale, che ora include `64:ff9b::/96` (NAT64) e `198.18.0.0/15`. Test: `test_ssrf_ipv4_mapped_ipv6_blocked`, `test_ssrf_nat64_and_benchmark_ranges_blocked`, `test_ssrf_public_literal_still_allowed`. **Nota per il Tester:** `is_private` copre anche le documentation range (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24): per questo i due test `fetch_url` che usavano `203.0.113.10` come "IP pubblico" ora usano `93.184.216.34` (aggiornati in `test_coverage_misc.py`).
+- **Bug #13 — `list_directory` con `*` percorreva tutto il sottoalbero.** `_scan_directory`: nuova `_pattern_max_depth` (n. di segmenti; illimitata solo con `**`); `os.walk` pota `dirnames[:]` oltre la profondità utile e il budget di 20.000 voci conta solo le voci raggiungibili dal pattern. Con `*` una sottocartella da 21.000 file non viene più traversata e `truncated` resta `False`. Test: `test_scan_star_does_not_walk_subtree`, `test_scan_prunes_only_beyond_pattern_depth`.
+- **Bug #14 — `list_directory` case-sensitive su Windows.** `_glob_match` usa `re.IGNORECASE` quando `os.name == "nt"` (come il `Path.glob` usato fino al ciclo 2). Test: `test_scan_matches_case_insensitively_on_windows` (platform-aware).
+- **Bug #15 — `--host ::1` rifiutava tutto.** `TrustedHostMiddleware` (che spezzava `[::1]:porta` su `:`) sostituito da un middleware ASGI dedicato `LocalhostOnlyMiddleware` in `app.py`: interpreta le parentesi quadre IPv6 e ammette `127.0.0.1`, `::1`, `localhost`, `*.localhost`. Test: `test_localhost_only_middleware_accepts_ipv6_loopback` (`[::1]:8765` → 200, `attacker.example` → 400).
+- **Miglioramento #7 — sync che rilegge tutto l'archivio.** `pipeline._sync`: tornato a dimensione+mtime come controllo normale, **senza** ricalcolo SHA-256 né riscrittura del manifest per i file invariati; la verifica completa dei contenuti resta disponibile con `rebuild` (force=True), che riesegue hash+parsing di tutto. Un file solo "toccato" (mtime cambiata) finisce in `todo` e viene hash-verificato singolarmente da `prepare_file` come prima. Test: `test_unchanged_sync_does_not_rehash` (0 hash su 40 file alla seconda sync); il test del ciclo precedente `test_sync_rehashes_files_with_preserved_timestamps` è diventato `test_rebuild_catches_files_with_preserved_timestamps`: la sync normale ignora il file manomesso (totale 0), la rebuild lo rileva (totale 2).
+- **Miglioramento #8 — `shell:open-path` senza controllo del tipo.** `desktop/electron/main.cjs`: `assertOpenableTarget(target, {forOpen})` — confronto su `fs.realpathSync` di file **e** radici (niente fuga via symlink/giunzioni); per l'apertura (`shell:open-path`) sono ammesse solo le estensioni `SUPPORTED_EXTS` lette da `/health` del motore (cache a primo uso). I tipi non ammessi (`.exe`, `.bat`, `.lnk`, …) restano raggiungibili solo da "Mostra nella cartella", che non esegue nulla.
+- **Miglioramento #9 — chiavi deduplica non normalizzate.** `pull_dedup` e `start_pull` usano `normalize_name(model)` come chiave di `_pull_locks`/`_background_pulls` (`llama3` ≡ `llama3:latest`); i lock sono rimossi con un contatore di chiamanti quando nessuno li usa più. Test: `test_pull_dedup_normalizes_keys_and_releases_lock`, `test_start_pull_joins_normalized_duplicate`.
+- **Miglioramento #10 — troppe chiamate a Ollama per ricerca.** `ensure_loaded` fa ora UNA sola `GET /api/tags` per chiamata (nuova `ollama_hub.installed_names`), riusata per il controllo online e per l'elenco installati: da 4 richieste HTTP per modello a 1 per chiamata. Test: `test_ensure_loaded_uses_single_tags_call` (una `/api/tags`, nessuna `/api/ps`, nessun pull se già installato).
+- **Miglioramento #11 — testi e configurazione.** Pagina Modelli: il testo ora dice che "la ricerca viene inviata a ollama.com" e che anche l'agente può accedere alla rete (ricerca web, apertura pagine) solo dopo approvazione. `testserver` rimosso dagli host consentiti: il middleware ammette solo loopback e i test usano `TestClient(app, base_url="http://127.0.0.1")` (fixture di `test_regressions_qa_ciclo2.py` aggiornata).
+- **Miglioramento #12 — throttle che nascondeva i cambi di fase.** `ollama_hub.pull`: l'evento è inviato subito anche quando cambia `status` (es. `verifying sha256 digest`, `writing manifest`), non solo a tempo o allo stato finale. Test: `test_pull_emits_phase_changes_despite_throttle` (fasi visibili, flood comunque assente: <50 eventi su ~400 righe).
+
+**Note per il Tester**: la sonda del Bug #15 usava il `TestClient` di default (host `testserver`): con il Miglioramento #11 quell'host è respinto per design — le regressioni usano `base_url="http://127.0.0.1"` e impostano l'header `Host` esplicito dove serve. La sonda del Miglioramento #7 asseriva il vecchio comportamento (40 hash): la regressione corrispondente asserisce 0 hash in sync e copre la verifica completa via `rebuild` (vedi sopra). Il percorso UI del Bug #10 è verificato da `tsc --noEmit` + build; non esistono test unitari del frontend.

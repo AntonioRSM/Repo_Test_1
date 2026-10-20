@@ -123,7 +123,9 @@ def client(monkeypatch, tmp_path):
     # Avoid the full lifespan (which would submit real sync jobs): the delete route
     # only needs state.settings for the Ollama endpoints.
     monkeypatch.setattr(appmod.state, "settings", SettingsStore(path=tmp_path / "settings.json"), raising=False)
-    return TestClient(appmod.app)
+    # Miglioramento #11 (ciclo 3): "testserver" is no longer an allowed Host; the
+    # TestClient must present a loopback base URL instead.
+    return TestClient(appmod.app, base_url="http://127.0.0.1")
 
 
 def test_delete_route_accepts_namespaced_models(client, monkeypatch):
@@ -158,7 +160,9 @@ def test_old_delete_route_is_gone(client, monkeypatch):
 def test_trusted_host_middleware_installed_only_without_token():
     from vault_engine import app as appmod
 
-    installed = any(m.cls.__name__ == "TrustedHostMiddleware" for m in appmod.app.user_middleware)
+    # Ciclo 3 (Bug #15): LocalhostOnlyMiddleware replaces TrustedHostMiddleware, which
+    # misparsed IPv6 bracket hosts ([::1]:port) and rejected every request.
+    installed = any(m.cls.__name__ == "LocalhostOnlyMiddleware" for m in appmod.app.user_middleware)
     assert installed == (not os.environ.get("WSOS_TOKEN"))
 
 

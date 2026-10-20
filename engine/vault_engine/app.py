@@ -14,6 +14,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+from starlette.responses import PlainTextResponse
 
 from .chunking import ChunkingSettings
 from .config import ModelRef, OcrSettings, SettingsStore
@@ -110,16 +111,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if not os.environ.get("WSOS_TOKEN"):
-    # Bug #6 (DNS rebinding): without the per-launch token the API is reachable by any
-    # local process, so the Host header must be loopback-only. (WSOS_TOKEN is read at
-    # import time: the desktop app sets it before spawning the engine.)
-    from fastapi.middleware.trustedhost import TrustedHostMiddleware
+_LOCAL_HOSTNAMES = {"127.0.0.1", "::1", "localhost"}
 
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=["127.0.0.1", "localhost", "*.localhost", "testserver"],  # testserver: TestClient default host
-    )
+
+def _host_header_is_local(value: str) -> bool:
+    """Hostname part of a Host header. IPv6 literals arrive in brackets ([::1]:8765):
+    TrustedHostMiddleware's split(':') turned that into '[' and 400'd everything
+    (Bug #15)."""
+    host = value.strip().lower()
+    if host.startswith("["):
+        host = host[1:].split("]", 1)[0]
+    else:
+        host = host.split(":", 1)[0]
+    return host in _LOCAL_HOSTNAMES or host.endswith(".localhost")
+
+
+class LocalhostOnlyMiddleware:
+    """Bug #6 (DNS rebinding): without the per-launch token the API is reachable by any
+    local process, so the Host header must be loopback-only. (WSOS_TOKEN is read at
+    import time: the desktop app sets it before spawning the engine.)"""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            host = next(
+                (v.decode("latin-1") for k, v in scope.get("headers", []) if k.lower() == b"host"),
+                "",
+            )
+            if not _host_header_is_local(host):
+                await PlainTextResponse("host non consentito", status_code=400)(scope, receive, send)
+                return
+        await self.app(scope, receive, send)
+
+
+if not os.environ.get("WSOS_TOKEN"):
+    app.add_middleware(LocalhostOnlyMiddleware)
 
 
 def require_token(request: Request) -> None:
@@ -263,20 +291,26 @@ async def ollama_pull(body: PullBody):
     started = ollama_hub.start_pull(
         state.settings.get().endpoints,
         body.model,
-        on_progress=lambda p, m=body.model: state.events.publish(
-            {
-                "type": "ollama",
-                "kind": "pull",
-                "model": m,
-                "status": p.get("status") or "download",
-                "completed": p.get("completed"),
-                "total": p.get("total"),
-            }
-        ),
+        on_progress=lambda p, m=body.model: _report_pull_progress(m, p),
         on_finished=lambda m=body.model: _report_pull_done(m),
         on_error=lambda exc, m=body.model: _report_pull_error(m, exc),
     )
     return {"accepted": True, "model": body.model, "already": not started}
+
+
+async def _report_pull_progress(model: str, p: dict) -> None:
+    # Bug #8: pull() awaits on_progress — a plain lambda returning publish()'s None
+    # raised TypeError on the very first progress line, failing every download.
+    state.events.publish(
+        {
+            "type": "ollama",
+            "kind": "pull",
+            "model": model,
+            "status": p.get("status") or "download",
+            "completed": p.get("completed"),
+            "total": p.get("total"),
+        }
+    )
 
 
 async def _report_pull_done(model: str) -> None:
