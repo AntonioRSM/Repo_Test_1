@@ -1,21 +1,178 @@
-# FEEDBACK QA – ciclo 4
+# FEEDBACK QA – ciclo 5
 
-**Ambito:** commit `3f02398..b91580b` sul branch `claude/workspace-os-installer` (PR #20): `b91580b`, correzioni di Bug #8-#15 e Miglioramenti #7-#12 del ciclo 3.
+**Ambito:**
+- di nuovo l'intervallo `dbacb23..7ec57c8` sul branch `claude/workspace-os-installer` (PR #20): `5b64cbe` (correzioni QA) e `7ec57c8` (gestione dei modelli Ollama), con tutto il codice che ne dipende nello stato attuale;
+- i commit arrivati sulla PR dopo il ciclo 4: `79acbc3` (README, `start.cmd`), `9d6b2be` (Ollama nell'installatore), `d04bcf3` (Workspace Harness).
 
-**Esito:** NON APPROVATO. Tutte le voci del ciclo 3 sono risolte e i test passano. Restano 3 bug nuovi di gravità media o bassa e 1 miglioramento: niente di bloccante come il Bug #8.
+**Esito:** NON APPROVATO.
+- Dopo il ciclo 4 non c'è stato nessun commit di correzione, quindi le 4 voci aperte del ciclo 4 lo sono ancora.
+- Il ciclo 5 trova 7 bug nuovi. Il più grave è il Bug #19: "Elimina" nella pagina Modelli non ha mai funzionato.
+- Il ciclo 5 trova anche 4 miglioramenti.
 
-**Test eseguiti (Linux):**
-- Suite completa (`uv run pytest`): 145 passati, 1 saltato, 1 fallito. Il test fallito è `test_mcp.py::test_stdio_server_lifecycle_and_secrets` (DPAPI, solo Windows): è atteso. Lo sviluppatore riporta 146 su 146 su Windows.
-- Interfaccia: `npm ci` e `npm run build` vanno a buon fine.
-- Sonde del ciclo 3: 10 su 11 ora falliscono, quindi quei difetti sono corretti. L'undicesima, `test_scan_is_case_sensitive`, passa ancora solo perché la correzione vale per Windows e qui gira Linux.
-- Sonde del ciclo 4: 5 su 5 confermano i difetti qui sotto, più un controllo positivo che verifica la correzione del Bug #15. Il codice è in fondo al file.
-- `ruff check vault_engine`: 3 segnalazioni (vedi Miglioramento #13).
+**Test eseguiti (Windows 11, Smart App Control attivo, Ollama 0.40.6 e LM Studio attivi):**
+- **Motore:**
+  - `pytest` (suite completa, compresi i test `live` sui modelli reali): **147 passati**, 0 falliti;
+  - `pytest -m "not live"`: 146 passati, 1 deselezionato;
+  - su Windows passa anche il test DPAPI che su Linux falliva.
+- **Interfaccia:** `npm install` e `npm run build` (`tsc --noEmit` + `vite build`) vanno a buon fine.
+- **Workspace Harness:** `npm test` passa (traduzioni, plugin generati, profilo composto con `dsh --dump-config`).
+- **`ruff check vault_engine tests`** (ruff 0.8.4): 6 segnalazioni (vedi Miglioramento #13 e Miglioramento #14).
+- **Sonde del ciclo 4:** 6 su 6 passano ancora, quindi i Bug #16 e #17 sono ancora presenti.
+- **Sonde del ciclo 5:** 2 su 2 confermano il Bug #19. I Bug #22-#25 si riproducono con i passi indicati nelle voci.
+- **Prova reale:** `ollama_hub.delete` chiamato contro Ollama locale con un modello inesistente fallisce con `TypeError` prima di qualunque richiesta HTTP.
 
 ---
 
-## Ciclo 4 – Bug
+## Ciclo 5 – Bug
+
+- [ ] **Bug #19 (alta): "Elimina" nella pagina Modelli fallisce sempre con un errore 500**
+  - **File:** `engine/vault_engine/ollama_hub.py` (`delete`) e `engine/vault_engine/app.py` (`ollama_delete`).
+  - **Causa:** `client.delete(f"{base}/api/delete", json={"model": model})`. In httpx 0.28.1 (versione installata) `AsyncClient.delete()` **non ha** il parametro `json` (firma: `url, params, headers, cookies, auth, follow_redirects, timeout, extensions`). Ne risulta `TypeError: AsyncClient.delete() got an unexpected keyword argument 'json'` ancora prima di contattare Ollama.
+  - **Effetti:**
+    - `/ollama/delete` cattura solo `HubError`, quindi risponde **500** e la pagina Modelli mostra un errore generico.
+    - Il modello però viene prima scaricato dalla memoria (`unload`), quindi l'utente vede sparire il modello dalla RAM ma non dal disco.
+    - Nessun test se ne accorge: tutti sostituiscono `ollama_hub.delete` con un finto (`test_regressions_qa_ciclo2.py`). La nota del ciclo 2 "verificato live" non è riproducibile con httpx 0.28.
+  - **Come riprodurlo:**
+    - pagina Modelli → "Elimina" su un modello installato → conferma → errore;
+    - oppure `asyncio.run(ollama_hub.delete({"ollama": "http://127.0.0.1:11434"}, "x:latest"))` → `TypeError`;
+    - sonde: `test_hub_delete_raises_typeerror`, `test_delete_route_answers_500`.
+  - **Correzione proposta:**
+    - `await client.request("DELETE", f"{base}/api/delete", json={"model": model})`;
+    - aggiungere un test con `httpx.MockTransport` che verifichi metodo, percorso e body della richiesta senza sostituire `ollama_hub.delete`.
+
+- [ ] **Bug #20 (media): l'avanzamento dei download avviati automaticamente non compare da nessuna parte**
+  - **File:** `desktop/src/pages/Models.tsx` (`pulls`, `progressOf`).
+  - **Causa:**
+    - lo stato dei download è indicizzato con il nome **esatto** ricevuto negli eventi;
+    - le righe della pagina lo cercano con il proprio nome: quello installato (`bge-m3:latest`) o quello della libreria, senza tag (`qwen3`);
+    - un download avviato da un Vault, da una ricerca o dall'agente usa il nome delle impostazioni (es. `qwen3:4b-instruct`, `bge-m3:latest`, che l'installatore ora scrive con il tag).
+  - **Effetti:**
+    - per un modello non ancora installato e non presente tra i risultati della libreria non esiste nessuna riga: l'avanzamento e l'eventuale errore con "Riprova" (Bug #2 e #9) non si vedono;
+    - con un nome che ha il tag, la riga della libreria (senza tag) non trova l'evento.
+  - **Come riprodurlo:**
+    - Vault con embedding `ollama/nomic-embed-text:v1.5`, non installato;
+    - avvia la sincronizzazione e apri Modelli: nessuna riga mostra il download, anche se gli eventi `pull` arrivano (visibili in `/events`).
+  - **Correzione proposta:**
+    - indicizzare `pulls` con `normalizeName(e.model)` e cercare con `normalizeName(riga)`;
+    - aggiungere una sezione "Download in corso" che elenchi le voci di `pulls` non mostrate da nessuna riga, con avanzamento, errore e "Riprova".
+
+- [ ] **Bug #21 (bassa): un errore immediato del download può essere sovrascritto e la riga resta su "download_avviato…" senza "Riprova"**
+  - **File:** `desktop/src/pages/Models.tsx` (`pull`).
+  - **Causa:**
+    - `setPulls(... status: "download_avviato")` viene eseguito **dopo** `await api.ollamaPull(model)`;
+    - la risposta 202 e gli eventi SSE viaggiano su connessioni diverse;
+    - se il download fallisce subito, l'evento `errore` (o `download_completato`) può arrivare prima della risposta e viene sovrascritto.
+  - **Come riprodurlo:**
+    - Ollama spento, pagina Modelli, cerca in libreria e premi "Scarica";
+    - il task in background fallisce subito con "Ollama non raggiungibile": a seconda dell'ordine di arrivo la riga resta "download_avviato…" per sempre, senza errore né "Riprova".
+  - **Correzione proposta:**
+    - impostare lo stato "in avvio" **prima** della chiamata;
+    - dopo la risposta aggiornarlo solo se nel frattempo non è arrivato un evento (`prev[model]?.status === "in avvio"`).
+
+- [ ] **Bug #22 (media, Workspace Harness): l'avvio si interrompe alla prima riga che dsh scrive su stderr**
+  - **File:** `harness/avvia.ps1` (`d04bcf3`).
+  - **Causa:**
+    - lo script imposta `$ErrorActionPreference = 'Stop'` e legge l'output con `& node ... 2>&1 | ForEach-Object`;
+    - in Windows PowerShell 5.1 ogni riga stderr di un programma nativo diventa un `NativeCommandError`, che con `Stop` termina lo script.
+  - **Effetti:**
+    - basta un avviso (`dsh: warning: N entries did not activate`, avvisi di Node, errori di un plugin) perché la finestra si chiuda;
+    - i messaggi di avvio tradotti non compaiono;
+    - il processo `node` può restare attivo senza finestra.
+  - **Come riprodurlo** (stesso schema dello script):
+    ```powershell
+    $ErrorActionPreference = 'Stop'
+    & node -e "console.log('a'); console.error('dsh: warning: 2 entries did not activate')" 2>&1 | ForEach-Object { "ricevuto: $_" }
+    'fine'   # non viene mai raggiunta: NativeCommandError, exit 1
+    ```
+  - **Correzione proposta:**
+    - impostare `$ErrorActionPreference = 'Continue'` prima di lanciare `node`;
+    - nel `ForEach-Object`, convertire gli `ErrorRecord` in testo (`if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }`);
+    - in alternativa, usare `System.Diagnostics.Process` con lettura asincrona di stdout e stderr, e terminare `node` alla chiusura della finestra.
+
+- [ ] **Bug #23 (media, Workspace Harness): a ogni avvio spariscono i plugin installati dall'utente**
+  - **File:** `harness/avvia.ps1` (`Copy-Item ... package.json -Force`).
+  - **Causa:**
+    - il `package.json` del profilo è il file in cui il gestore dei plugin di dsh scrive le dipendenze e l'elenco `dsh.profile.bundles`;
+    - lo script lo sovrascrive a ogni avvio con il modello di `harness/profile`.
+  - **Effetti:** un plugin aggiunto dalla pagina "Plugin" (o con `dsh plugin add`) funziona fino al riavvio, poi sparisce da dipendenze e bundle anche se i file restano in `node_modules`.
+  - **Come riprodurlo:**
+    - aggiungi `"@x/plugin"` a `dependencies` e a `dsh.profile.bundles` in `%LOCALAPPDATA%\WorkspaceOS\harness\profiles\workspace\package.json`;
+    - rilancia il collegamento "Workspace Harness": il file torna al modello con 3 bundle.
+  - **Correzione proposta:**
+    - copiare il modello solo se il file manca;
+    - altrimenti unire: aggiungere i bundle obbligatori (`dsh-base`, `dsh-web-app`, `@workspace-sm/dsh-workspace`) se assenti e conservare dipendenze e bundle dell'utente.
+
+- [ ] **Bug #24 (media, Workspace Harness): "Aggiungi plugin" fallisce sempre perché pnpm non è installato**
+  - **File:** `installer/installa.ps1` (passo 5/6) e `harness/README.md`.
+  - **Causa:** il gestore dei plugin di dsh esegue `pnpm` (`dsh-plugin-manager`: `execa(options.command ?? "pnpm", …)`). L'installatore installa Node.js e il runtime con `npm`, ma non `pnpm`, che su questo PC infatti non c'è.
+  - **Effetti:** pagina "Plugin" → "Aggiungi plugin" → errore `installFailurePnpmMissing` ("pnpm non trovato: non si può installare nulla"). Anche il marketplace "Scopri" non può installare nulla.
+  - **Come riprodurlo:** Workspace Harness → Plugin → Aggiungi plugin → `dsh-plugin-whale-pet` → Installa.
+  - **Correzione proposta:**
+    - nel passo 5/6 abilitare pnpm con `corepack enable pnpm`, incluso in Node.js 22/24 (oppure `npm install -g pnpm@<versione fissata>`);
+    - verificare con `pnpm --version`;
+    - in alternativa, impostare `pnpmCommand` nel livello `dsh-workspace` verso un pnpm locale in `harness/node_modules/.bin`.
+
+- [ ] **Bug #25 (bassa, Workspace Harness): con LM Studio il contesto dei modelli è sovrastimato e il modello predefinito è scelto a caso**
+  - **File:** `harness/avvia.ps1` (blocco LM Studio).
+  - **Causa:**
+    - per i modelli non caricati lo script dichiara a dsh `max_context_length` (es. `google/gemma-4-e4b`: 131.072, `qwen3.5-4b`: 262.144);
+    - ma LM Studio li carica su richiesta con la lunghezza di contesto predefinita (su questo PC `qwen3.5-4b` caricato: 8.192);
+    - l'avviso "contesto troppo piccolo" esiste solo per Ollama;
+    - il modello predefinito è il primo dell'elenco (qui `llama-2-7b-chat`, contesto 4.096 e senza tool calling).
+  - **Effetti:** l'agente invia un prompt di circa 8.500 token a un modello caricato con 4.096 o 8.192 token di contesto, quindi la richiesta viene rifiutata o troncata. dsh non compatta perché crede di avere 131.072 token.
+  - **Come riprodurlo:**
+    - `GET http://127.0.0.1:1234/api/v0/models`: per i modelli `not-loaded` c'è solo `max_context_length`;
+    - avvia Workspace Harness senza Ollama e invia un messaggio.
+  - **Correzione proposta:**
+    - usare `loaded_context_length` quando il modello è caricato;
+    - altrimenti caricarlo esplicitamente con il contesto richiesto (`POST /api/v1/models/load` con `context_length: 16384`) oppure dichiarare 4.096 e avvisare;
+    - scegliere come predefinito un modello con `trained_for_tool_use` (`/api/v1/models`);
+    - estendere l'avviso sui 12.000 token anche a LM Studio.
+
+---
+
+## Ciclo 5 – Miglioramenti
+
+- [ ] **Miglioramento #14: completare la configurazione di `ruff`**
+  - Oltre al Miglioramento #13 (ancora aperto), `ruff` segnala:
+    - `F821 Undefined name 'BaseExceptionGroup'` in `agent/mcp.py:243`: è un falso positivo, perché `pyproject.toml` non dichiara `requires-python`/`target-version` (il motore usa Python 3.12);
+    - due import inutilizzati nei test: `ModelRef` in `tests/test_agent.py` e `json` in `tests/test_regressions_qa_ciclo2.py`.
+  - **Proposta:** `[tool.ruff] target-version = "py312"` in `engine/pyproject.toml`, `ruff check --fix` sui test e `ruff check` tra i controlli prima del push.
+
+- [ ] **Miglioramento #15: test delle chiamate HTTP del hub Ollama a livello di trasporto**
+  - **Problema:** i test di `load`, `unload`, `delete` e delle route `/ollama/*` sostituiscono le funzioni di `ollama_hub`. Così il Bug #19 è passato inosservato per tre cicli.
+  - **Proposta:**
+    - permettere di iniettare il `transport` (o un `AsyncClient`) in `ollama_hub`;
+    - testare con `httpx.MockTransport` metodo, percorso, body e gestione degli errori di `delete`, `unload` e `load`, incluso il ripiego su `/api/embed`.
+
+- [ ] **Miglioramento #16 (sicurezza, bassa): `fetch_url` è esposto al DNS rebinding tra controllo e connessione**
+  - **File:** `engine/vault_engine/agent/web.py` (`_validate_url` e `fetch_url`).
+  - **Problema:**
+    - `_validate_url` risolve il nome e controlla gli IP, ma poi `httpx` risolve di nuovo;
+    - un DNS ostile con TTL 0 può rispondere con un IP pubblico al controllo e con `127.0.0.1` alla connessione;
+    - la docstring lo riconosce. Il rischio è ridotto dall'approvazione obbligatoria, ma l'utente approva un URL che sembra pubblico.
+  - **Proposta:**
+    - connettersi all'IP già validato (trasporto personalizzato che fissa l'indirizzo, con `Host` e SNI originali);
+    - in più, usare `bytearray` per il corpo della risposta: oggi `body += chunk` copia il buffer a ogni blocco.
+
+- [ ] **Miglioramento #17 (Workspace Harness): testi residui in inglese**
+  - **Problema:**
+    - i titoli delle sessioni generati dal modello sono in inglese (es. "Hello, I'm a language model"), perché il prompt del generatore di titoli è in inglese;
+    - le descrizioni dei plugin integrati restano in inglese: dsh le legge da `locale/*.json` dei pacchetti, non dai dizionari.
+  - **Proposta:**
+    - nel livello `dsh-workspace`, sovrascrivere la configurazione della riga `session-title-llm` con un'istruzione in italiano, se lo schema lo consente (verificare con `dsh --dump-config-schema`);
+    - documentare il limite delle descrizioni dei plugin.
+
+---
+
+## Verifica delle voci del ciclo 4
+
+Dopo `77f0aed` (ciclo 4) sul branch non c'è nessun commit di correzione: le voci restano aperte. Le sonde del ciclo 4 passano ancora tutte (6 su 6).
+
+### Bug
 
 - [ ] **Bug #16 (media, sicurezza): il filtro su `-EncodedCommand` si aggira passando gli argomenti con `Start-Process -ArgumentList`**
+  - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_bypass_cycle4` passa su tutti e 3 i casi.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Causa:** per ogni argomento tra virgolette il filtro controlla solo la **prima parola**, e una lista separata da virgole diventa un unico token `\S+` che inizia con `,` o `@(`.
   - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle4`):
@@ -25,6 +182,7 @@
   - **Correzione proposta:** dividere ogni argomento su spazi **e** virgole, togliere virgolette, `@(` e `)`, e controllare **ogni** parola, non solo la prima.
 
 - [ ] **Bug #17 (bassa): il filtro blocca comandi legittimi quando `powershell` o `pwsh` compaiono come argomento**
+  - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_false_positive_cycle4` passa su entrambi i casi.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Causa:** appena trova un token con nome `powershell`/`pwsh`, il filtro esamina **tutti** i token successivi, anche quando quel nome è un argomento di un altro cmdlet. In quel caso `-ea` è l'alias comunissimo di `-ErrorAction`.
   - **Come riprodurlo:** `Get-Process pwsh -ea SilentlyContinue` e `Stop-Process -Name powershell -ea 0` vengono rifiutati come "comandi codificati". Sonda: `test_encoded_filter_false_positive_cycle4`.
@@ -33,21 +191,69 @@
     - fermare la scansione degli argomenti al separatore di comando successivo.
 
 - [ ] **Bug #18 (media): se il primo "Apri documento" fallisce, l'apertura resta bloccata fino al riavvio dell'app**
+  - **Verifica QA ciclo 5:** ancora presente: `desktop/electron/main.cjs:199` usa ancora `supportedExtsPromise ??= engineFetch("/health")...` senza azzerare la cache in caso di errore.
   - **File:** `desktop/electron/main.cjs` (`supportedExtensions`).
   - **Causa:** `supportedExtsPromise ??= engineFetch("/health")...` memorizza anche una promessa **rifiutata**. Se la prima richiesta capita mentre il motore non è pronto o si sta riavviando, ogni apertura successiva fallisce subito senza riprovare.
   - **Effetti:** il messaggio "apertura consentita solo per i documenti supportati dei Vault" compare per qualunque documento finché non si chiude e riapre l'app.
   - **Come riprodurlo** (simulazione Node dello stesso schema): con un `engineFetch` che fallisce solo la prima volta, i tentativi 1, 2 e 3 falliscono tutti e `/health` viene chiamato una sola volta.
   - **Correzione proposta:** `engineFetch(...).then(...).catch((e) => { supportedExtsPromise = null; throw e; })`; in aggiunta, azzerare la cache quando il motore si riavvia.
 
----
-
-## Ciclo 4 – Miglioramenti
+### Miglioramenti
 
 - [ ] **Miglioramento #13: segnalazioni di `ruff` e nessun test per la logica di apertura dei file**
+  - **Verifica QA ciclo 5:** ancora aperto: `ruff` segnala ancora `F821 Any` in `providers.py` (righe 198 e 220) e `F401 Any` in `ollama_hub.py`. Altre segnalazioni nel Miglioramento #14.
   - **`providers.py`:** `F821 Undefined name 'Any'` alle righe 198 e 220, introdotto con `ensure_loaded(events: Any = None)`. Oggi funziona solo grazie a `from __future__ import annotations`; `typing.get_type_hints(ensure_loaded)` solleverebbe `NameError`.
   - **`ollama_hub.py`:** `F401 'typing.Any' imported but unused`.
   - **Proposta:** importare `Any` in `providers.py`, togliere l'import inutile e aggiungere `ruff check` ai controlli che si lanciano prima di ogni push.
   - **Test mancanti:** la logica di `assertOpenableTarget` (Miglioramento #8 e Bug #18) non ha test automatici. Spostarla in un modulo CommonJS senza dipendenze da Electron e testarla con `node --test`.
+
+---
+
+## Sonde QA del ciclo 5 (riproducibili)
+
+Per eseguirle: salva il codice qui sotto in `engine/tests/_probe_qa5.py` (file temporaneo, da non committare) e lancia `uv run pytest -q tests/_probe_qa5.py` dalla cartella `engine`. Ogni test passa quando il difetto è presente: al ciclo 5 passano entrambi.
+
+| Sonda | Voce |
+|---|---|
+| `test_hub_delete_raises_typeerror` | Bug #19 |
+| `test_delete_route_answers_500` | Bug #19 |
+
+I Bug #20 e #21 riguardano l'interfaccia React; i Bug #22-#25 gli script PowerShell di Workspace Harness. Si riproducono con i passi indicati nelle voci.
+
+<details><summary>Codice delle sonde del ciclo 5</summary>
+
+```python
+"""Sonde QA ciclo 5: ciascun test PASSA se il difetto ipotizzato è presente."""
+import asyncio
+
+import pytest
+
+from vault_engine import ollama_hub
+
+
+def test_hub_delete_raises_typeerror():
+    """Bug #19: httpx.AsyncClient.delete() non accetta json=; fallisce prima di contattare Ollama."""
+    with pytest.raises(TypeError, match="unexpected keyword argument 'json'"):
+        asyncio.run(ollama_hub.delete({"ollama": "http://127.0.0.1:9"}, "qualsiasi:latest"))
+
+
+def test_delete_route_answers_500(monkeypatch):
+    """Bug #19: la route cattura solo HubError, quindi il TypeError diventa un 500."""
+    from fastapi.testclient import TestClient
+
+    from vault_engine import app as appmod
+
+    async def fake_unload(endpoints, model):
+        return None
+
+    monkeypatch.delenv("WSOS_TOKEN", raising=False)
+    monkeypatch.setattr(ollama_hub, "unload", fake_unload)
+    monkeypatch.setattr(appmod.state, "settings", type("S", (), {"get": lambda self: type("C", (), {"endpoints": {"ollama": "http://127.0.0.1:9"}})()})(), raising=False)
+    client = TestClient(appmod.app, base_url="http://127.0.0.1", raise_server_exceptions=False)
+    assert client.post("/ollama/delete", json={"model": "bge-m3:latest"}).status_code == 500
+```
+
+</details>
 
 ---
 
