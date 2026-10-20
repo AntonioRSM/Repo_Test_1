@@ -67,6 +67,7 @@ function Leggi($url) { try { Invoke-RestMethod $url -TimeoutSec 3 } catch { $nul
 
 $Rotte = [ordered]@{}
 $Predefinito = $null
+$Nascosti = @()        # modelli Ollama con contesto troppo piccolo per l'agente
 
 $Ollama = Leggi 'http://127.0.0.1:11434/api/tags'
 if ($Ollama) {
@@ -76,15 +77,19 @@ if ($Ollama) {
         if ($info -and $info.capabilities -and -not ($info.capabilities -contains 'completion')) { continue }   # solo embedding
         $ctx = 4096
         if ($info.parameters -match 'num_ctx\s+(\d+)') { $ctx = [int]$Matches[1] }
+        # Il prompt dell'agente occupa circa 8.500 token: un modello che Ollama carica con meno contesto
+        # fallisce a ogni messaggio ("request exceeds the available context size"), quindi non si offre.
+        if ($ctx -lt 12000) { $Nascosti += $m.name; continue }
         $modelli += [ordered]@{ id = $m.name; name = $m.name; contextWindow = $ctx; reasoningEfforts = $false }
         if ($m.name -like 'workspace-agent*') { $Predefinito = @('ollama-locale', $m.name) }
     }
     if ($modelli.Count) {
         $Rotte['ollama-locale'] = [ordered]@{ displayName = 'Ollama (locale)'; api = 'openai-completions'; baseURL = 'http://127.0.0.1:11434/v1'; apiKeyEnv = 'WSOS_LOCAL_LLM_KEY'; models = $modelli }
         Riga "Ollama: $($modelli.Count) modelli ($(($modelli | ForEach-Object { $_.id }) -join ', '))"
-        foreach ($m in $modelli) {
-            if ($m.contextWindow -lt 12000) { Write-Host "    $(Grigio "$($m.id): contesto di $($m.contextWindow) token, troppo piccolo per l'agente (serve circa 12.000)")" }
-        }
+    }
+    if ($Nascosti.Count) {
+        $alternativa = if ($Predefinito) { "usa $($Predefinito[1])" } else { 'rilancia INSTALLA.bat per creare workspace-agent' }
+        Write-Host "    $(Grigio "Non offerti all'agente (contesto sotto 12.000 token): $($Nascosti -join ', '); $alternativa")"
     }
 }
 
@@ -137,6 +142,19 @@ if ($LmStudio) {
 if (-not $Rotte.Count) { Avviso 'Nessun modello locale trovato (Ollama o LM Studio). Potrai configurare un provider dalla pagina Modelli.' }
 if (-not $Predefinito -and $Rotte.Contains('ollama-locale')) { $Predefinito = @('ollama-locale', $Rotte['ollama-locale'].models[0].id) }
 if ($Predefinito) { Riga "Modello predefinito: $($Predefinito[1])" }
+
+# Un modello predefinito salvato dalle Impostazioni su un modello Ollama non più offerto (es.
+# qwen3:4b-instruct a 4.096 token) passa al modello dell'agente: il resto della scelta dell'utente resta.
+$PatchUtente = Join-Path $Profilo 'cordis.patch.yml'
+if ($Nascosti.Count -and $Predefinito -and $Predefinito[0] -eq 'ollama-locale' -and (Test-Path $PatchUtente)) {
+    $testo = [IO.File]::ReadAllText($PatchUtente)
+    $nomi = ($Nascosti | ForEach-Object { [regex]::Escape($_) }) -join '|'
+    $nuovo = [regex]::Replace($testo, "(?m)^(\s*provider:\s*[`"']?ollama-locale[`"']?\s*\r?\n\s*model:\s*)[`"']?(?:$nomi)[`"']?[ \t]*(?=\r?$)", "`${1}$($Predefinito[1])")
+    if ($nuovo -ne $testo) {
+        [IO.File]::WriteAllText($PatchUtente, $nuovo, (New-Object Text.UTF8Encoding $false))
+        Riga "Il modello scelto nelle Impostazioni ha un contesto troppo piccolo: uso $($Predefinito[1])"
+    }
+}
 
 $env:DSH_HOME = $DshHome
 # Bug #24: il gestore dei plugin di dsh esegue "pnpm"; quello fissato in harness/package.json
