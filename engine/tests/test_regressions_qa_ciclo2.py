@@ -4,7 +4,6 @@ The QA probes asserted each defect; these tests assert the fixed behaviour.
 """
 
 import asyncio
-import json
 import os
 
 import httpx

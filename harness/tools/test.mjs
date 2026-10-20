@@ -69,7 +69,9 @@ if (!fs.existsSync(dsh)) {
       fs.mkdirSync(path.join(profile, 'node_modules', '@workspace-sm'), { recursive: true })
       for (const f of fs.readdirSync(path.join(harness, 'profile'))) fs.copyFileSync(path.join(harness, 'profile', f), path.join(profile, f))
       for (const p of ['dsh-workspace-brand', 'dsh-workspace-it']) {
-        fs.symlinkSync(path.join(harness, 'plugins', p), path.join(profile, 'node_modules', '@workspace-sm', p), 'junction')
+        // Copia, mai junction: il gestore plugin di dsh (pnpm) segue i junction e
+        // SVUOTA la cartella della repo collegata (documentato come Bug #26 correlato).
+        fs.cpSync(path.join(harness, 'plugins', p), path.join(profile, 'node_modules', '@workspace-sm', p), { recursive: true })
       }
       const providers = { 'ollama-locale': { api: 'openai-completions', baseURL: 'http://127.0.0.1:11434/v1', apiKeyEnv: 'WSOS_LOCAL_LLM_KEY', models: [{ id: 'workspace-agent:latest' }] } }
       const dump = run([dsh, '--profile', 'workspace', '--dump-config'], {
@@ -87,6 +89,12 @@ if (!fs.existsSync(dsh)) {
     } finally {
       fs.rmSync(home, { recursive: true, force: true })
     }
+  })
+}
+
+if (process.platform === 'win32') {
+  check('junction dei plugin gestiti in sicurezza (Bug #26)', () => {
+    execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(harness, 'tools', 'testa-junction.ps1')], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   })
 }
 

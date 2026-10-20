@@ -190,65 +190,18 @@ ipcMain.handle("dialog:pick-folders", async () => {
 });
 // Only files inside a Vault's source folders may be opened: the renderer can be
 // fed arbitrary paths (prompt injection, corrupted state) and shell.openPath on an
-// executable would run it.
-let supportedExtsPromise = null;
-function supportedExtensions() {
-  // The engine exposes its document types on /health (SUPPORTED_EXTS): only those may
-  // be OPENED — an .exe/.bat/.cmd/.js/.lnk/.url inside a source folder would otherwise
-  // be executed by shell.openPath (Miglioramento #8).
-  supportedExtsPromise ??= engineFetch("/health").then(
-    (h) => new Set((h.supported_extensions ?? []).map((e) => String(e).toLowerCase())),
-  );
-  return supportedExtsPromise;
-}
-
-async function assertOpenableTarget(target, { forOpen = false } = {}) {
-  let resolved;
-  try {
-    // realpath follows symlinks/junctions: a link inside a Vault source must not
-    // silently point outside it (Miglioramento #8).
-    resolved = fs.realpathSync(path.resolve(String(target)));
-  } catch {
-    return null; // must exist
-  }
-  let stat;
-  try {
-    stat = fs.statSync(resolved);
-  } catch {
-    return null;
-  }
-  if (!stat.isFile()) return null;
-  let vaults, exts;
-  try {
-    [vaults, exts] = await Promise.all([engineFetch("/vaults"), forOpen ? supportedExtensions() : Promise.resolve(null)]);
-  } catch {
-    return null; // engine unreachable: deny rather than guess
-  }
-  const normalized = resolved.toLowerCase();
-  const inside = (vaults ?? []).some((v) =>
-    (v.sources ?? []).some((s) => {
-      let root;
-      try {
-        root = fs.realpathSync(path.resolve(String(s))).toLowerCase();
-      } catch {
-        root = path.resolve(String(s)).toLowerCase();
-      }
-      return normalized === root || normalized.startsWith(root + path.sep);
-    }),
-  );
-  if (!inside) return null;
-  // For unsupported types the UI keeps only "mostra nella cartella" (no execution).
-  if (forOpen && (!(exts instanceof Set) || !exts.has(path.extname(resolved).toLowerCase()))) return null;
-  return resolved;
-}
+// executable would run it. The logic lives in openable.cjs (no Electron deps) so it
+// can be unit-tested with node --test (Miglioramento #13).
+const { assertOpenableTarget, makeSupportedExtensions } = require("./openable.cjs");
+const supportedExtensions = makeSupportedExtensions(engineFetch);
 
 ipcMain.handle("shell:open-path", async (_e, target) => {
-  const safe = await assertOpenableTarget(target, { forOpen: true });
+  const safe = await assertOpenableTarget(target, { forOpen: true, engineFetch, supportedExtensions });
   if (!safe) throw new Error("apertura consentita solo per i documenti supportati dei Vault");
   return shell.openPath(safe);
 });
 ipcMain.handle("shell:show-in-folder", async (_e, target) => {
-  const safe = await assertOpenableTarget(target);
+  const safe = await assertOpenableTarget(target, { engineFetch, supportedExtensions });
   if (!safe) throw new Error("apertura consentita solo per i documenti dei Vault");
   shell.showItemInFolder(safe);
 });

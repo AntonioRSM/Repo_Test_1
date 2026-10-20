@@ -75,6 +75,23 @@ powershell -ExecutionPolicy Bypass -File avvia.ps1
 
 La cartella di lavoro predefinita è `Documenti\Workspace Harness`.
 
+## Plugin
+
+La pagina **Plugin** ("Aggiungi plugin" e il marketplace "Scopri") installa con `pnpm`: l'installer
+lo rende disponibile con `corepack` (incluso in Node.js 22+) e, in mancanza, con `npm install -g pnpm`.
+Senza pnpm l'elenco plugin si vede ma nessuna installazione parte.
+
+Due limiti noti del runtime dsh 0.2.1-rc.2, verificati con `dsh --dump-config-schema` (Miglioramento #17):
+
+- **Descrizioni dei plugin integrate in inglese**: dsh le legge dai file `locale/*.json` di ogni
+  pacchetto, non dai dizionari della lingua registrati da `dsh-workspace-it`. I plugin Workspace
+  (marchio, lingua) hanno invece i propri testi in italiano.
+- **Titoli di sessione**: la riga di configurazione `session-title-llm` non espone alcun campo per
+  il prompt (solo lunghezze, timeout, provider/modello), quindi il prompt non si può sovrascrivere
+  da un livello di patch senza modificare il codice di DeepSeek (che non tocchiamo). Per fortuna il
+  prompt di sistema chiede al modello di usare la lingua dei messaggi: i titoli seguono la lingua
+  della conversazione.
+
 ## Aggiornare DeepSeek Harness
 
 1. Cambia la versione di `@deepseek-ai/dsh` in `package.json` e i limiti `engines.dsh` dei tre plugin.

@@ -13,7 +13,7 @@ import logging
 import re
 import time
 from html import unescape
-from typing import Any, Awaitable, Callable
+from typing import Awaitable, Callable
 from urllib.parse import quote
 
 import httpx
@@ -26,6 +26,25 @@ PULL_TIMEOUT = httpx.Timeout(600.0, connect=10.0)
 LIBRARY_URL = "https://ollama.com/library"
 
 ProgressFn = Callable[[dict], Awaitable[None]]
+
+# Miglioramento #15: transport iniettabile per i test. I test di regressione
+# intercettano le chiamate HTTP a livello di trasporto (httpx.MockTransport) invece
+# di sostituire le funzioni del modulo: è così che il Bug #19 (delete con json= su
+# httpx 0.28) è passato inosservato per tre cicli. In produzione resta None.
+_transport: httpx.AsyncBaseTransport | None = None
+
+
+def set_transport(transport: httpx.AsyncBaseTransport | None) -> None:
+    """Pinna un transport httpx (es. MockTransport nei test) per TUTTE le chiamate
+    all'API di Ollama di questo modulo. None ripristina il comportamento reale."""
+    global _transport
+    _transport = transport
+
+
+def _client(timeout: httpx.Timeout) -> httpx.AsyncClient:
+    if _transport is not None:
+        return httpx.AsyncClient(timeout=timeout, transport=_transport)
+    return httpx.AsyncClient(timeout=timeout)
 
 
 class HubError(RuntimeError):
@@ -61,7 +80,7 @@ def base_of(endpoints: dict[str, str]) -> str:
 async def status(endpoints: dict[str, str]) -> dict:
     """Installed and in-memory models, for the Models page."""
     base = base_of(endpoints)
-    async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
+    async with _client(API_TIMEOUT) as client:
         try:
             tags = await client.get(f"{base}/api/tags")
             ps = await client.get(f"{base}/api/ps")
@@ -151,7 +170,7 @@ async def pull(endpoints: dict[str, str], model: str, on_progress: ProgressFn | 
             if on_progress is not None:
                 await on_progress(event)
 
-    async with httpx.AsyncClient(timeout=PULL_TIMEOUT) as client:
+    async with _client(PULL_TIMEOUT) as client:
         try:
             async with client.stream("POST", f"{base}/api/pull", json={"model": model, "stream": True}) as resp:
                 if resp.status_code != 200:
@@ -181,7 +200,7 @@ async def installed_names(endpoints: dict[str, str]) -> set[str] | None:
     call; None when the server is offline. status() would cost a second call to /api/ps
     (Miglioramento #10)."""
     base = base_of(endpoints)
-    async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
+    async with _client(API_TIMEOUT) as client:
         try:
             resp = await client.get(f"{base}/api/tags")
         except httpx.HTTPError:
@@ -281,7 +300,7 @@ async def load(endpoints: dict[str, str], model: str, keep_alive_minutes: int) -
     with the same keep_alive so the residency setting also applies to them.
     """
     base = base_of(endpoints)
-    async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=5.0)) as client:
+    async with _client(httpx.Timeout(600.0, connect=5.0)) as client:
         try:
             resp = await client.post(f"{base}/api/generate", json=_keep_alive_body(model, keep_alive_minutes))
             if resp.status_code == 400 and "does not support generate" in resp.text:
@@ -295,7 +314,7 @@ async def load(endpoints: dict[str, str], model: str, keep_alive_minutes: int) -
 async def unload(endpoints: dict[str, str], model: str) -> None:
     """Frees the model's RAM/VRAM immediately (keep_alive: 0)."""
     base = base_of(endpoints)
-    async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
+    async with _client(API_TIMEOUT) as client:
         try:
             resp = await client.post(f"{base}/api/generate", json=_keep_alive_body(model, 0))
             if resp.status_code == 400 and "does not support generate" in resp.text:
@@ -308,9 +327,10 @@ async def unload(endpoints: dict[str, str], model: str) -> None:
 
 async def delete(endpoints: dict[str, str], model: str) -> None:
     base = base_of(endpoints)
-    async with httpx.AsyncClient(timeout=API_TIMEOUT) as client:
+    async with _client(API_TIMEOUT) as client:
         try:
-            # httpx.AsyncClient.delete() has no json= parameter: DELETE with a body goes through request() (Bug #19)
+            # Bug #19: in httpx 0.28 AsyncClient.delete() NON accetta json= (TypeError
+            # prima di qualunque richiesta); il verbo va scelto con request().
             resp = await client.request("DELETE", f"{base}/api/delete", json={"model": model})
         except httpx.HTTPError as exc:
             raise HubError(f"eliminazione {model}: Ollama non raggiungibile ({type(exc).__name__})") from exc
@@ -333,6 +353,7 @@ __all__ = [
     "normalize_name",
     "pull",
     "pull_dedup",
+    "set_transport",
     "start_pull",
     "status",
     "unload",

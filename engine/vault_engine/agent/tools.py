@@ -277,34 +277,91 @@ _PWSH_NAMES = {"powershell", "powershell.exe", "pwsh", "pwsh.exe"}
 _PWSH_DASHES = ("-", "/", "\u2013", "\u2014", "\u2015")
 _ENCODED_PARAM = ("encodedcommand", "encodedarguments")
 _TOKEN = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'|\S+')
+# Segment di comando: dopo ; | & && || comincia un comando nuovo (Bug #17).
+_SEGMENT_SPLIT = re.compile(r"(&&|\|\||[;&|])")
+# Programmi che avviano un altro processo: il programma avviato va trattato come
+# comando in posizione di testa, con i propri argomenti (Bug #16, Start-Process).
+_LAUNCHER_NAMES = {"start-process", "start-process.exe", "start"}
+
+
+def _segment_tokens(tokens: list[str]) -> list[list[str]]:
+    """Divide il flusso di token in segmenti di comando ai separatori ; | & && ||.
+    Le stringhe tra virgolette restano intere: un separatore dentro virgolette è testo."""
+    segments: list[list[str]] = []
+    current: list[str] = []
+    for token in tokens:
+        quoted = token[:1] in "\"'"
+        parts = [token] if quoted else _SEGMENT_SPLIT.split(token)
+        for part in parts:
+            if not quoted and part in (";", "|", "&", "&&", "||"):
+                if current:
+                    segments.append(current)
+                    current = []
+            elif part:
+                current.append(part)
+    if current:
+        segments.append(current)
+    return segments
+
+
+def _encoded_switch(word: str) -> bool:
+    if not word.startswith(_PWSH_DASHES):
+        return False
+    name = word.lstrip("".join(_PWSH_DASHES)).lower()
+    # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
+    return bool(name) and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM))
+
+
+def _scan_pwsh_args(args: list[str]) -> bool:
+    """Bug #16: si controlla OGNI parola di OGNI argomento, non solo la prima:
+    gli argomenti vanno divisi su spazi E virgole, tolti virgolette, @( e ). Così
+    `-ArgumentList '-NoProfile','-e','<b64>'` e `@('-e','<b64>')` non passano più."""
+    for arg in args:
+        text = arg.replace("@(", " ").replace(")", " ")
+        for word in re.split(r"[,\s]+", text):
+            word = word.strip("\"'")
+            if word and _encoded_switch(word):
+                return True
+    return False
 
 
 def _uses_encoded_command(command: str) -> bool:
-    tokens = _TOKEN.findall(command)
-    # Scan from every powershell/pwsh invocation: nested calls are the dangerous ones.
-    for i, token in enumerate(tokens):
-        quoted = token[:1] in "\"'"
-        inner = token.strip('"\'').lstrip("&").strip()
-        # Bug #11: compare the invoked executable by FILE NAME, so a full path
-        # (C:\...\powershell.exe) or an &-call ("C:\Program Files\...\pwsh.exe")
-        # names the same binary as the bare alias.
-        if inner and PureWindowsPath(inner).name.lower() in _PWSH_NAMES:
-            for arg in tokens[i + 1 :]:
-                # Bug #11: '-e <b64>' (Start-Process -ArgumentList) arrives as ONE
-                # quoted token containing a space — the effective switch is its
-                # first word.
-                words = arg.strip('"\'').split()
-                word = words[0] if words else ""
-                if not word.startswith(_PWSH_DASHES):
+    for segment in _segment_tokens(_TOKEN.findall(command)):
+        # Bug #11: una riga di comando annidata può nascondersi dentro un token
+        # quotato (cmd /c "powershell -e …") — riesaminarlo come comando.
+        for token in segment:
+            inner = token.strip("\"'")
+            if token[:1] in "\"'" and " " in inner and _uses_encoded_command(inner):
+                return True
+        head = segment[0].strip("\"'").lstrip("&").strip()
+        # Bug #17: powershell/pwsh conta SOLO in posizione di comando (primo token
+        # del segmento). Come argomento di un altro cmdlet (`Get-Process pwsh -ea
+        # SilentlyContinue`) non attiva la scansione: -ea è -ErrorAction.
+        head_name = PureWindowsPath(head).name.lower() if head else ""
+        if head_name in _PWSH_NAMES:
+            if _scan_pwsh_args(segment[1:]):
+                return True
+        elif head_name in _LAUNCHER_NAMES:
+            # Bug #16: per Start-Process il programma avviato è il primo token non
+            # switch (posizionale o dopo -FilePath); gli argomenti scansionati sono
+            # solo i suoi, fino al separatore di comando successivo.
+            rest = segment[1:]
+            for j, token in enumerate(rest):
+                candidate = token.strip("\"'")
+                if candidate.startswith(_PWSH_DASHES):
                     continue
-                name = word.lstrip("".join(_PWSH_DASHES)).lower()
-                # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
-                if name and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM)):
+                if PureWindowsPath(candidate).name.lower() in _PWSH_NAMES and _scan_pwsh_args(rest[j + 1 :]):
                     return True
-        elif quoted and " " in inner and _uses_encoded_command(inner):
-            # Bug #11: cmd /c "powershell -e …" hides a whole command line inside one
-            # quoted token — re-examine its contents as a command.
-            return True
+                break
+        elif head_name in ("cmd", "cmd.exe"):
+            # cmd /c (o /k) esegue il resto della riga come nuovo comando: anche senza
+            # virgolette (`cmd /c powershell.exe -encodedcommand …`) va riesaminato.
+            for j, token in enumerate(segment[1:]):
+                if token.strip("\"'").lower() in ("/c", "/k"):
+                    remainder = " ".join(segment[j + 2 :])
+                    if remainder and _uses_encoded_command(remainder):
+                        return True
+                    break
     return False
 
 

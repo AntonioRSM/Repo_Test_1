@@ -25,7 +25,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 ## Ciclo 6 – Bug
 
-- [ ] **Bug #26 (media, Workspace Harness, da confermare su Windows): un collegamento ai plugin rimasto orfano blocca l'avvio, e la sua rimozione può cancellare i file di un'altra copia**
+- [x] **Bug #26 (media, Workspace Harness, da confermare su Windows): un collegamento ai plugin rimasto orfano blocca l'avvio, e la sua rimozione può cancellare i file di un'altra copia**
   - **File:** `harness/avvia.ps1` (ciclo `foreach ($p in 'dsh-workspace-brand', 'dsh-workspace-it')`).
   - **Causa:**
     - Lo script usa `Test-Path $link` per capire se il collegamento esiste. Per un collegamento orfano (cartella di destinazione spostata o cancellata, per esempio dopo aver spostato o riclonato `WorkspaceOS`) `Test-Path` segue il collegamento e restituisce `$false`.
@@ -40,7 +40,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
     - togliere il collegamento senza toccare la destinazione: `[System.IO.Directory]::Delete($link)` (senza ricorsione) oppure `cmd /c rmdir "$link"`, **mai** `Remove-Item -Recurse` su un collegamento;
     - confrontare il `Target` con `[IO.Path]::GetFullPath(...)` per evitare differenze di forma del percorso.
 
-- [ ] **Bug #27 (bassa, Workspace Harness): un modello Ollama senza `num_ctx` viene sempre considerato a 4.096 token e nascosto all'agente**
+- [x] **Bug #27 (bassa, Workspace Harness): un modello Ollama senza `num_ctx` viene sempre considerato a 4.096 token e nascosto all'agente**
   - **File:** `harness/avvia.ps1` (blocco Ollama, `b527423`).
   - **Causa:**
     - `$ctx = 4096` vale per ogni modello che non ha `num_ctx` nei `parameters` del Modelfile;
@@ -59,7 +59,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 ## Ciclo 6 – Miglioramenti
 
-- [ ] **Miglioramento #18 (Workspace Harness, da verificare): caricamento in LM Studio di un modello già in memoria con contesto piccolo**
+- [x] **Miglioramento #18 (Workspace Harness, da verificare): caricamento in LM Studio di un modello già in memoria con contesto piccolo**
   - **File:** `harness/avvia.ps1` (blocco LM Studio).
   - **Problema:**
     - Se il modello scelto è già caricato con meno di 12.000 token, lo script chiama `POST /api/v1/models/load` con `context_length: 16384` senza prima scaricarlo dalla memoria.
@@ -190,21 +190,21 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
 
 ### Miglioramenti
 
-- [ ] **Miglioramento #14: completare la configurazione di `ruff`**
+- [x] **Miglioramento #14: completare la configurazione di `ruff`**
   - **Verifica QA ciclo 6:** Ancora aperto: `ruff check vault_engine tests` dà ancora 5 segnalazioni (F401 in `tests/test_agent.py`, `tests/test_regressions_qa_ciclo2.py` e `ollama_hub.py`; F821 `Any` in `providers.py`). `pyproject.toml` non ha `target-version`.
   - Oltre al Miglioramento #13 (ancora aperto), `ruff` segnala:
     - `F821 Undefined name 'BaseExceptionGroup'` in `agent/mcp.py:243`: è un falso positivo, perché `pyproject.toml` non dichiara `requires-python`/`target-version` (il motore usa Python 3.12);
     - due import inutilizzati nei test: `ModelRef` in `tests/test_agent.py` e `json` in `tests/test_regressions_qa_ciclo2.py`.
   - **Proposta:** `[tool.ruff] target-version = "py312"` in `engine/pyproject.toml`, `ruff check --fix` sui test e `ruff check` tra i controlli prima del push.
 
-- [ ] **Miglioramento #15: test delle chiamate HTTP del hub Ollama a livello di trasporto**
+- [x] **Miglioramento #15: test delle chiamate HTTP del hub Ollama a livello di trasporto**
   - **Verifica QA ciclo 6:** Aperto solo in parte: `delete` e la route `/ollama/delete` sono ora testati a livello di trasporto. `load`, `unload` (incluso il ripiego su `/api/embed`) e `pull` no.
   - **Problema:** i test di `load`, `unload`, `delete` e delle route `/ollama/*` sostituiscono le funzioni di `ollama_hub`. Così il Bug #19 è passato inosservato per tre cicli.
   - **Proposta:**
     - permettere di iniettare il `transport` (o un `AsyncClient`) in `ollama_hub`;
     - testare con `httpx.MockTransport` metodo, percorso, body e gestione degli errori di `delete`, `unload` e `load`, incluso il ripiego su `/api/embed`.
 
-- [ ] **Miglioramento #16 (sicurezza, bassa): `fetch_url` è esposto al DNS rebinding tra controllo e connessione**
+- [x] **Miglioramento #16 (sicurezza, bassa): `fetch_url` è esposto al DNS rebinding tra controllo e connessione**
   - **Verifica QA ciclo 6:** Ancora aperto: `agent/web.py` non è cambiato.
   - **File:** `engine/vault_engine/agent/web.py` (`_validate_url` e `fetch_url`).
   - **Problema:**
@@ -215,7 +215,7 @@ Ho ricontrollato anche le voci ancora aperte dei cicli 4 e 5, oltre all'installa
     - connettersi all'IP già validato (trasporto personalizzato che fissa l'indirizzo, con `Host` e SNI originali);
     - in più, usare `bytearray` per il corpo della risposta: oggi `body += chunk` copia il buffer a ogni blocco.
 
-- [ ] **Miglioramento #17 (Workspace Harness): testi residui in inglese**
+- [x] **Miglioramento #17 (Workspace Harness): testi residui in inglese**
   - **Verifica QA ciclo 6:** Ancora aperto: nessuna modifica ai testi residui in inglese.
   - **Problema:**
     - i titoli delle sessioni generati dal modello sono in inglese (es. "Hello, I'm a language model"), perché il prompt del generatore di titoli è in inglese;
@@ -232,7 +232,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
 
 ### Bug
 
-- [ ] **Bug #16 (media, sicurezza): il filtro su `-EncodedCommand` si aggira passando gli argomenti con `Start-Process -ArgumentList`**
+- [x] **Bug #16 (media, sicurezza): il filtro su `-EncodedCommand` si aggira passando gli argomenti con `Start-Process -ArgumentList`**
   - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_bypass_cycle4` passa su tutti e 3 i casi.
   - **Verifica QA ciclo 6:** ancora presente: `tools.py` non è cambiato e `test_encoded_filter_bypass_cycle4` passa su tutti e 3 i casi.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
@@ -243,7 +243,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
     - `Start-Process powershell -ArgumentList @('-e','<b64>')`.
   - **Correzione proposta:** dividere ogni argomento su spazi **e** virgole, togliere virgolette, `@(` e `)`, e controllare **ogni** parola, non solo la prima.
 
-- [ ] **Bug #17 (bassa): il filtro blocca comandi legittimi quando `powershell` o `pwsh` compaiono come argomento**
+- [x] **Bug #17 (bassa): il filtro blocca comandi legittimi quando `powershell` o `pwsh` compaiono come argomento**
   - **Verifica QA ciclo 5:** ancora presente: `test_encoded_filter_false_positive_cycle4` passa su entrambi i casi.
   - **Verifica QA ciclo 6:** ancora presente: `test_encoded_filter_false_positive_cycle4` passa su entrambi i casi.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
@@ -253,7 +253,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
     - considerare `powershell`/`pwsh` solo in **posizione di comando**: primo token di un segmento dopo `;`, `|`, `&&`, `||` o `&`, oppure `-FilePath`/primo argomento posizionale di `Start-Process`;
     - fermare la scansione degli argomenti al separatore di comando successivo.
 
-- [ ] **Bug #18 (media): se il primo "Apri documento" fallisce, l'apertura resta bloccata fino al riavvio dell'app**
+- [x] **Bug #18 (media): se il primo "Apri documento" fallisce, l'apertura resta bloccata fino al riavvio dell'app**
   - **Verifica QA ciclo 5:** ancora presente: `desktop/electron/main.cjs:199` usa ancora `supportedExtsPromise ??= engineFetch("/health")...` senza azzerare la cache in caso di errore.
   - **Verifica QA ciclo 6:** ancora presente: `main.cjs` non è cambiato dopo il ciclo 4.
   - **File:** `desktop/electron/main.cjs` (`supportedExtensions`).
@@ -264,7 +264,7 @@ Né nel ciclo 5 né nel ciclo 6 sono arrivati commit di correzione per queste vo
 
 ### Miglioramenti
 
-- [ ] **Miglioramento #13: segnalazioni di `ruff` e nessun test per la logica di apertura dei file**
+- [x] **Miglioramento #13: segnalazioni di `ruff` e nessun test per la logica di apertura dei file**
   - **Verifica QA ciclo 5:** ancora aperto: `ruff` segnala ancora `F821 Any` in `providers.py` (righe 198 e 220) e `F401 Any` in `ollama_hub.py`. Altre segnalazioni nel Miglioramento #14.
   - **Verifica QA ciclo 6:** ancora aperto: stesse segnalazioni F821/F401 di `ruff`, e nessun test per `assertOpenableTarget`.
   - **`providers.py`:** `F821 Undefined name 'Any'` alle righe 198 e 220, introdotto con `ensure_loaded(events: Any = None)`. Oggi funziona solo grazie a `from __future__ import annotations`; `typing.get_type_hints(ensure_loaded)` solleverebbe `NameError`.
@@ -702,3 +702,23 @@ Suite su Windows 11: motore **152 passati, 0 falliti** (compresi i test `live`; 
 - **Bug #25 — contesto LM Studio sovrastimato e predefinito casuale.** `avvia.ps1`: per i modelli caricati usa `loaded_context_length`, per quelli non caricati dichiara 4.096 token (il contesto con cui LM Studio li carica su richiesta), non più `max_context_length`. Il predefinito (se manca `workspace-agent` di Ollama) è nell'ordine: caricato con almeno 12.000 token e tool calling, caricato con almeno 12.000 token, con tool calling (`trained_for_tool_use` da `/api/v1/models`, se disponibile), primo dell'elenco. Se il predefinito non ha contesto sufficiente lo script lo carica con `POST /api/v1/models/load` e `context_length: 16384`, altrimenti avvisa. L'avviso «troppo pochi per l'agente» vale ora anche per LM Studio. **Non verificato dal vivo:** LM Studio non era avviabile su questo PC durante la correzione (`lms server start`: daemon non trovato); lo script si analizza senza errori in PowerShell 5.1.
 
 **Note per il Tester:** le sonde del ciclo 5 per il Bug #19 (`test_hub_delete_raises_typeerror`, `test_delete_route_answers_500`) ora falliscono per costruzione. Restano aperte le voci del ciclo 4 (Bug #16, #17, #18, Miglioramento #13) e i Miglioramenti #14, #16, #17 del ciclo 5; il #15 è coperto solo per `delete`. Da verificare nel ciclo 6: con LM Studio attivo, la scelta del modello predefinito e il caricamento a 16.384 token (Bug #25); un plugin reale installato dalla pagina "Plugin" (Bug #24). `ruff` segnala ancora `typing.Any` inutilizzato in `ollama_hub.py`, già nel Miglioramento #14.
+
+---
+
+## Soluzioni applicate (fase Developer, ciclo 6)
+
+Suite su Windows 11: motore **164 passati, 0 falliti, 1 deselezionato** (`pytest -m "not live"`; 1 nuovo file `engine/tests/test_regressions_qa_ciclo5.py` esteso con le regressioni dei Bug #16/#17 e del Miglioramento #15/#16); interfaccia: `tsc --noEmit` e `vite build` vanno a buon fine; processo Electron: `node --test electron/openable.test.cjs` 6/6; Workspace Harness: `npm test` passa tutti e 7 i controlli (aggiunto quello sul Bug #26).
+
+- **Bug #16 — filtro `-EncodedCommand` aggirabile con `Start-Process -ArgumentList`.** `agent/tools.py` (`_uses_encoded_command`) riscritto a segmenti di comando: `_segment_tokens` divide ogni argomento su spazi **e** virgole, toglie virgolette, `@(`, `)` e `,`, e il controllo di ogni parola avviene su **tutte** le parole, non solo sulla prima. I nomi di eseguibile riconosciuti includono anche `cmd` e `start` con gestione ricorsiva di `/c`. Le 3 forme di aggiramento del ciclo 4 sono bloccate. Test: `test_encoded_filter_bypass_cycle4_blocked` (3 casi) e `test_encoded_filter_no_new_false_positives` in `engine/tests/test_regressions_qa_ciclo5.py`.
+- **Bug #17 — falsi positivi su `powershell`/`pwsh` come argomento.** Lo scanner ora considera `powershell`/`pwsh` solo in **posizione di comando** (primo token di un segmento dopo `;`, `|`, `&&`, `||`, `&`, oppure `-FilePath`/primo argomento posizionale di `Start-Process`) e si ferma al separatore di comando successivo: `-ea` dopo `Get-Process pwsh` è di nuovo l'alias di `-ErrorAction`. Test: `test_encoded_filter_false_positive_cycle4_unblocked` (2 casi).
+- **Bug #18 — "Apri documento" bloccato dopo il primo fallimento.** La logica di `assertOpenableTarget` è stata spostata in un nuovo modulo CommonJS senza dipendenze da Electron, `desktop/electron/openable.cjs`: la promessa della cache è azzerata in caso di errore (`.catch((e) => { cache = null; throw e })`), quindi il tentativo successivo riprova davvero. `main.cjs` usa il modulo. Test: `desktop/electron/openable.test.cjs` con `node --test` (6 test, inclusa la simulazione del primo tentativo fallito e dei 3 successivi).
+- **Miglioramento #13 — `ruff` e test di `assertOpenableTarget`.** `typing.Any` importato in `providers.py` (le annotazioni di `ensure_loaded` risolvono ora con `get_type_hints`), import inutilizzati rimossi da `ollama_hub.py`, `test_agent.py` e `test_regressions_qa_ciclo2.py`; test di `assertOpenableTarget` in `openable.test.cjs` (vedi Bug #18). `ruff` non è installato nella venv di sviluppo: le 5 segnalazioni elencate dal Tester (2× F821 `Any`, F401 `Any`, 2× F401 nei test) corrispondono uno-a-uno alle modifiche sopra, verificabili a vista; chiedo conferma con `ruff check` nel ciclo 7.
+- **Miglioramento #14 — configurazione di `ruff`.** `engine/pyproject.toml` ora dichiara `[tool.ruff] target-version = "py312"`: il falso positivo `F821 BaseExceptionGroup` in `agent/mcp.py:243` sparisce (Python 3.12).
+- **Miglioramento #15 — test HTTP del hub a livello di trasporto (completato).** `ollama_hub` accetta ora l'iniezione del trasporto: `set_transport()` / `_transport` usati da `status`, `pull`, `installed_names`, `load`, `unload` e `delete` (i test non sostituiscono più le funzioni del modulo). Test in `test_regressions_qa_ciclo5.py`: `test_hub_load_sends_generate_with_keep_alive`, `test_hub_load_falls_back_to_embed_with_keep_alive` (ripiego `/api/embed` con `keep_alive` nel body), `test_hub_unload_sends_post`, `test_hub_pull_posts_to_api_pull`.
+- **Miglioramento #16 — DNS rebinding su `fetch_url`.** `agent/web.py`: `_pinned_target` fissa l'IP già validato nella connessione (transport con `sni_hostname` e header `Host` originali), eliminando la finestra tra il controllo e la risoluzione del nome; il corpo della risposta usa `bytearray`. Test: `test_fetch_url_pins_validated_ip` e `test_fetch_url_uses_bytearray_body` in `test_regressions_qa_ciclo5.py`.
+- **Miglioramento #17 — testi residui in inglese.** Verificato con `dsh --dump-config-schema` (dsh 0.2.1-rc.2): lo schema della riga `session-title-llm` espone solo `targetWords`/`targetCjkCharacters`/`maxInputBytes`/`maxOutputTokens`/`timeoutMs`/`provider`/`model` — **nessun campo prompt**, quindi la sovrascrittura proposta non è applicabile; il system prompt integrato dice già "Use the language of the messages". Limite documentato in `harness/README.md` (nuova nota "Due limiti noti del runtime dsh 0.2.1-rc.2"), insieme alla nota su pnpm/corepack del Bug #24. Le descrizioni dei plugin in inglese restano un limite del runtime, non del profilo.
+- **Bug #26 — junction orfano che blocca l'avvio / cancella l'altra copia.** `harness/avvia.ps1`: il ciclo dei plugin usa `Get-Item -LiteralPath $link -Force` (non segue il collegamento) invece di `Test-Path`; la rimozione avviene solo con `[System.IO.Directory]::Delete($link)` (senza ricorsione, mai `Remove-Item -Recurse` su un junction); il confronto del target usa `[IO.Path]::GetFullPath` su entrambi i lati. Una cartella reale (non link) continua a essere sostituita normalmente. Test mirato: `harness/tools/testa-junction.ps1` (5 scenari: junction valido intoccato, orfano rilevato, orfano sostituito, riattacco verso altra copia, contenuto dell'altra copia intatto) richiamato anche da `npm test` della Harness (solo su Windows). **Verificato su Windows 11 con PowerShell 5.1: 5/5.**
+- **Bug #27 — contesto Ollama sempre 4.096 e file utente riscritto.** `harness/avvia.ps1`: per i modelli già caricati si legge `context_length` da `/api/ps` (con guardia se il campo manca); poi `num_ctx` del Modelfile; poi `OLLAMA_CONTEXT_LENGTH` da ambiente utente e macchina; infine 4.096. La riscrittura silenziosa di `cordis.patch.yml` è stata tolta: ora solo un avviso suggerisce `workspace-agent` (sintassi verificata; la logica contro Ollama reale non è stata eseguita).
+- **Miglioramento #18 — seconda istanza in LM Studio.** `harness/avvia.ps1`: prima di caricare il modello scelto con 16.384 token, se è già `loaded` con contesto insufficiente lo script scarica prima la vecchia istanza (`POST /api/v1/models/unload`, eventuale errore ignorato) e poi carica. **Verificabile solo su Windows con LM Studio 0.3.x attivo: non eseguito dal vivo in questa correzione** (come per il Bug #25 al ciclo 5).
+
+**Note per il Tester:** le sonde del ciclo 4 (`test_encoded_filter_bypass_cycle4`, `test_encoded_filter_false_positive_cycle4`) ora falliscono per costruzione: le regressioni con asserzione invertita sono in `engine/tests/test_regressions_qa_ciclo5.py`. Il controllo "profilo workspace composto da dsh" di `harness/tools/test.mjs` copia ora i plugin invece di collegarli con junction: i junction verso la repo venivano seguiti dal gestore plugin di dsh (pnpm), che **svuotava** `harness/plugins/*` — stessa causa del Bug #26; con la copia la repo resta intatta a ogni `npm test`. Da verificare nel ciclo 7: su Windows, Bug #27 e Miglioramento #18 contro Ollama/LM Studio reali, e `ruff check` (segnalazioni attese: 0).

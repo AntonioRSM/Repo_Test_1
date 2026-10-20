@@ -63,27 +63,48 @@ class WebError(RuntimeError):
     pass
 
 
-async def _validate_url(url: str) -> None:
+async def _validate_url(url: str) -> list[str]:
     """Resolves the host and rejects private/loopback/link-local destinations (SSRF guard).
 
-    Note: this validates the IPs returned at check time; a hostile DNS could later
-    rebind them (DNS rebinding). For a localhost assistant the residual risk is low,
-    but keep the tool behind user approval."""
+    Returns the validated IP addresses. Callers should connect to one of THESE
+    IPs (see _pinned_target): resolving the name again at connection time would
+    reopen the DNS-rebinding window (Miglioramento #16)."""
     parsed = httpx.URL(url)
     host = parsed.host
     if not host:
         raise WebError("URL senza host")
     try:
-        ips = [ipaddress.ip_address(host.strip("[]"))]
+        ips = [str(ipaddress.ip_address(host.strip("[]")))]
     except ValueError:
         try:
             infos = await asyncio.to_thread(socket.getaddrinfo, host, parsed.port or 443, proto=socket.IPPROTO_TCP)
         except socket.gaierror as exc:
             raise WebError(f"host non risolvibile: {host}") from exc
-        ips = [ipaddress.ip_address(info[4][0]) for info in infos]
-    blocked = [str(ip) for ip in ips if _is_blocked(ip)]
+        ips = list(dict.fromkeys(str(ipaddress.ip_address(info[4][0])) for info in infos))
+    blocked = [ip for ip in ips if _is_blocked(ipaddress.ip_address(ip))]
     if blocked:
         raise WebError(f"destinazione privata o locale non consentita: {host} ({', '.join(blocked)})")
+    return ips
+
+
+def _pinned_target(url: str, ip: str) -> tuple[httpx.URL, dict[str, str], dict]:
+    """Builds the request target that pins the connection to an ALREADY VALIDATED IP.
+
+    DNS rebinding closes: between the SSRF check and the connection a hostile DNS
+    (TTL 0) could swap a public IP for 127.0.0.1, because httpx would resolve the
+    name a second time. Connecting to the validated IP removes the second lookup;
+    the original Host header and TLS SNI are preserved so name-based hosting and
+    certificates keep working."""
+    parsed = httpx.URL(url)
+    host = parsed.host  # brackets stripped by httpx for IPv6 literals
+    bracketed_host = f"[{host}]" if ":" in host else host
+    bracketed_ip = f"[{ip}]" if ":" in ip else ip
+    default_port = 443 if parsed.scheme == "https" else 80
+    port = parsed.port or default_port
+    host_header = bracketed_host if port == default_port else f"{bracketed_host}:{port}"
+    headers = {"Host": host_header}
+    extensions = {"sni_hostname": host} if parsed.scheme == "https" else {}
+    return parsed.copy_with(host=bracketed_ip), headers, extensions
 
 
 class _DdgParser(HTMLParser):
@@ -204,9 +225,11 @@ async def fetch_url(url: str, max_chars: int = 12000) -> dict:
     async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": USER_AGENT}) as client:
         try:
             for _ in range(MAX_REDIRECTS + 1):
-                await _validate_url(current)
-                async with client.stream("GET", current, follow_redirects=False) as resp:
-                    body = b""
+                ips = await _validate_url(current)
+                pinned, hop_headers, extensions = _pinned_target(current, ips[0])
+                async with client.stream("GET", pinned, headers=hop_headers, extensions=extensions, follow_redirects=False) as resp:
+                    # bytearray: body += chunk on bytes copies the whole buffer per block.
+                    body = bytearray()
                     async for chunk in resp.aiter_bytes():
                         body += chunk
                         if len(body) > MAX_PAGE_BYTES:
@@ -215,7 +238,7 @@ async def fetch_url(url: str, max_chars: int = 12000) -> dict:
                     if status in (301, 302, 303, 307, 308) and resp.headers.get("location"):
                         current = urljoin(current, resp.headers["location"])
                         continue
-                    final_url = str(resp.url)
+                    final_url = current  # the original (unpinned) URL, not the IP
                     encoding = resp.encoding or "utf-8"
                     break
             else:

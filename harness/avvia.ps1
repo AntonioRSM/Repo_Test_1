@@ -1,4 +1,4 @@
-﻿# Avvia Workspace Harness: DeepSeek Harness (MIT) con il profilo Workspace OS, in italiano,
+# Avvia Workspace Harness: DeepSeek Harness (MIT) con il profilo Workspace OS, in italiano,
 # con il marchio Workspace e i modelli locali (Ollama / LM Studio) già collegati.
 # Uso: collegamento "Workspace Harness" nel menu Start, oppure
 #   powershell -ExecutionPolicy Bypass -File harness\avvia.ps1 [-Porta 18790] [-NonAprire] [-Cartella <percorso>]
@@ -53,11 +53,19 @@ $Scope = Join-Path $Profilo 'node_modules\@workspace-sm'
 New-Item -ItemType Directory -Force -Path $Scope | Out-Null
 foreach ($p in 'dsh-workspace-brand', 'dsh-workspace-it') {
     $link = Join-Path $Scope $p
-    $target = Join-Path $Harness "plugins\$p"
-    if (Test-Path $link) {
-        $item = Get-Item $link -Force
-        if ($item.LinkType -eq 'Junction' -and $item.Target -contains $target) { continue }
-        Remove-Item $link -Recurse -Force
+    $target = [IO.Path]::GetFullPath((Join-Path $Harness "plugins\$p"))
+    # Bug #26: Test-Path SEGUE il collegamento e restituisce $false per un junction orfano
+    # (destinazione spostata/cancellata): New-Item falliva a ogni avvio. Peggio: Remove-Item
+    # -Recurse in Windows PowerShell 5.1 cancella il CONTENUTO della cartella di destinazione
+    # di un junction — con due copie del progetto si distruggevano i plugin dell'altra.
+    # Get-Item -LiteralPath non segue il collegamento; [System.IO.Directory]::Delete toglie
+    # solo il collegamento, senza toccare la destinazione.
+    $item = Get-Item -LiteralPath $link -Force -ErrorAction SilentlyContinue
+    if ($item) {
+        $destinazione = if ($item.Target) { [IO.Path]::GetFullPath(@($item.Target)[0]) } else { $null }
+        if ($item.LinkType -eq 'Junction' -and $destinazione -eq $target) { continue }
+        if ($item.LinkType -eq 'Junction' -or $item.LinkType -eq 'SymbolicLink') { [System.IO.Directory]::Delete($link) }
+        else { Remove-Item -LiteralPath $link -Recurse -Force }   # cartella reale, non collegamento
     }
     New-Item -ItemType Junction -Path $link -Target $target | Out-Null
 }
@@ -71,12 +79,27 @@ $Nascosti = @()        # modelli Ollama con contesto troppo piccolo per l'agente
 
 $Ollama = Leggi 'http://127.0.0.1:11434/api/tags'
 if ($Ollama) {
+    # Bug #27: il contesto effettivo non dipende solo da num_ctx del Modelfile. Vale anche il
+    # contesto del server (variabile OLLAMA_CONTEXT_LENGTH, es. 32.768 per tutti i modelli) e,
+    # per i modelli già caricati, quello reale riportato da /api/ps. Ignorarli nascondeva
+    # all'agente modelli perfettamente utilizzabili.
+    $ctxServer = [Environment]::GetEnvironmentVariable('OLLAMA_CONTEXT_LENGTH', 'User')
+    if (-not $ctxServer) { $ctxServer = [Environment]::GetEnvironmentVariable('OLLAMA_CONTEXT_LENGTH', 'Machine') }
+    $caricati = @{}
+    $ps = Leggi 'http://127.0.0.1:11434/api/ps'
+    # Contesto reale per i modelli caricati: /api/ps può omettere context_length
+    # ([int]$null darebbe 0 e il modello verrebbe nascosto per errore).
+    if ($ps) { foreach ($m in $ps.models) { if ($m.context_length) { $caricati[$m.name] = [int]$m.context_length } } }
     $modelli = @()
     foreach ($m in $Ollama.models) {
         $info = try { Invoke-RestMethod 'http://127.0.0.1:11434/api/show' -Method Post -Body (@{ model = $m.name } | ConvertTo-Json) -TimeoutSec 5 } catch { $null }
         if ($info -and $info.capabilities -and -not ($info.capabilities -contains 'completion')) { continue }   # solo embedding
-        $ctx = 4096
-        if ($info.parameters -match 'num_ctx\s+(\d+)') { $ctx = [int]$Matches[1] }
+        # Precedenza: contesto reale del modello già caricato, poi num_ctx del Modelfile,
+        # poi il contesto predefinito del server, infine il valore di fallback di Ollama.
+        if ($caricati.ContainsKey($m.name)) { $ctx = $caricati[$m.name] }
+        elseif ($info -and $info.parameters -match 'num_ctx\s+(\d+)') { $ctx = [int]$Matches[1] }
+        elseif ($ctxServer -match '^\d+$') { $ctx = [int]$ctxServer }
+        else { $ctx = 4096 }
         # Il prompt dell'agente occupa circa 8.500 token: un modello che Ollama carica con meno contesto
         # fallisce a ogni messaggio ("request exceeds the available context size"), quindi non si offre.
         if ($ctx -lt 12000) { $Nascosti += $m.name; continue }
@@ -119,6 +142,14 @@ if ($LmStudio) {
             if ($scelto.contextWindow -lt 12000) {
                 Riga "Carico $($scelto.id) in LM Studio con un contesto di $ContestoAgente token (può richiedere qualche minuto)..."
                 try {
+                    # Miglioramento #18: se il modello è già caricato con un contesto più piccolo,
+                    # caricarlo senza scaricarlo prima può creare una seconda istanza (il doppio della
+                    # RAM/VRAM) restando instradati sulla prima: lo si scarica, poi si ricarica.
+                    if ($scelto.caricato) {
+                        try {
+                            Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/unload' -Method Post -Body (@{ model = $scelto.id } | ConvertTo-Json) -ContentType 'application/json' -TimeoutSec 120 | Out-Null
+                        } catch { }
+                    }
                     $corpo = @{ model = $scelto.id; context_length = $ContestoAgente } | ConvertTo-Json
                     Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/load' -Method Post -Body $corpo -ContentType 'application/json' -TimeoutSec 300 | Out-Null
                     $scelto.contextWindow = $ContestoAgente
@@ -143,16 +174,14 @@ if (-not $Rotte.Count) { Avviso 'Nessun modello locale trovato (Ollama o LM Stud
 if (-not $Predefinito -and $Rotte.Contains('ollama-locale')) { $Predefinito = @('ollama-locale', $Rotte['ollama-locale'].models[0].id) }
 if ($Predefinito) { Riga "Modello predefinito: $($Predefinito[1])" }
 
-# Un modello predefinito salvato dalle Impostazioni su un modello Ollama non più offerto (es.
-# qwen3:4b-instruct a 4.096 token) passa al modello dell'agente: il resto della scelta dell'utente resta.
+# Bug #27: se il modello salvato dalle Impostazioni non è più offerto (contesto troppo piccolo),
+# NON si riscrive più il suo file in silenzio: si avvisa e la scelta resta all'utente.
 $PatchUtente = Join-Path $Profilo 'cordis.patch.yml'
 if ($Nascosti.Count -and $Predefinito -and $Predefinito[0] -eq 'ollama-locale' -and (Test-Path $PatchUtente)) {
     $testo = [IO.File]::ReadAllText($PatchUtente)
     $nomi = ($Nascosti | ForEach-Object { [regex]::Escape($_) }) -join '|'
-    $nuovo = [regex]::Replace($testo, "(?m)^(\s*provider:\s*[`"']?ollama-locale[`"']?\s*\r?\n\s*model:\s*)[`"']?(?:$nomi)[`"']?[ \t]*(?=\r?$)", "`${1}$($Predefinito[1])")
-    if ($nuovo -ne $testo) {
-        [IO.File]::WriteAllText($PatchUtente, $nuovo, (New-Object Text.UTF8Encoding $false))
-        Riga "Il modello scelto nelle Impostazioni ha un contesto troppo piccolo: uso $($Predefinito[1])"
+    if ([regex]::IsMatch($testo, "(?m)^\s*provider:\s*[`"']?ollama-locale[`"']?\s*\r?\n\s*model:\s*[`"']?(?:$nomi)[`"']?[ \t]*(?=\r?$)")) {
+        Avviso "Il modello scelto nelle Impostazioni ha un contesto troppo piccolo per l'agente: aprilo e cambialo (suggerito: $($Predefinito[1]))."
     }
 }
 
