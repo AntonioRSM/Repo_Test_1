@@ -20,7 +20,14 @@ engine/    Python 3.12: FastAPI su 127.0.0.1, LanceDB, PyMuPDF, RapidOCR-ONNX, w
    (oppure il file ZIP del ramo, ma senza git l'aggiornamento automatico non è disponibile).
 2. Doppio clic su **`INSTALLA.bat`**. Se mancano installa con `winget` **uv** (che scarica Python 3.12) e
    **Node.js LTS**, poi prepara il motore (`uv sync --no-build`) e compila l'interfaccia (`npm install`, `npm run build`).
-3. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
+3. **Modelli locali.** Se LM Studio non è installato, l'installer installa **Ollama** con `winget`, lo avvia
+   e scarica `bge-m3` (embedding multilingue, ~1,2 GB) e `qwen3:4b-instruct` (LLM con tool calling per l'agente,
+   ~2,5 GB, funziona anche senza GPU). Poi li imposta come modelli predefiniti, ma solo dove in
+   Impostazioni non ne hai già scelto uno. Ollama parte con Windows; altri modelli si scaricano dalla
+   pagina **Modelli**.
+   - `INSTALLA.bat -Ollama` installa Ollama anche se LM Studio è presente;
+   - `INSTALLA.bat -SenzaModelli` salta questo passo.
+4. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
    - **RAG Vault Studio**: avvia l'app;
    - **Manuale RAG Vault Studio**: il manuale d'uso;
    - **Aggiorna RAG Vault Studio** (solo se la cartella è un clone git): `git pull` e reinstallazione.

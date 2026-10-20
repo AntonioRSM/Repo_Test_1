@@ -1,7 +1,9 @@
 ﻿# Installa o aggiorna RAG Vault Studio su Windows 11 e crea i collegamenti nel menu Start.
 # Avvio: doppio clic su INSTALLA.bat nella cartella principale del progetto.
 # Con -Aggiorna (usato dal collegamento "Aggiorna RAG Vault Studio") scarica prima l'ultima versione con git.
-param([switch]$Aggiorna)
+# Senza LM Studio installa Ollama e scarica i modelli predefiniti; -Ollama lo fa anche se LM Studio c'è,
+# -SenzaModelli salta del tutto il passo dei modelli locali.
+param([switch]$Aggiorna, [switch]$Ollama, [switch]$SenzaModelli)
 
 $ErrorActionPreference = 'Continue'   # gli errori gravi sono gestiti esplicitamente
 
@@ -59,7 +61,7 @@ if ($Aggiorna) {
 }
 
 # ---------------------------------------------------------------- 1. prerequisiti
-Passo '1/4 Prerequisiti: uv (gestisce Python 3.12) e Node.js'
+Passo '1/5 Prerequisiti: uv (gestisce Python 3.12) e Node.js'
 Aggiorna-Path
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) { Installa-Winget 'astral-sh.uv' 'uv' }
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) { Esci 'uv non trovato dopo l''installazione. Chiudi questa finestra e rilancia INSTALLA.bat.' }
@@ -70,7 +72,7 @@ if ((Versione-Node) -lt 22) { Esci 'Serve Node.js 22 o successivo. Chiudi questa
 Write-Host "Node.js: $(& node --version)"
 
 # ---------------------------------------------------------------- 2. motore Python
-Passo '2/4 Motore Python (scarica Python 3.12 se manca)'
+Passo '2/5 Motore Python (scarica Python 3.12 se manca)'
 Push-Location $Engine
 & uv sync --no-build
 $esito = $LASTEXITCODE
@@ -78,7 +80,7 @@ Pop-Location
 if ($esito -ne 0 -or -not (Test-Path (Join-Path $Engine '.venv\Scripts\python.exe'))) { Esci 'Installazione del motore non riuscita (uv sync).' }
 
 # ---------------------------------------------------------------- 3. interfaccia desktop
-Passo '3/4 Interfaccia desktop (Electron + React)'
+Passo '3/5 Interfaccia desktop (Electron + React)'
 Push-Location $Desktop
 & npm.cmd install --no-audit --no-fund
 $esito = $LASTEXITCODE
@@ -87,8 +89,26 @@ Pop-Location
 if ($esito -ne 0) { Esci 'Installazione o compilazione dell''interfaccia non riuscita (npm).' }
 if (-not (Test-Path $Electron)) { Esci "Electron non trovato in $Electron." }
 
-# ---------------------------------------------------------------- 4. menu Start
-Passo '4/4 Collegamenti nel menu Start'
+# ---------------------------------------------------------------- 4. modelli locali
+Passo '4/5 Modelli locali (LM Studio oppure Ollama)'
+$ModelliOllama = $null
+if ($SenzaModelli) {
+    Write-Host 'Saltato (-SenzaModelli).'
+} else {
+    . (Join-Path $PSScriptRoot 'ollama.ps1') -Forza:$Ollama
+    $ModelliOllama = Prepara-Ollama
+    if ($ModelliOllama.Pronto) {
+        # Imposta i modelli predefiniti solo dove l'utente non ha già scelto in Impostazioni.
+        $argomenti = @('--provider', 'ollama')
+        if ($ModelliOllama.Embedding) { $argomenti += @('--embedding', $ModelliOllama.Embedding) }
+        if ($ModelliOllama.Llm) { $argomenti += @('--llm', $ModelliOllama.Llm) }
+        & (Join-Path $Engine '.venv\Scripts\python.exe') -X utf8 (Join-Path $Engine 'scripts\configure_models.py') @argomenti
+        if ($LASTEXITCODE -ne 0) { Avviso 'Modelli predefiniti non impostati: sceglili in Impostazioni → Model Router.' }
+    }
+}
+
+# ---------------------------------------------------------------- 5. menu Start
+Passo '5/5 Collegamenti nel menu Start'
 New-Item -ItemType Directory -Force -Path $MenuStart | Out-Null
 $Shell = New-Object -ComObject WScript.Shell
 function Collegamento($nome, $target, $argomenti, $cartella, $icona, $descr) {
@@ -115,7 +135,12 @@ if (Test-Path (Join-Path $Radice '.git')) {
 
 Write-Host "`nInstallazione completata." -ForegroundColor Green
 Write-Host 'Apri il menu Start e cerca:  RAG Vault Studio'
-Write-Host 'Ricorda di avviare LM Studio (o Ollama) con un modello di embedding, es. bge-m3.'
+if ($ModelliOllama -and $ModelliOllama.Pronto) {
+    Write-Host "Modelli locali con Ollama: embedding $($ModelliOllama.Embedding), LLM $($ModelliOllama.Llm)."
+    Write-Host 'Ollama parte con Windows; altri modelli si scaricano dalla pagina Modelli dell''app.'
+} else {
+    Write-Host 'Ricorda di avviare LM Studio (o Ollama) con un modello di embedding, es. bge-m3.'
+}
 if ((Read-Host "`nAvviare RAG Vault Studio adesso? (S/N)") -match '^[sS]') {
     Start-Process -FilePath $Electron -ArgumentList "`"$Desktop`"" -WorkingDirectory $Desktop
 }
