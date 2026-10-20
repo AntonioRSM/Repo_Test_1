@@ -1,23 +1,64 @@
-# FEEDBACK QA – ciclo 3
+# FEEDBACK QA – ciclo 4
 
-**Ambito:** commit `8da243b..21b104e` sul branch `claude/workspace-os-installer` (PR #20):
-- `eafcb1a`: Miglioramenti #1-#9 (prestazioni, sicurezza, copertura dei test);
-- `21b104e`: correzioni di Bug #1-#7 e Miglioramenti #1-#6 del ciclo 2.
+**Ambito:** commit `3f02398..b91580b` sul branch `claude/workspace-os-installer` (PR #20): `b91580b`, correzioni di Bug #8-#15 e Miglioramenti #7-#12 del ciclo 3.
 
-**Esito:** NON APPROVATO. Le voci del ciclo 2 sono risolte e i test passano, ma ci sono 8 bug nuovi (uno ad alta priorità) e 6 miglioramenti.
+**Esito:** NON APPROVATO. Tutte le voci del ciclo 3 sono risolte e i test passano. Restano 3 bug nuovi di gravità media o bassa e 1 miglioramento: niente di bloccante come il Bug #8.
 
 **Test eseguiti (Linux):**
-- Suite completa (`uv run pytest`): 123 passati, 1 saltato, 1 fallito. Il test fallito è `test_mcp.py::test_stdio_server_lifecycle_and_secrets`, che usa DPAPI e funziona solo su Windows: è atteso.
+- Suite completa (`uv run pytest`): 145 passati, 1 saltato, 1 fallito. Il test fallito è `test_mcp.py::test_stdio_server_lifecycle_and_secrets` (DPAPI, solo Windows): è atteso. Lo sviluppatore riporta 146 su 146 su Windows.
 - Interfaccia: `npm ci` e `npm run build` vanno a buon fine.
-- Sonde del ciclo 2: 11 su 13 ora falliscono, quindi quei difetti sono corretti. Le altre 2 passano per come sono scritte: la vecchia route DELETE risponde 404 per scelta, e la sonda su `list_directory` misurava solo il tempo.
-- Sonde del ciclo 3: 11 su 11 confermano i difetti qui sotto. Il codice è in fondo al file.
-- Ho escluso un sospetto: se l'avvio del motore fallisce, il nuovo `__main__._serve` non si blocca, perché uvicorn esce con codice 3.
+- Sonde del ciclo 3: 10 su 11 ora falliscono, quindi quei difetti sono corretti. L'undicesima, `test_scan_is_case_sensitive`, passa ancora solo perché la correzione vale per Windows e qui gira Linux.
+- Sonde del ciclo 4: 5 su 5 confermano i difetti qui sotto, più un controllo positivo che verifica la correzione del Bug #15. Il codice è in fondo al file.
+- `ruff check vault_engine`: 3 segnalazioni (vedi Miglioramento #13).
 
 ---
 
-## Ciclo 3 – Bug
+## Ciclo 4 – Bug
+
+- [ ] **Bug #16 (media, sicurezza): il filtro su `-EncodedCommand` si aggira passando gli argomenti con `Start-Process -ArgumentList`**
+  - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
+  - **Causa:** per ogni argomento tra virgolette il filtro controlla solo la **prima parola**, e una lista separata da virgole diventa un unico token `\S+` che inizia con `,` o `@(`.
+  - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle4`):
+    - `Start-Process powershell -ArgumentList '-NoProfile -e <b64>'`: la prima parola è `-NoProfile`;
+    - `Start-Process powershell -ArgumentList '-NoProfile','-e','<b64>'`: il token è `,'-e','<b64>'`;
+    - `Start-Process powershell -ArgumentList @('-e','<b64>')`.
+  - **Correzione proposta:** dividere ogni argomento su spazi **e** virgole, togliere virgolette, `@(` e `)`, e controllare **ogni** parola, non solo la prima.
+
+- [ ] **Bug #17 (bassa): il filtro blocca comandi legittimi quando `powershell` o `pwsh` compaiono come argomento**
+  - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
+  - **Causa:** appena trova un token con nome `powershell`/`pwsh`, il filtro esamina **tutti** i token successivi, anche quando quel nome è un argomento di un altro cmdlet. In quel caso `-ea` è l'alias comunissimo di `-ErrorAction`.
+  - **Come riprodurlo:** `Get-Process pwsh -ea SilentlyContinue` e `Stop-Process -Name powershell -ea 0` vengono rifiutati come "comandi codificati". Sonda: `test_encoded_filter_false_positive_cycle4`.
+  - **Correzione proposta:**
+    - considerare `powershell`/`pwsh` solo in **posizione di comando**: primo token di un segmento dopo `;`, `|`, `&&`, `||` o `&`, oppure `-FilePath`/primo argomento posizionale di `Start-Process`;
+    - fermare la scansione degli argomenti al separatore di comando successivo.
+
+- [ ] **Bug #18 (media): se il primo "Apri documento" fallisce, l'apertura resta bloccata fino al riavvio dell'app**
+  - **File:** `desktop/electron/main.cjs` (`supportedExtensions`).
+  - **Causa:** `supportedExtsPromise ??= engineFetch("/health")...` memorizza anche una promessa **rifiutata**. Se la prima richiesta capita mentre il motore non è pronto o si sta riavviando, ogni apertura successiva fallisce subito senza riprovare.
+  - **Effetti:** il messaggio "apertura consentita solo per i documenti supportati dei Vault" compare per qualunque documento finché non si chiude e riapre l'app.
+  - **Come riprodurlo** (simulazione Node dello stesso schema): con un `engineFetch` che fallisce solo la prima volta, i tentativi 1, 2 e 3 falliscono tutti e `/health` viene chiamato una sola volta.
+  - **Correzione proposta:** `engineFetch(...).then(...).catch((e) => { supportedExtsPromise = null; throw e; })`; in aggiunta, azzerare la cache quando il motore si riavvia.
+
+---
+
+## Ciclo 4 – Miglioramenti
+
+- [ ] **Miglioramento #13: segnalazioni di `ruff` e nessun test per la logica di apertura dei file**
+  - **`providers.py`:** `F821 Undefined name 'Any'` alle righe 198 e 220, introdotto con `ensure_loaded(events: Any = None)`. Oggi funziona solo grazie a `from __future__ import annotations`; `typing.get_type_hints(ensure_loaded)` solleverebbe `NameError`.
+  - **`ollama_hub.py`:** `F401 'typing.Any' imported but unused`.
+  - **Proposta:** importare `Any` in `providers.py`, togliere l'import inutile e aggiungere `ruff check` ai controlli che si lanciano prima di ogni push.
+  - **Test mancanti:** la logica di `assertOpenableTarget` (Miglioramento #8 e Bug #18) non ha test automatici. Spostarla in un modulo CommonJS senza dipendenze da Electron e testarla con `node --test`.
+
+---
+
+## Verifica delle voci del ciclo 3
+
+Tutte le voci del ciclo 3 sono corrette e verificate. Le regressioni sono in `engine/tests/test_regressions_qa_ciclo3.py`. Il codice delle sonde del ciclo 3 è stato tolto: ora che i difetti sono corretti lo sostituiscono quei test.
+
+### Bug
 
 - [x] **Bug #8 (alta): il pulsante "Scarica" della pagina Modelli fallisce sempre**
+  - **Verifica QA ciclo 4:** Verificato: `on_progress` ora asincrono (`_report_pull_progress`). La sonda ora fallisce e c'è un test end-to-end che non sostituisce `start_pull`.
   - **File:** `engine/vault_engine/app.py` (`ollama_pull`) e `engine/vault_engine/ollama_hub.py` (`pull`).
   - **Causa:** `ollama_pull` passa a `start_pull` una `lambda` sincrona come `on_progress`: restituisce il risultato di `state.events.publish(...)`, cioè `None`. Ma `pull()` esegue `await on_progress(event)`, quindi alla prima riga di avanzamento solleva `TypeError: object NoneType can't be used in 'await' expression`.
   - **Effetti:** ogni download avviato dalla pagina Modelli finisce subito in "Errore". Il test di regressione `test_regressions_qa_ciclo2.py` sostituisce `start_pull` con un finto, quindi non se ne accorge.
@@ -25,6 +66,7 @@
   - **Correzione proposta:** trasformare `on_progress` in una `async def`, come `_report_pull_done`, e aggiungere un test end-to-end di `/ollama/pull` che non sostituisca `start_pull`.
 
 - [x] **Bug #9 (media): il download avviato da una ricerca o domanda (risposta 409) non segnala mai l'esito**
+  - **Verifica QA ciclo 4:** Verificato: arrivano `download_completato`/`errore` anche dal percorso 409, e senza callback l'errore finisce nel log.
   - **File:** `engine/vault_engine/providers.py` (`ensure_loaded`, ramo `allow_download=False`) e `engine/vault_engine/ollama_hub.py` (`start_pull`).
   - **Causa:** `start_pull` viene chiamata senza `on_finished` né `on_error`.
   - **Effetti:**
@@ -34,6 +76,7 @@
   - **Correzione proposta:** passare `on_finished`/`on_error` che pubblichino `download_completato`/`errore` (lo stesso `report`) e, in `start_pull`, scrivere nel log l'eccezione quando `on_error` manca.
 
 - [x] **Bug #10 (media): la libreria segna come "installato" un modello di cui è presente solo un'altra variante**
+  - **Verifica QA ciclo 4:** Verificato nel codice: confronto esatto con `:latest` più l'indicazione "altre varianti installate". `tsc` e la build passano.
   - **File:** `desktop/src/pages/Models.tsx` (`installedNames`).
   - **Causa:** dopo il Miglioramento #5 il confronto avviene senza tag da entrambe le parti: con solo `qwen2.5:0.5b` installato, la riga `qwen2.5` della libreria mostra ✓ e "installato". È l'equivalente nell'interfaccia del Bug #3, appena corretto nel motore.
   - **Effetti:** dalla libreria non si può più scaricare la versione predefinita (`:latest`) di un modello di cui si ha un'altra variante.
@@ -41,6 +84,7 @@
   - **Correzione proposta:** normalizzare come nel motore: il nome della libreria diventa `nome:latest` e va confrontato esattamente con i nomi installati. Eventualmente mostrare "altre varianti installate: …".
 
 - [x] **Bug #11 (media, sicurezza): il filtro su `-EncodedCommand` si aggira ancora**
+  - **Verifica QA ciclo 4:** Verificato: i 4 aggiramenti del ciclo 3 sono bloccati. Restano altre forme con `Start-Process -ArgumentList`: vedi Bug #16.
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`).
   - **Comandi codificati che passano il filtro** (sonda `test_encoded_filter_bypass_cycle3`):
     - percorso completo: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -e <b64>`, perché il token non è uguale a `powershell.exe`;
@@ -53,6 +97,7 @@
     - dividere sugli spazi gli argomenti tra virgolette prima di controllarne il prefisso.
 
 - [x] **Bug #12 (media, sicurezza): la protezione SSRF di `fetch_url` si aggira con indirizzi IPv6 che rappresentano indirizzi IPv4**
+  - **Verifica QA ciclo 4:** Verificato: `::ffff:127.0.0.1` è bloccato. Vengono usati anche `ipv4_mapped`, NAT64, `198.18.0.0/15` e le proprietà `is_private`/`is_loopback`/….
   - **File:** `engine/vault_engine/agent/web.py` (`_BLOCKED_NETWORKS` e `_validate_url`).
   - **Causa:** `::ffff:127.0.0.1` è un `IPv6Address`, che non risulta contenuto in nessuna rete IPv4 dell'elenco, quindi non viene bloccato. Lo stesso vale per `::ffff:192.168.x.x` e `::ffff:10.x.x.x`. Mancano anche `64:ff9b::/96` (NAT64) e `198.18.0.0/15`.
   - **Effetti:** su sistemi dual-stack (Windows lo è) l'agente può raggiungere servizi locali, per esempio `http://[::ffff:127.0.0.1]:11434/api/delete` di Ollama, o host della rete locale.
@@ -62,6 +107,7 @@
     - in più usare le proprietà `ip.is_private`, `is_loopback`, `is_link_local`, `is_reserved`, `is_unspecified` e `is_multicast` invece del solo elenco manuale.
 
 - [x] **Bug #13 (media, regressione): `list_directory` con il pattern predefinito `*` percorre tutto il sottoalbero e segnala `truncated: true` a torto**
+  - **Verifica QA ciclo 4:** Verificato: con `*` non si scende nelle sottocartelle e `truncated` è corretto.
   - **File:** `engine/vault_engine/agent/tools.py` (`_scan_directory`).
   - **Causa:** `os.walk` scende sempre in profondità, anche quando il pattern (es. `*` o `*.pdf`) può corrispondere solo al primo livello.
   - **Effetti:**
@@ -74,12 +120,14 @@
     - contare nel budget solo le voci entro la profondità utile.
 
 - [x] **Bug #14 (bassa, regressione su Windows): `list_directory` distingue tra maiuscole e minuscole**
+  - **Verifica QA ciclo 4:** Verificato nel codice: `re.IGNORECASE` su Windows. Su Linux la sonda passa ancora, come previsto: lì il file system distingue maiuscole e minuscole.
   - **File:** `engine/vault_engine/agent/tools.py` (`_glob_match`).
   - **Causa:** l'espressione regolare costruita è sensibile a maiuscole e minuscole. Su Windows `Path.glob`, usato fino al ciclo 2, non lo era: `*.pdf` trovava anche `Contratto.PDF`.
   - **Come riprodurlo:** file `Contratto.PDF`; `_scan_directory(path, "*.pdf")` non restituisce nulla. Sonda: `test_scan_is_case_sensitive`.
   - **Correzione proposta:** usare `re.fullmatch(..., flags=re.IGNORECASE)` quando `os.name == "nt"`.
 
 - [x] **Bug #15 (bassa): con `--host ::1` il motore rifiuta tutte le richieste**
+  - **Verifica QA ciclo 4:** Verificato: `Host: [::1]:8765` → 200 e `Host: attacker.example` → 400 (sonda positiva `test_ipv6_loopback_host_now_accepted`).
   - **File:** `engine/vault_engine/app.py` (`TrustedHostMiddleware`) e `engine/vault_engine/__main__.py` (`LOCALHOST`).
   - **Causa:**
     - `__main__` considera `::1` un indirizzo locale e non avvisa.
@@ -89,9 +137,10 @@
 
 ---
 
-## Ciclo 3 – Miglioramenti
+### Miglioramenti
 
 - [x] **Miglioramento #7 (alta, prestazioni): ogni sincronizzazione rilegge e ricalcola lo SHA-256 di tutto l'archivio**
+  - **Verifica QA ciclo 4:** Verificato: una sync senza modifiche non calcola nessun SHA-256. La verifica completa è riservata a `rebuild`.
   - **File:** `engine/vault_engine/pipeline.py` (`_sync`, introdotto da `eafcb1a`).
   - **Problema:**
     - Anche i file con dimensione e data di modifica invariate vengono riletti per intero e ne viene ricalcolato lo SHA-256.
@@ -104,6 +153,7 @@
     - in ogni caso non riscrivere il manifest quando dimensione e data di modifica coincidono già.
 
 - [x] **Miglioramento #8 (sicurezza): `shell:open-path` limita la cartella ma non il tipo di file**
+  - **Verifica QA ciclo 4:** Verificato nel codice (`SUPPORTED_EXTS` da `/health`, `realpathSync`). Le estensioni ammesse sono solo documenti, senza formati con macro. Ha però un difetto nella cache: vedi Bug #18.
   - **File:** `desktop/electron/main.cjs` (`assertOpenableTarget`).
   - **Problema:**
     - Dentro le cartelle sorgenti di un Vault (es. una cartella "Download" o una condivisione di rete) un `.exe`, `.bat`, `.cmd`, `.js`, `.lnk` o `.url` viene comunque aperto, e quindi eseguito, da `shell.openPath`.
@@ -114,6 +164,7 @@
     - per i tipi non ammessi lasciare solo "mostra nella cartella".
 
 - [x] **Miglioramento #9: le chiavi della deduplica dei download non sono normalizzate**
+  - **Verifica QA ciclo 4:** Verificato: chiavi normalizzate e lock rilasciati quando non servono più.
   - **File:** `engine/vault_engine/ollama_hub.py` (`pull_dedup`, `start_pull`).
   - **Problema:**
     - `llama3` e `llama3:latest` usano chiavi diverse in `_pull_locks` e `_background_pulls`, quindi lo stesso modello può essere scaricato due volte in parallelo.
@@ -121,15 +172,18 @@
   - **Proposta:** usare `normalize_name(model)` come chiave e rimuovere il lock quando non ci sono più chiamanti in attesa.
 
 - [x] **Miglioramento #10 (prestazioni): troppe chiamate a Ollama per ogni ricerca**
+  - **Verifica QA ciclo 4:** Verificato: una sola chiamata `/api/tags` per ogni `ensure_loaded`.
   - **File:** `engine/vault_engine/providers.py` (`ensure_loaded`).
   - **Problema:** per ogni modello Ollama vengono chiamati `status()` (controllo online) e `is_installed()`, che richiama `status()`: sono 4 richieste HTTP (`/api/tags` e `/api/ps` due volte) prima del preload, a ogni ricerca o domanda.
   - **Proposta:** una sola chiamata a `status()` per ogni `ensure_loaded`, riutilizzata per il controllo online e per l'elenco dei modelli installati (servirebbe solo `/api/tags`).
 
 - [x] **Miglioramento #11: testi e configurazione**
+  - **Verifica QA ciclo 4:** Verificato: testo della pagina Modelli corretto; `testserver` tolto dagli host consentiti.
   - **Testo della pagina Modelli:** dice che la ricerca in libreria è l'"unica chiamata di rete del programma", ma l'agente ha anche `web_search` (DuckDuckGo) e `fetch_url`. Correggere, per esempio in "la ricerca viene inviata a ollama.com".
   - **`testserver` tra gli host consentiti in produzione:** è il valore predefinito di TestClient. Meglio configurare i test con `TestClient(app, base_url="http://127.0.0.1")` e togliere `testserver` dall'elenco.
 
 - [x] **Miglioramento #12: la limitazione degli eventi di avanzamento nasconde i cambi di fase**
+  - **Verifica QA ciclo 4:** Verificato: l'evento parte subito anche quando cambia `status`.
   - **File:** `engine/vault_engine/ollama_hub.py` (`pull`, `throttled`).
   - **Problema:** la limitazione è solo a tempo, quindi fasi come `verifying sha256 digest` o `writing manifest` possono non comparire mai nell'interfaccia.
   - **Proposta:** inviare subito l'evento anche quando cambia `status`, non solo per lo stato finale.
@@ -309,165 +363,52 @@ Tutte le voci risultano corrette e verificate. Le sonde corrispondenti sono stat
 
 ---
 
-## Sonde QA del ciclo 3 (riproducibili)
+## Sonde QA del ciclo 4 (riproducibili)
 
-Per eseguirle: salva il codice qui sotto in `engine/tests/_probe_qa3.py` (file temporaneo, da non committare) e lancia `uv run pytest -q tests/_probe_qa3.py` dalla cartella `engine`. Ogni test passa quando il difetto è presente: al ciclo 3 ne passano 11 su 11. Quando un bug viene corretto, la sonda va trasformata in test di regressione con l'asserzione invertita.
+Per eseguirle: salva il codice qui sotto in `engine/tests/_probe_qa4.py` (file temporaneo, da non committare) e lancia `uv run pytest -q tests/_probe_qa4.py` dalla cartella `engine`. Ogni test di difetto passa quando il difetto è presente: al ciclo 4 passano tutti e 5. `test_ipv6_loopback_host_now_accepted` invece è un controllo positivo e deve passare sempre.
 
 | Sonda | Voce |
 |---|---|
-| `test_ollama_pull_route_fails_on_first_progress_event` | Bug #8 |
-| `test_background_pull_from_search_reports_no_outcome` | Bug #9 |
-| `test_encoded_filter_bypass_cycle3` (4 casi) | Bug #11 |
-| `test_ssrf_ipv4_mapped_loopback_not_blocked` | Bug #12 |
-| `test_scan_star_walks_subtree_and_reports_truncated` | Bug #13 |
-| `test_scan_is_case_sensitive` | Bug #14 |
-| `test_trusted_host_rejects_ipv6_loopback` | Bug #15 |
-| `test_unchanged_sync_rehashes_every_file` | Miglioramento #7 |
+| `test_encoded_filter_bypass_cycle4` (3 casi) | Bug #16 |
+| `test_encoded_filter_false_positive_cycle4` (2 casi) | Bug #17 |
+| `test_ipv6_loopback_host_now_accepted` | verifica del Bug #15 (controllo positivo) |
 
-<details><summary>Codice delle sonde del ciclo 3</summary>
+Il Bug #18 riguarda Electron: si riproduce con la simulazione Node descritta nella voce stessa.
+
+<details><summary>Codice delle sonde del ciclo 4</summary>
 
 ```python
-"""Sonde QA ciclo 3: ciascun test PASSA se il difetto ipotizzato è presente."""
-import asyncio
-import ipaddress
-
-import httpx
+"""Sonde QA ciclo 4: ciascun test PASSA se il difetto ipotizzato è presente."""
 import pytest
 
-from vault_engine import ollama_hub, providers
-from vault_engine.agent.tools import _uses_encoded_command, _scan_directory
-from vault_engine.config import ModelRef
-
-
-def fake_ollama(tags, pull_lines):
-    def handler(req: httpx.Request):
-        if req.url.path == "/api/tags":
-            return httpx.Response(200, json={"models": [{"name": n, "size": 1} for n in tags]})
-        if req.url.path == "/api/ps":
-            return httpx.Response(200, json={"models": []})
-        if req.url.path == "/api/pull":
-            return httpx.Response(200, text="\n".join(pull_lines))
-        return httpx.Response(200, json={})
-    return httpx.MockTransport(handler)
-
-
-def patch_transport(monkeypatch, transport):
-    orig = httpx.AsyncClient.__init__
-    def init(self, *a, **kw):
-        kw["transport"] = transport
-        orig(self, *a, **kw)
-    monkeypatch.setattr(httpx.AsyncClient, "__init__", init)
-
-
-def test_ollama_pull_route_fails_on_first_progress_event(monkeypatch):
-    """/ollama/pull passa una lambda sincrona (publish -> None) come on_progress, ma pull() la await."""
-    from fastapi.testclient import TestClient
-    from vault_engine import app as appmod
-    monkeypatch.delenv("WSOS_TOKEN", raising=False)
-    patch_transport(monkeypatch, fake_ollama([], ['{"status":"pulling manifest"}', '{"status":"success"}']))
-    seen = []
-    with TestClient(appmod.app) as c:
-        monkeypatch.setattr(appmod.state.events, "publish", lambda e: seen.append(e))
-        assert c.post("/ollama/pull", json={"model": "bge-m3"}).status_code == 202
-        async def wait():
-            for _ in range(100):
-                if any(e.get("status") in ("errore", "download_completato") for e in seen):
-                    return
-                await asyncio.sleep(0.02)
-        c.portal.call(wait)
-    final = [e for e in seen if e.get("status") in ("errore", "download_completato")]
-    assert final and final[-1]["status"] == "errore" and "await" in final[-1]["error"]
-
-
-def test_background_pull_from_search_reports_no_outcome(monkeypatch):
-    """Percorso 409 (allow_download=False): start_pull senza on_finished/on_error."""
-    patch_transport(monkeypatch, fake_ollama([], ['{"error":"file does not exist"}']))
-    seen = []
-    class Ev:
-        def publish(self, e): seen.append(e)
-    ref = ModelRef(provider="ollama", model="modello-inesistente")
-    async def run():
-        with pytest.raises(providers.ProviderError):
-            await providers.ensure_loaded({}, [(ref, "embedding")], events=Ev(), allow_download=False)
-        await asyncio.sleep(0.3)
-    asyncio.run(run())
-    assert not any(e.get("status") in ("errore", "download_completato") for e in seen)
+from vault_engine.agent.tools import _uses_encoded_command
 
 
 @pytest.mark.parametrize("cmd", [
-    r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -e SGVsbG8=",
-    r'& "C:\Program Files\PowerShell\7\pwsh.exe" -enc SGVsbG8=',
-    'cmd /c "powershell -e SGVsbG8="',
-    "Start-Process powershell -ArgumentList '-e SGVsbG8='",
+    "Start-Process powershell -ArgumentList '-NoProfile -e SGVsbG8='",   # solo la prima parola è controllata
+    "Start-Process powershell -ArgumentList '-NoProfile','-e','SGVsbG8='",  # lista separata da virgole = un token \S+
+    "Start-Process powershell -ArgumentList @('-e','SGVsbG8=')",
 ])
-def test_encoded_filter_bypass_cycle3(cmd):
+def test_encoded_filter_bypass_cycle4(cmd):
     assert not _uses_encoded_command(cmd)
 
 
-def test_ssrf_ipv4_mapped_loopback_not_blocked():
-    from vault_engine.agent import web
-    ip = ipaddress.ip_address("::ffff:127.0.0.1")
-    assert not any(ip in net for net in web._BLOCKED_NETWORKS)
-    asyncio.run(web._validate_url("http://[::ffff:127.0.0.1]:11434/api/tags"))  # nessuna WebError
+@pytest.mark.parametrize("cmd", [
+    "Get-Process pwsh -ea SilentlyContinue",          # -ea = alias comune di -ErrorAction
+    "Stop-Process -Name powershell -ea 0",
+])
+def test_encoded_filter_false_positive_cycle4(cmd):
+    assert _uses_encoded_command(cmd)
 
 
-def test_scan_star_walks_subtree_and_reports_truncated(tmp_path):
-    (tmp_path / "a.txt").write_text("x")
-    deep = tmp_path / "archivio"
-    deep.mkdir()
-    for i in range(21_000):
-        (deep / f"f{i}").touch()
-    out = _scan_directory(tmp_path, "*")
-    assert {e["name"] for e in out["entries"]} == {"a.txt", "archivio"}
-    assert out["truncated"] is True  # falso: il livello richiesto è completo
-
-
-def test_scan_is_case_sensitive(tmp_path):
-    (tmp_path / "Contratto.PDF").write_text("x")
-    assert _scan_directory(tmp_path, "*.pdf")["entries"] == []  # su Windows Path.glob lo trovava
-
-
-def test_trusted_host_rejects_ipv6_loopback(monkeypatch):
+def test_ipv6_loopback_host_now_accepted(monkeypatch):
+    """Controllo positivo (deve PASSARE anche a difetto corretto): verifica del Bug #15."""
     from fastapi.testclient import TestClient
     from vault_engine import app as appmod
     monkeypatch.delenv("WSOS_TOKEN", raising=False)
-    with TestClient(appmod.app) as c:
-        assert c.get("/health", headers={"Host": "[::1]:8765"}).status_code == 400
-
-
-def test_unchanged_sync_rehashes_every_file(tmp_path, monkeypatch, fake_embeddings):
-    """Una sync senza modifiche rilegge e calcola lo SHA-256 di TUTTI i file (e riscrive il manifest)."""
-    from vault_engine import pipeline
-    from vault_engine.config import SettingsStore
-    from vault_engine.events import EventBus
-    from vault_engine.vaults import VaultConfig, VaultRegistry
-    monkeypatch.setenv("WSOS_DATA_DIR", str(tmp_path / "data"))
-    src = tmp_path / "src"
-    src.mkdir()
-    for i in range(40):
-        (src / f"nota{i}.txt").write_text(f"contenuto {i}")
-    calls = []
-    orig = pipeline.sha256_file
-    monkeypatch.setattr(pipeline, "sha256_file", lambda p: calls.append(p) or orig(p))
-
-    async def scenario():
-        events = EventBus()
-        events.bind(asyncio.get_running_loop())
-        registry = VaultRegistry()
-        jobs = pipeline.JobManager(registry, SettingsStore(), events)
-        vault = registry.create(VaultConfig(name="T", sources=[str(src)], embedding=ModelRef(provider="lmstudio", model="fake")))
-        async def run():
-            job = jobs.submit(vault.config.id, "sync")
-            while job.status in ("queued", "running"):
-                await asyncio.sleep(0.05)
-            return job
-        await run()
-        calls.clear()
-        second = await run()
-        await jobs.shutdown()
-        return second
-    second = asyncio.run(scenario())
-    assert second.total == 0 and len(calls) == 40
+    with TestClient(appmod.app, base_url="http://127.0.0.1") as c:
+        assert c.get("/health", headers={"Host": "[::1]:8765"}).status_code == 200
+        assert c.get("/health", headers={"Host": "attacker.example"}).status_code == 400
 ```
 
 </details>
