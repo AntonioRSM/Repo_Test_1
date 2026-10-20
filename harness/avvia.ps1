@@ -1,4 +1,4 @@
-# Avvia Workspace Harness: DeepSeek Harness (MIT) con il profilo Workspace OS, in italiano,
+﻿# Avvia Workspace Harness: DeepSeek Harness (MIT) con il profilo Workspace OS, in italiano,
 # con il marchio Workspace e i modelli locali (Ollama / LM Studio) già collegati.
 # Uso: collegamento "Workspace Harness" nel menu Start, oppure
 #   powershell -ExecutionPolicy Bypass -File harness\avvia.ps1 [-Porta 18790] [-NonAprire] [-Cartella <percorso>]
@@ -49,26 +49,9 @@ foreach ($f in 'cordis.yml', 'cordis.patch.yml') {                     # livello
     if (-not (Test-Path (Join-Path $Profilo $f))) { Copy-Item (Join-Path $Modello $f) $Profilo }
 }
 # I plugin del profilo si risolvono dalla sua node_modules: collegamenti ai plugin Workspace installati.
-$Scope = Join-Path $Profilo 'node_modules\@workspace-sm'
-New-Item -ItemType Directory -Force -Path $Scope | Out-Null
-foreach ($p in 'dsh-workspace-brand', 'dsh-workspace-it') {
-    $link = Join-Path $Scope $p
-    $target = [IO.Path]::GetFullPath((Join-Path $Harness "plugins\$p"))
-    # Bug #26: Test-Path SEGUE il collegamento e restituisce $false per un junction orfano
-    # (destinazione spostata/cancellata): New-Item falliva a ogni avvio. Peggio: Remove-Item
-    # -Recurse in Windows PowerShell 5.1 cancella il CONTENUTO della cartella di destinazione
-    # di un junction — con due copie del progetto si distruggevano i plugin dell'altra.
-    # Get-Item -LiteralPath non segue il collegamento; [System.IO.Directory]::Delete toglie
-    # solo il collegamento, senza toccare la destinazione.
-    $item = Get-Item -LiteralPath $link -Force -ErrorAction SilentlyContinue
-    if ($item) {
-        $destinazione = if ($item.Target) { [IO.Path]::GetFullPath(@($item.Target)[0]) } else { $null }
-        if ($item.LinkType -eq 'Junction' -and $destinazione -eq $target) { continue }
-        if ($item.LinkType -eq 'Junction' -or $item.LinkType -eq 'SymbolicLink') { [System.IO.Directory]::Delete($link) }
-        else { Remove-Item -LiteralPath $link -Recurse -Force }   # cartella reale, non collegamento
-    }
-    New-Item -ItemType Junction -Path $link -Target $target | Out-Null
-}
+# Logica condivisa con il test (Miglioramento #19): harness\tools\collegamenti.ps1.
+. (Join-Path $Harness 'tools\collegamenti.ps1')
+Installa-PluginWorkspace -Profilo $Profilo -Harness $Harness
 
 # ── modelli locali ────────────────────────────────────────────────────────────────────────────
 function Leggi($url) { try { Invoke-RestMethod $url -TimeoutSec 3 } catch { $null } }
@@ -141,20 +124,40 @@ if ($LmStudio) {
                       @($modelli | Where-Object { $_.strumenti }) + $modelli | Select-Object -First 1
             if ($scelto.contextWindow -lt 12000) {
                 Riga "Carico $($scelto.id) in LM Studio con un contesto di $ContestoAgente token (può richiedere qualche minuto)..."
-                try {
-                    # Miglioramento #18: se il modello è già caricato con un contesto più piccolo,
-                    # caricarlo senza scaricarlo prima può creare una seconda istanza (il doppio della
-                    # RAM/VRAM) restando instradati sulla prima: lo si scarica, poi si ricarica.
-                    if ($scelto.caricato) {
+                # Miglioramento #18 (corretto al ciclo 7): LM Studio 0.4.x richiede
+                # instance_id per lo scarico — verificato su 0.4.25: HTTP 400 "Missing
+                # required field 'instance_id'" se si passa il nome. L'id si legge da
+                # /api/v1/models → loaded_instances. Se NESSUNO dei due tentativi riesce
+                # NON si carica: una load senza scarico crea una seconda istanza
+                # (modello:2, doppia RAM/VRAM) e le richieste restano instradate sulla
+                # prima, ancora a contesto piccolo.
+                $scaricato = -not $scelto.caricato
+                if ($scelto.caricato) {
+                    $istanza = $null
+                    $elenco = Leggi 'http://127.0.0.1:1234/api/v1/models'
+                    if ($elenco -and $elenco.models) {
+                        $voce = @($elenco.models | Where-Object { $_.key -eq $scelto.id })[0]
+                        if ($voce -and $voce.loaded_instances) { $istanza = @($voce.loaded_instances)[0].id }
+                    }
+                    foreach ($corpoUnload in @(@{ instance_id = $istanza }, @{ model = $scelto.id })) {
+                        if ($corpoUnload.ContainsKey('instance_id') -and -not $corpoUnload['instance_id']) { continue }
                         try {
-                            Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/unload' -Method Post -Body (@{ model = $scelto.id } | ConvertTo-Json) -ContentType 'application/json' -TimeoutSec 120 | Out-Null
+                            Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/unload' -Method Post -Body ($corpoUnload | ConvertTo-Json) -ContentType 'application/json' -TimeoutSec 120 | Out-Null
+                            $scaricato = $true
+                            break
                         } catch { }
                     }
-                    $corpo = @{ model = $scelto.id; context_length = $ContestoAgente } | ConvertTo-Json
-                    Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/load' -Method Post -Body $corpo -ContentType 'application/json' -TimeoutSec 300 | Out-Null
-                    $scelto.contextWindow = $ContestoAgente
-                } catch {
-                    Avviso "Caricamento non riuscito: in LM Studio carica $($scelto.id) con almeno $ContestoAgente token di contesto."
+                }
+                if (-not $scaricato) {
+                    Avviso "Scarico di $($scelto.id) non riuscito: salto il caricamento per non creare una seconda istanza. In LM Studio scarica il modello e ricaricalo con almeno $ContestoAgente token di contesto."
+                } else {
+                    try {
+                        $corpo = @{ model = $scelto.id; context_length = $ContestoAgente } | ConvertTo-Json
+                        Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/load' -Method Post -Body $corpo -ContentType 'application/json' -TimeoutSec 300 | Out-Null
+                        $scelto.contextWindow = $ContestoAgente
+                    } catch {
+                        Avviso "Caricamento non riuscito: in LM Studio carica $($scelto.id) con almeno $ContestoAgente token di contesto."
+                    }
                 }
             }
             $Predefinito = @('lmstudio-locale', $scelto.id)

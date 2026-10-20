@@ -98,5 +98,21 @@ if (process.platform === 'win32') {
   })
 }
 
+check('script .ps1 con BOM UTF-8: accenti leggibili in Windows PowerShell 5.1 (Bug #30)', () => {
+  const scan = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        if (entry.name !== 'node_modules') scan(p)
+      } else if (entry.name.endsWith('.ps1')) {
+        const b = fs.readFileSync(p)
+        if (!(b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf)) throw new Error(`${entry.name}: manca il BOM UTF-8 (salvare come UTF-8 with BOM)`)
+      }
+    }
+  }
+  scan(harness)
+  scan(path.resolve(harness, '..', 'installer'))
+})
+
 console.log(failed ? `\n${failed} controlli non superati` : '\nTutti i controlli superati')
 process.exit(failed ? 1 : 0)

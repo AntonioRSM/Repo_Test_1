@@ -277,31 +277,65 @@ _PWSH_NAMES = {"powershell", "powershell.exe", "pwsh", "pwsh.exe"}
 _PWSH_DASHES = ("-", "/", "\u2013", "\u2014", "\u2015")
 _ENCODED_PARAM = ("encodedcommand", "encodedarguments")
 _TOKEN = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'|\S+')
-# Segment di comando: dopo ; | & && || comincia un comando nuovo (Bug #17).
-_SEGMENT_SPLIT = re.compile(r"(&&|\|\||[;&|])")
+# Bug #28: anche ( ) { } chiudono un comando e ne aprono un altro — in PowerShell un
+# comando può iniziare dopo ( $( { } (blocchi, sottoespressioni) e dentro le parole
+# chiave di blocco (if/try/foreach/…), non solo dopo ; | & && || come al Bug #17.
+# Gruppo di cattura esterno: re.split deve RESTITUIRE i separatori come pezzi.
+_BLOCK_BOUNDARY = re.compile(r"(&&|\|\||[;|&(){}])")
+_BLOCK_KEYWORD = re.compile(r"^(?:if|elseif|else|try|catch|finally|foreach|while|for|do|switch)$", re.IGNORECASE)
+# Gruppo di cattura: re.split deve RESTITUIRE le parti quotate, non scartarle.
+_QUOTED_SPAN = re.compile(r'(\"[^\"\r\n]*\"|\'[^\'\r\n]*\')')
+# Bug #28: `&"C:\…\pwsh.exe"` con & attaccato alla virgoletta veniva spezzato dal
+# tokenizzatore in `&"C:\Program` + `Files\…`: separando & dal percorso la testa
+# torna intera. Vale solo fuori dalle virgolette e per il & singolo (non &&).
+_ATTACHED_CALL = re.compile(r'(?<!&)&(?=["\'])')
+# Un `(` attaccato al token precedente (@(, Write-Host() non apre una posizione di
+# comando nuova: va tenuto nel token, altrimenti `@('-e',…)` spezzerebbe l'elenco
+# degli argomenti di Start-Process. `$(` invece resta separatore (sottoespressione).
+_ATTACHED_PAREN = re.compile(r"(?<=[^\s$])\(")
+_PAREN_PLACEHOLDER = "\x00"
 # Programmi che avviano un altro processo: il programma avviato va trattato come
-# comando in posizione di testa, con i propri argomenti (Bug #16, Start-Process).
-_LAUNCHER_NAMES = {"start-process", "start-process.exe", "start"}
+# comando in posizione di testa, con i propri argomenti (Bug #16, Start-Process;
+# Bug #28: saps è l'alias predefinito di Start-Process).
+_LAUNCHER_NAMES = {"start-process", "start-process.exe", "start", "saps"}
 
 
-def _segment_tokens(tokens: list[str]) -> list[list[str]]:
-    """Divide il flusso di token in segmenti di comando ai separatori ; | & && ||.
-    Le stringhe tra virgolette restano intere: un separatore dentro virgolette è testo."""
+def _segment_tokens(command: str) -> list[list[str]]:
+    """Divide il comando in segmenti di comando. Separatori: ; | & && || e anche
+    ( ) { } e le parole chiave di blocco (Bug #28); le stringhe tra virgolette
+    restano intere: un separatore o una parentesi dentro virgolette è testo."""
     segments: list[list[str]] = []
     current: list[str] = []
-    for token in tokens:
-        quoted = token[:1] in "\"'"
-        parts = [token] if quoted else _SEGMENT_SPLIT.split(token)
-        for part in parts:
-            if not quoted and part in (";", "|", "&", "&&", "||"):
-                if current:
-                    segments.append(current)
-                    current = []
-            elif part:
-                current.append(part)
-    if current:
-        segments.append(current)
-    return segments
+
+    def boundary() -> None:
+        nonlocal current
+        if current:
+            segments.append(current)
+            current = []
+
+    for span in _QUOTED_SPAN.split(command):
+        if not span:
+            continue
+        if span[:1] in "\"'":
+            current.append(span)
+            continue
+        span = _ATTACHED_CALL.sub("& ", span)
+        span = _ATTACHED_PAREN.sub(_PAREN_PLACEHOLDER, span)
+        for piece in _BLOCK_BOUNDARY.split(span):
+            bare = piece.strip()
+            if not bare:
+                continue
+            if bare in (";", "|", "&", "&&", "||", "(", ")", "{", "}"):
+                boundary()
+                continue
+            for token in _TOKEN.findall(piece):
+                token = token.replace(_PAREN_PLACEHOLDER, "(")
+                if _BLOCK_KEYWORD.match(token.strip("\"'")):
+                    boundary()  # la parola chiave chiude il comando precedente
+                    continue
+                current.append(token)
+    boundary()
+    return [s for s in segments if s]
 
 
 def _encoded_switch(word: str) -> bool:
@@ -326,7 +360,13 @@ def _scan_pwsh_args(args: list[str]) -> bool:
 
 
 def _uses_encoded_command(command: str) -> bool:
-    for segment in _segment_tokens(_TOKEN.findall(command)):
+    for segment in _segment_tokens(command):
+        # Bug #28: l'operatore di invocazione & ora è un token a sé (anche `& "percorso"`):
+        # la testa del comando è il token successivo.
+        while segment and segment[0] in ("&",):
+            segment = segment[1:]
+        if not segment:
+            continue
         # Bug #11: una riga di comando annidata può nascondersi dentro un token
         # quotato (cmd /c "powershell -e …") — riesaminarlo come comando.
         for token in segment:

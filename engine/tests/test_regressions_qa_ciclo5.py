@@ -128,6 +128,13 @@ def test_encoded_filter_false_positive_cycle4_allowed(cmd):
         "Get-Content f.txt -Enc UTF8",
         "Select-String f.txt -E 'x'",
         "powershell -File script.ps1 -Verbose",
+        # Bug #28: nessun nuovo falso positivo dai blocchi e dalle parentesi
+        "if ($x) { Get-Process }",
+        "Start-Sleep -Seconds (Get-Random 5)",
+        "1 | ForEach-Object { Get-Process }",
+        "try { Get-Process } catch { Write-Host 'x' }",
+        "foreach ($f in $files) { Get-Item $f }",
+        "Write-Host('ciao')",
     ],
 )
 def test_encoded_filter_no_new_false_positives(cmd):
@@ -135,6 +142,27 @@ def test_encoded_filter_no_new_false_positives(cmd):
     from vault_engine.agent import tools as agent_tools
 
     assert not agent_tools._uses_encoded_command(cmd)
+
+
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        "(powershell -e SGVsbG8=",  # gruppo: comando dopo (
+        "$(powershell -e SGVsbG8=)",  # sottoespressione $
+        "if ($true) { powershell -e SGVsbG8= }",  # blocco dopo parola chiave
+        "1 | ForEach-Object { powershell -e SGVsbG8= }",  # blocco dopo pipe
+        "try { pwsh -enc SGVsbG8= } catch { }",
+        '&"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -enc SGVsbG8=',  # & attaccato alle virgolette
+        "saps powershell -ArgumentList '-e SGVsbG8='",  # alias di Start-Process
+    ],
+)
+def test_encoded_filter_bypass_cycle7_blocked(cmd):
+    """Bug #28: il filtro guarda solo la testa di ogni segmento; ( ) { } e le parole
+    chiave di blocco aprono posizioni di comando, & attaccato alle virgolette spezzava
+    il percorso, saps è l'alias di Start-Process."""
+    from vault_engine.agent import tools as agent_tools
+
+    assert agent_tools._uses_encoded_command(cmd)
 
 
 # --------------------------------------------- Miglioramento #15 (load/unload/pull)
@@ -211,6 +239,8 @@ def test_fetch_url_pins_connection_to_validated_ip(monkeypatch):
         return [(2, 1, 6, "", ("93.184.216.34", port))]
 
     monkeypatch.setattr(web_mod.socket, "getaddrinfo", fake_getaddrinfo)
+    monkeypatch.setattr(web_mod.urllib.request, "getproxies", lambda: {})  # ermetico: niente proxy di sistema
+    monkeypatch.setattr(web_mod.urllib.request, "proxy_bypass", lambda host: False)
     result = asyncio.run(web_mod.fetch_url("https://esempio-esterno.example/page"))
     assert result["title"] == "T"
     assert len(resolutions) == 1  # one resolution only, at validation time
@@ -233,5 +263,69 @@ def test_fetch_url_reports_original_url_not_pinned_ip(monkeypatch):
         return real_client(*args, **kwargs)
 
     monkeypatch.setattr(web_mod.httpx, "AsyncClient", factory)
+    monkeypatch.setattr(web_mod.urllib.request, "getproxies", lambda: {})  # ermetico: niente proxy di sistema
+    monkeypatch.setattr(web_mod.urllib.request, "proxy_bypass", lambda host: False)
     result = asyncio.run(web_mod.fetch_url("http://93.184.216.34/a"))
     assert result["url"] == "http://93.184.216.34/a"
+
+
+def test_fetch_url_behind_proxy_uses_hostname_not_ip(monkeypatch):
+    """Bug #29: con un proxy attivo la richiesta deve andare per NOME HOST (la
+    risoluzione la fa il proxy; un CONNECT verso l'IP numerico viene rifiutato)."""
+    from vault_engine.agent import web as web_mod
+
+    requests = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, text="pagina")
+
+    real_client = httpx.AsyncClient
+
+    def factory(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handler)
+        return real_client(*args, **kwargs)
+
+    monkeypatch.setattr(web_mod.httpx, "AsyncClient", factory)
+    monkeypatch.setattr(web_mod.urllib.request, "getproxies", lambda: {"https": "http://proxy.azienda:3128"})
+    monkeypatch.setattr(web_mod.urllib.request, "proxy_bypass", lambda host: False)
+    monkeypatch.setattr(
+        web_mod.socket,
+        "getaddrinfo",
+        lambda host, port, *a, **k: [(2, 1, 6, "", ("93.184.216.34", port))],
+    )
+    result = asyncio.run(web_mod.fetch_url("https://esempio-esterno.example/page"))
+    assert result["title"] == ""  # nessun <title>: il corpo resta "pagina"
+    assert requests[0].url.host == "esempio-esterno.example"  # per nome, non per IP
+    assert "sni_hostname" not in requests[0].extensions or requests[0].extensions.get("sni_hostname") is None
+
+
+def test_fetch_url_tries_next_validated_ip_on_connect_error(monkeypatch):
+    """Miglioramento #20: al ConnectError sul primo IP validato si prova il successivo."""
+    from vault_engine.agent import web as web_mod
+
+    attempts = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        attempts.append(request.url.host)
+        if len(attempts) == 1:
+            raise httpx.ConnectError("rifiutato")
+        return httpx.Response(200, text="<html><head><title>OK</title></head><body>x</body></html>")
+
+    real_client = httpx.AsyncClient
+
+    def factory(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handler)
+        return real_client(*args, **kwargs)
+
+    monkeypatch.setattr(web_mod.httpx, "AsyncClient", factory)
+    monkeypatch.setattr(web_mod.urllib.request, "getproxies", lambda: {})
+    monkeypatch.setattr(web_mod.urllib.request, "proxy_bypass", lambda host: False)
+    monkeypatch.setattr(
+        web_mod.socket,
+        "getaddrinfo",
+        lambda host, port, *a, **k: [(2, 1, 6, "", ("93.184.216.34", port)), (2, 1, 6, "", ("93.184.216.35", port))],
+    )
+    result = asyncio.run(web_mod.fetch_url("https://esempio-esterno.example/"))
+    assert result["title"] == "OK"
+    assert attempts == ["93.184.216.34", "93.184.216.35"]  # entrambi provati, in ordine

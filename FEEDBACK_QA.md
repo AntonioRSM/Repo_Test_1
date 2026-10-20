@@ -19,7 +19,7 @@
 
 ## Ciclo 7 – Bug
 
-- [ ] **Bug #28 (media, sicurezza, in parte regressione): il filtro su `-EncodedCommand` guarda solo il primo token di ogni comando e si aggira con blocchi e sottoespressioni**
+- [x] **Bug #28 (media, sicurezza, in parte regressione): il filtro su `-EncodedCommand` guarda solo il primo token di ogni comando e si aggira con blocchi e sottoespressioni**
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`, `_segment_tokens`).
   - **Causa:**
     - per correggere il Bug #17, `powershell`/`pwsh` vengono riconosciuti solo come **primo token** di un segmento (dopo `;`, `|`, `&`, `&&` o `||`);
@@ -42,7 +42,7 @@
     - aggiungere `saps` a `_LAUNCHER_NAMES`;
     - aggiungere i 7 casi alle regressioni.
 
-- [ ] **Bug #29 (media, regressione del Miglioramento #16): dietro un proxy `fetch_url` non riesce più a scaricare nessuna pagina HTTPS**
+- [x] **Bug #29 (media, regressione del Miglioramento #16): dietro un proxy `fetch_url` non riesce più a scaricare nessuna pagina HTTPS**
   - **File:** `engine/vault_engine/agent/web.py` (`_pinned_target`, `fetch_url`).
   - **Causa:**
     - la richiesta viene ora inviata all'**IP** validato (`https://104.20.23.154/`) con `Host`/SNI originali;
@@ -60,7 +60,7 @@
     - se per l'URL è attivo un proxy (`httpx._utils.get_environment_proxies()` / `urllib.request.getproxies()` più `proxy_bypass`), non fissare l'IP e inviare il nome host: la protezione SSRF resta sul controllo iniziale e sui redirect;
     - aggiungere un test con un proxy finto che verifichi che la richiesta `CONNECT` usa il nome host.
 
-- [ ] **Bug #30 (bassa, regressione): `harness/avvia.ps1` ha perso il BOM UTF-8, quindi in Windows PowerShell 5.1 i messaggi in italiano sono storpiati**
+- [x] **Bug #30 (bassa, regressione): `harness/avvia.ps1` ha perso il BOM UTF-8, quindi in Windows PowerShell 5.1 i messaggi in italiano sono storpiati**
   - **File:** `harness/avvia.ps1`; anche `harness/tools/testa-junction.ps1`, nuovo, è senza BOM.
   - **Causa:**
     - `1022a7c` ha tolto i 3 byte `EF BB BF` iniziali (con `0d74647` il file inizia con `ef bb bf`, ora con `23 20 41`);
@@ -75,7 +75,7 @@
 
 ## Ciclo 7 – Miglioramenti
 
-- [ ] **Miglioramento #19: `testa-junction.ps1` prova una copia della logica, non `avvia.ps1`, e non copre il collegamento orfano**
+- [x] **Miglioramento #19: `testa-junction.ps1` prova una copia della logica, non `avvia.ps1`, e non copre il collegamento orfano**
   - **File:** `harness/tools/testa-junction.ps1`.
   - **Problema:**
     - la funzione `Collega` è una copia del blocco di `avvia.ps1`: se uno dei due cambia, il test continua a passare;
@@ -84,7 +84,7 @@
     - spostare la logica in `harness/tools/collegamenti.ps1` e richiamarla da `avvia.ps1` e dal test;
     - aggiungere il caso: collegamento orfano verso `A-spostata`, poi `Collega` verso `B` mentre A è ancora assente.
 
-- [ ] **Miglioramento #20: `fetch_url` prova solo il primo IP validato**
+- [x] **Miglioramento #20: `fetch_url` prova solo il primo IP validato**
   - **File:** `engine/vault_engine/agent/web.py`.
   - **Problema:** `_pinned_target(current, ips[0])` usa solo il primo indirizzo. Se è IPv6 e la rete ha solo IPv4, o se quell'IP non risponde, il download fallisce, mentre httpx per nome proverebbe anche gli altri.
   - **Proposta:** in caso di `ConnectError` provare in ordine tutti gli IP già validati.
@@ -833,3 +833,19 @@ Suite su Windows 11: motore **164 passati, 0 falliti, 1 deselezionato** (`pytest
 - **Miglioramento #18 — seconda istanza in LM Studio.** `harness/avvia.ps1`: prima di caricare il modello scelto con 16.384 token, se è già `loaded` con contesto insufficiente lo script scarica prima la vecchia istanza (`POST /api/v1/models/unload`, eventuale errore ignorato) e poi carica. **Verificabile solo su Windows con LM Studio 0.3.x attivo: non eseguito dal vivo in questa correzione** (come per il Bug #25 al ciclo 5).
 
 **Note per il Tester:** le sonde del ciclo 4 (`test_encoded_filter_bypass_cycle4`, `test_encoded_filter_false_positive_cycle4`) ora falliscono per costruzione: le regressioni con asserzione invertita sono in `engine/tests/test_regressions_qa_ciclo5.py`. Il controllo "profilo workspace composto da dsh" di `harness/tools/test.mjs` copia ora i plugin invece di collegarli con junction: i junction verso la repo venivano seguiti dal gestore plugin di dsh (pnpm), che **svuotava** `harness/plugins/*` — stessa causa del Bug #26; con la copia la repo resta intatta a ogni `npm test`. Da verificare nel ciclo 7: su Windows, Bug #27 e Miglioramento #18 contro Ollama/LM Studio reali, e `ruff check` (segnalazioni attese: 0).
+
+
+---
+
+## Soluzioni applicate (fase Developer, ciclo 7)
+
+Suite su Windows 11: motore **179 passati, 0 falliti, 1 deselezionato** (`pytest -m "not live"`; +15 test in `engine/tests/test_regressions_qa_ciclo5.py`); processo Electron 6/6; Workspace Harness `npm test` **8 controlli su 8** (nuovo controllo BOM); interfaccia `tsc --noEmit` e `vite build` a buon fine. Le prove Windows delle 23:00 (commento sulla PR #21, id 6302773000) hanno confermato **Bug #26 e Bug #27** e hanno mostrato che il Miglioramento #18 **non funzionava su LM Studio 0.4.25** (`unload` con il nome dà 400 `Missing required field 'instance_id'`): questa correzione lo risolve.
+
+- **Bug #28 — filtro aggirabile con blocchi e sottoespressioni.** `agent/tools.py` (`_segment_tokens`): i separatori di segmento ora includono anche `( ) { }` e le parole chiave di blocco (`if/elseif/else/try/catch/finally/foreach/while/for/do/switch`): in PowerShell un comando può iniziare dopo di essi, non solo dopo `; | & && ||`. `&` attaccato a un percorso tra virgolette (`&"C:\…\pwsh.exe"`) viene staccato PRIMA della tokenizzazione, così la testa non si spezza; un `(` attaccato al token precedente (`@(`, `Write-Host()`) NON apre una posizione di comando (altrimenti `-ArgumentList @('-e',…)` spezzerebbe gli argomenti), mentre `$(` resta separatore. Aggiunto `saps` (alias di `Start-Process`) a `_LAUNCHER_NAMES`. Tutti i 7 casi della sonda ciclo 7 sono bloccati; i 13 comandi legittimi (cicli 2-6 + 6 nuovi con blocchi e parentesi) restano permessi. Test: `test_encoded_filter_bypass_cycle7_blocked` (7 casi) e casi aggiunti a `test_encoded_filter_no_new_false_positives`.
+- **Bug #29 — `fetch_url` inutilizzabile dietro proxy.** `agent/web.py`: nuova `_proxy_for(url)` (variabili d'ambiente +, su Windows, registro di sistema; rispetta `proxy_bypass`). Con proxy attivo la richiesta va **per nome host** (il DNS lo fa il proxy; il pinning per IP era inutile e il `CONNECT` per IP numerico viene rifiutato dai proxy che filtrano per nome): la protezione SSRF resta sul controllo iniziale e su ogni hop dei redirect. Senza proxy il pinning dell'Miglioramento #16 resta invariato. I test sul pinning esistenti sono ora ermetici (`getproxies` azzerato via monkeypatch, essenziale negli ambienti con proxy di sistema). Test: `test_fetch_url_behind_proxy_uses_hostname_not_ip`.
+- **Bug #30 — BOM UTF-8 perso.** `harness/avvia.ps1` e `harness/tools/testa-junction.ps1` risalvati in UTF-8 **con BOM** (come `installer/*.ps1`): in Windows PowerShell 5.1 i messaggi accentati tornano leggibili. Nuovo controllo in `harness/tools/test.mjs` che verifica il BOM di ogni `*.ps1` di `harness/` e `installer/` (8º controllo della suite, eseguito su ogni piattaforma).
+- **Miglioramento #18 — unload con `instance_id` (corretto alla luce della prova su 0.4.25).** `harness/avvia.ps1`: lo scarico usa `instance_id` letto da `/api/v1/models` → `loaded_instances[].id` (su 0.4.25 il nome dà 400), con ripiego su `{"model": …}` per le versioni che lo accettano. Se NESSUN tentativo riesce, lo script **avvisa e salta il caricamento** invece di creare in silenzio una seconda istanza (`modello:2`, doppia RAM/VRAM, richieste ancora instradate sulla prima). Da riverificare su Windows con LM Studio reale: lo scenario è ora coperto dal passo 4 della procedura del Tester.
+- **Miglioramento #19 — test che prova la copia invece del codice vero.** La logica di collegamento è stata estratta in `harness/tools/collegamenti.ps1` (`Installa-PluginWorkspace -Profilo … -Harness …`) e richiamata sia da `avvia.ps1` sia da `tools/testa-junction.ps1`: il test esercita il codice di produzione, non una copia. Aggiunto il caso mancante dello scenario 2: collegamento orfano verso `A-spostata` con `A` **ancora assente** quando la funzione viene chiamata verso `B` — il collegamento orfano viene sostituito senza toccare `A-spostata`. Test su Windows 11/PS 5.1: 5/5.
+- **Miglioramento #20 — solo il primo IP.** `agent/web.py` (`fetch_url`): al `ConnectError` sul primo IP validato si riprova con i successivi, in ordine, fino all'esaurimento (poi l'errore si propaga come prima). Test: `test_fetch_url_tries_next_validated_ip_on_connect_error` (primo IP rifiutato, secondo OK, entrambi registrati).
+
+**Note per il Tester:** le sonde del ciclo 7 (`test_encoded_filter_bypass_cycle7`) ora falliscono per costruzione; le regressioni con asserzione invertita sono in `test_regressions_qa_ciclo5.py`. Restano aperte solo le tre voci con prove Windows dal vivo: **Bug #26 e Bug #27 hanno output eseguiti il 20/10 alle 23:00** (commento PR 6302773000 — `C:\Prove` eliminato dopo le prove, quindi per eventuali riprese servono due nuove copie); **Miglioramento #18** va riprovato con LM Studio 0.4.x dopo questa correzione (la procedura è la stessa del ciclo 7). Il modello `qwen3:4b-instruct` resta installato in Ollama sulla macchina di prova.

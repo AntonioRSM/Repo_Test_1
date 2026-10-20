@@ -6,6 +6,7 @@ import asyncio
 import ipaddress
 import re
 import socket
+import urllib.request
 from html import unescape
 from html.parser import HTMLParser
 from urllib.parse import parse_qs, unquote, urljoin, urlparse
@@ -105,6 +106,22 @@ def _pinned_target(url: str, ip: str) -> tuple[httpx.URL, dict[str, str], dict]:
     headers = {"Host": host_header}
     extensions = {"sni_hostname": host} if parsed.scheme == "https" else {}
     return parsed.copy_with(host=bracketed_ip), headers, extensions
+
+
+def _proxy_for(url: str) -> str | None:
+    """Bug #29: se per questa URL è attivo un proxy (variabili d'ambiente o, su
+    Windows, il registro di sistema), la risoluzione DNS la fa il proxy e fissare
+    l'IP è inutile — anzi il CONNECT verso un IP numerico viene rifiutato dai proxy
+    che filtrano per nome. In quel caso la richiesta va inviata per nome host."""
+    parsed = httpx.URL(url)
+    host = parsed.host
+    try:
+        if urllib.request.proxy_bypass(host):
+            return None
+        proxies = urllib.request.getproxies()  # env + registro di sistema su Windows
+    except Exception:
+        return None
+    return proxies.get(parsed.scheme) or proxies.get("all")
 
 
 class _DdgParser(HTMLParser):
@@ -226,21 +243,35 @@ async def fetch_url(url: str, max_chars: int = 12000) -> dict:
         try:
             for _ in range(MAX_REDIRECTS + 1):
                 ips = await _validate_url(current)
-                pinned, hop_headers, extensions = _pinned_target(current, ips[0])
-                async with client.stream("GET", pinned, headers=hop_headers, extensions=extensions, follow_redirects=False) as resp:
-                    # bytearray: body += chunk on bytes copies the whole buffer per block.
-                    body = bytearray()
-                    async for chunk in resp.aiter_bytes():
-                        body += chunk
-                        if len(body) > MAX_PAGE_BYTES:
-                            break
-                    status, ctype = resp.status_code, resp.headers.get("content-type", "")
-                    if status in (301, 302, 303, 307, 308) and resp.headers.get("location"):
-                        current = urljoin(current, resp.headers["location"])
-                        continue
-                    final_url = current  # the original (unpinned) URL, not the IP
-                    encoding = resp.encoding or "utf-8"
-                    break
+                # Bug #29: dietro un proxy la risoluzione la fa il proxy e il pinning
+                # dell'IP romperebbe la richiesta (CONNECT per IP numerico rifiutato):
+                # si invia per nome host. Senza proxy si fissano gli IP già validati,
+                # in ordine (Miglioramento #20: al ConnectError si prova il successivo).
+                targets = [(httpx.URL(current), {}, {})] if _proxy_for(current) else [_pinned_target(current, ip) for ip in ips]
+                for attempt, (pinned, hop_headers, extensions) in enumerate(targets):
+                    try:
+                        async with client.stream("GET", pinned, headers=hop_headers, extensions=extensions, follow_redirects=False) as resp:
+                            # bytearray: body += chunk on bytes copies the whole buffer per block.
+                            body = bytearray()
+                            async for chunk in resp.aiter_bytes():
+                                body += chunk
+                                if len(body) > MAX_PAGE_BYTES:
+                                    break
+                            status, ctype = resp.status_code, resp.headers.get("content-type", "")
+                            location = resp.headers.get("location")
+                            encoding = resp.encoding or "utf-8"
+                        break  # tentativo riuscito
+                    except httpx.ConnectError:
+                        if attempt == len(targets) - 1:
+                            raise
+                        continue  # Miglioramento #20: prossimo IP validato
+                else:
+                    raise WebError("connessione non riuscita")
+                if status in (301, 302, 303, 307, 308) and location:
+                    current = urljoin(current, location)
+                    continue
+                final_url = current  # the original (unpinned) URL, not the IP
+                break
             else:
                 raise WebError(f"troppi redirect (oltre {MAX_REDIRECTS})")
         except httpx.HTTPError as exc:
