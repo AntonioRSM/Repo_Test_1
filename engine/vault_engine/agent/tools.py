@@ -298,6 +298,29 @@ _PAREN_PLACEHOLDER = "\x00"
 # comando in posizione di testa, con i propri argomenti (Bug #16, Start-Process;
 # Bug #28: saps è l'alias predefinito di Start-Process).
 _LAUNCHER_NAMES = {"start-process", "start-process.exe", "start", "saps"}
+# Bug #31: in PowerShell l'accento grave (`) è il carattere di escape. Davanti a
+# n t r 0 a b f v è una sequenza di controllo; a fine riga unisce le due righe;
+# davanti a qualunque altro carattere viene semplicemente IGNORATO — la tecnica di
+# offuscamento nota per cui `power`shell` è `powershell` e `-e`nc` si spezza in
+# `-e` + a capo + `nc`. Per confrontare il testo come lo vede davvero PowerShell,
+# prima di tokenizzare si traducono le sequenze reali e si tolgono gli altri `.
+_PWSH_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "0": "\0", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
+_BACKTICK_ANY = re.compile(r"`(.)", re.DOTALL)
+
+
+def _deobfuscate_backticks(text: str) -> str:
+    """Bug #31: riscrive il testo come lo interpreta PowerShell."""
+
+    def repl(match: re.Match) -> str:
+        ch = match.group(1)
+        low = ch.lower()
+        if low in _PWSH_ESCAPES:
+            return _PWSH_ESCAPES[low]
+        if ch in "\r\n":
+            return ""  # accento grave a fine riga: continuazione di riga
+        return ch  # `` resta un ` letterale, ogni altro `X diventa X
+
+    return _BACKTICK_ANY.sub(repl, text)
 
 
 def _segment_tokens(command: str) -> list[list[str]]:
@@ -360,10 +383,12 @@ def _scan_pwsh_args(args: list[str]) -> bool:
 
 
 def _uses_encoded_command(command: str) -> bool:
+    command = _deobfuscate_backticks(command)  # Bug #31
     for segment in _segment_tokens(command):
         # Bug #28: l'operatore di invocazione & ora è un token a sé (anche `& "percorso"`):
         # la testa del comando è il token successivo.
-        while segment and segment[0] in ("&",):
+        # Bug #31: anche l'operatore punto (dot-source) avvia un programma come &.
+        while segment and segment[0] in ("&", "."):
             segment = segment[1:]
         if not segment:
             continue
@@ -393,9 +418,10 @@ def _uses_encoded_command(command: str) -> bool:
                 if PureWindowsPath(candidate).name.lower() in _PWSH_NAMES and _scan_pwsh_args(rest[j + 1 :]):
                     return True
                 break
-        elif head_name in ("cmd", "cmd.exe"):
+        elif head_name in ("cmd", "cmd.exe") or head.lower() in ("$env:comspec", "${env:comspec}"):
             # cmd /c (o /k) esegue il resto della riga come nuovo comando: anche senza
             # virgolette (`cmd /c powershell.exe -encodedcommand …`) va riesaminato.
+            # Bug #31: cmd può essere richiamato anche tramite $env:ComSpec.
             for j, token in enumerate(segment[1:]):
                 if token.strip("\"'").lower() in ("/c", "/k"):
                     remainder = " ".join(segment[j + 2 :])

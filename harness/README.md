@@ -57,6 +57,16 @@ modelli e provider cambiati nelle Impostazioni restano validi.
   un contesto di 16.384 token, senza scaricare nulla; l'avvio lo usa come modello predefinito;
 - con LM Studio carica il modello con una lunghezza di contesto di almeno 16.384 token.
 
+**Contesto di Ollama.** Per decidere quali modelli offrire all'agente, `avvia.ps1` legge il contesto
+reale dei modelli già caricati (`/api/ps`), poi `num_ctx` del Modelfile, poi la variabile d'ambiente
+`OLLAMA_CONTEXT_LENGTH` (utente o macchina) e infine il valore predefinito di Ollama (4.096 token).
+Attenzione: un contesto più ampio impostato dalle **Impostazioni dell'app Ollama** non è leggibile
+dall'esterno — non è una variabile d'ambiente — quindi quei modelli risulterebbero «non offerti»
+anche se il server li caricherebbe con un contesto sufficiente. In quel caso il rimedio è impostare
+anche `OLLAMA_CONTEXT_LENGTH` (e riavviare Ollama) oppure rilanciare `INSTALLA.bat` per creare
+`workspace-agent`, che ha il contesto giusto nel proprio Modelfile. Se cambi la variabile con Ollama
+già avviato, riavvia `ollama serve`: il server legge l'ambiente solo all'avvio.
+
 Su un PC senza GPU dedicata la prima risposta può richiedere alcuni minuti: il modello deve leggere
 l'intero prompt. Con una GPU o un modello cloud configurato dalla pagina **Modelli** i tempi scendono
 a pochi secondi.

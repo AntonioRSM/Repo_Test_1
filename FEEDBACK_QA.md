@@ -25,7 +25,8 @@
 
 ## Ciclo 8 – Bug
 
-- [ ] **Bug #31 (bassa, sicurezza): il filtro su `-EncodedCommand` si aggira ancora con accento grave, operatore punto e `$env:ComSpec`**
+- [x] **Bug #31 (bassa, sicurezza): il filtro su `-EncodedCommand` si aggira ancora con accento grave, operatore punto e `$env:ComSpec`**
+  - **Soluzione applicata (ciclo 8):** in `engine/vault_engine/agent/tools.py`: nuova `_deobfuscate_backticks` chiamata all'ingresso di `_uses_encoded_command` (vale anche per le righe annidate riesaminate): le sequenze reali `` `n `` `` `t `` `` `r `` `` `0 `` `` `a `` `` `b `` `` `f `` `` `v `` diventano il carattere di controllo (così `` -e`nc `` si spezza in `-e` + `nc`), l'accento grave a fine riga unisce le righe e ogni altro `` ` `` viene tolto (`power`shell` → `powershell`); l'operatore `.` in testa al segmento è trattato come `&`; `$env:ComSpec` (anche `${env:ComSpec}`) è riconosciuto come `cmd` nella scansione di `/c` e `/k`. I 4 casi della sonda sono bloccati; nessun nuovo falso positivo sui comandi legittimi. Test: `engine/tests/test_regressions_qa_ciclo8.py` (`test_encoded_filter_bypass_cycle8_blocked`, 5 casi; `test_encoded_filter_cycle8_no_false_positives`, 5 casi).
   - **File:** `engine/vault_engine/agent/tools.py` (`_uses_encoded_command`, `_segment_tokens`).
   - **Causa:**
     - il nome del comando e gli switch vengono confrontati così come sono scritti;
@@ -48,7 +49,8 @@
 
 ## Ciclo 8 – Miglioramenti
 
-- [ ] **Miglioramento #21 (Workspace Harness): ricarico in LM Studio più robusto (casi limite del Miglioramento #18)**
+- [x] **Miglioramento #21 (Workspace Harness): ricarico in LM Studio più robusto (casi limite del Miglioramento #18)**
+  - **Soluzione applicata (ciclo 8):** in `harness/avvia.ps1` (blocco LM Studio): lo scarico ora riguarda **tutte** le `loaded_instances` del modello (un `unload` per ogni `instance_id`; ripiego su `{"model": …}` solo se l'API v1 non è disponibile) e basta un solo scarico fallito per saltare il caricamento con avviso. Dopo il `load` lo script rilegge `/api/v1/models` e avvisa se il modello non ha esattamente **una** istanza con contesto di almeno 16.384 token (leggendo `config.context_length` dell'istanza), indicando il rimedio manuale; in quel caso il `contextWindow` registrato viene aggiornato al valore reale invece che a 16.384. Sintassi verificata con il parser di PowerShell; **da riprovare dal vivo su LM Studio 0.4.x** (stessa sessione della prova del Miglioramento #18).
   - **File:** `harness/avvia.ps1` (blocco LM Studio).
   - **Problema:**
     - viene scaricata solo `loaded_instances[0]`: se sono rimaste più istanze dello stesso modello (per esempio una `modello:2` lasciata da un avvio precedente), le altre restano in memoria e le richieste per `modello` possono finire su quella a contesto piccolo;
@@ -57,7 +59,8 @@
     - scaricare **tutte** le `loaded_instances` del modello;
     - dopo il caricamento rileggere `/api/v1/models` e avvisare se le istanze non sono esattamente una, con contesto di almeno 16.384.
 
-- [ ] **Miglioramento #22 (Workspace Harness): il contesto impostato nell'app Ollama non viene letto**
+- [x] **Miglioramento #22 (Workspace Harness): il contesto impostato nell'app Ollama non viene letto**
+  - **Soluzione applicata (ciclo 8):** in `harness/avvia.ps1` (blocco Ollama): quando ci sono modelli «Non offerti all'agente» e **non** è impostata `OLLAMA_CONTEXT_LENGTH`, compare una riga aggiuntiva: «Se hai impostato un contesto più ampio nelle Impostazioni dell'app Ollama, imposta anche la variabile OLLAMA_CONTEXT_LENGTH oppure rilancia INSTALLA.bat per creare workspace-agent: quel valore non è leggibile dalla Harness.» Documentato in `harness/README.md` (nuovo paragrafo «Contesto di Ollama» nella sezione Modelli locali, con la nota che il server legge le variabili solo al proprio avvio). Non implementata la lettura del contesto reale via `POST /api/generate` + `/api/ps` (opzione «in alternativa»): un caricamento, anche leggero, occupa RAM/VRAM a ogni avvio; il messaggio copre il caso senza effetti collaterali.
   - **File:** `harness/avvia.ps1` (blocco Ollama) e `harness/README.md`.
   - **Problema:** caso limite segnalato al ciclo 7 e confermato nella prova su Windows. Se il contesto è impostato dalle Impostazioni dell'app Ollama invece che con `OLLAMA_CONTEXT_LENGTH`, i modelli non caricati vengono considerati a 4.096 token e nascosti all'agente.
   - **Proposta:**
@@ -894,3 +897,15 @@ Suite su Windows 11: motore **179 passati, 0 falliti, 1 deselezionato** (`pytest
 - **Miglioramento #20 — solo il primo IP.** `agent/web.py` (`fetch_url`): al `ConnectError` sul primo IP validato si riprova con i successivi, in ordine, fino all'esaurimento (poi l'errore si propaga come prima). Test: `test_fetch_url_tries_next_validated_ip_on_connect_error` (primo IP rifiutato, secondo OK, entrambi registrati).
 
 **Note per il Tester:** le sonde del ciclo 7 (`test_encoded_filter_bypass_cycle7`) ora falliscono per costruzione; le regressioni con asserzione invertita sono in `test_regressions_qa_ciclo5.py`. Restano aperte solo le tre voci con prove Windows dal vivo: **Bug #26 e Bug #27 hanno output eseguiti il 20/10 alle 23:00** (commento PR 6302773000 — `C:\Prove` eliminato dopo le prove, quindi per eventuali riprese servono due nuove copie); **Miglioramento #18** va riprovato con LM Studio 0.4.x dopo questa correzione (la procedura è la stessa del ciclo 7). Il modello `qwen3:4b-instruct` resta installato in Ollama sulla macchina di prova.
+
+---
+
+## Soluzioni applicate (fase Developer, ciclo 8)
+
+Suite su Windows 11: motore **189 passati, 0 falliti, 1 deselezionato** (`pytest -m "not live"`; nuovo file `engine/tests/test_regressions_qa_ciclo8.py` con 10 test); Workspace Harness `npm test` **8 controlli su 8**, compreso quello sul BOM (tutti e 5 gli `*.ps1` tracciati iniziano con `EF BB BF`, ricontrollati dopo le modifiche); interfaccia non toccata in questo ciclo. Sintassi di `avvia.ps1` verificata con il parser di PowerShell (`[System.Management.Automation.Language.Parser]::ParseFile`, 0 errori).
+
+- **Bug #31 — aggiramenti residui del filtro `-EncodedCommand`.** `engine/vault_engine/agent/tools.py`: (1) nuova `_deobfuscate_backticks` all'ingresso di `_uses_encoded_command` (quindi anche per le righe annidate): le sequenze di escape reali `` `n `` `` `t `` `` `r `` `` `0 `` `` `a `` `` `b `` `` `f `` `` `v `` diventano il carattere di controllo — così `` powershell -e`nc … `` si spezza nei token `-e` e `nc` e `-e` viene riconosciuto — l'accento grave a fine riga unisce le righe e ogni altro accento grave viene tolto (`` power`shell `` → `powershell`); (2) l'operatore punto (dot-source) in testa a un segmento è trattato come `&`, quindi `. powershell -e …` viene scansionato; (3) `$env:ComSpec` (e la forma `${env:ComSpec}`) è riconosciuto come `cmd`, quindi `& $env:ComSpec /c powershell -e …` riesamina il resto della riga. Le 4 sonde del ciclo 8 sono bloccate; i 13 comandi legittimi dei cicli precedenti più 5 nuovi (dot-source di script, `$env:ComSpec /c dir`, `` `n `` in stringa, `` `% ``) restano permessi. Test: `engine/tests/test_regressions_qa_ciclo8.py`.
+- **Miglioramento #21 — ricarico LM Studio più robusto.** `harness/avvia.ps1`: lo scarico riguarda ora **tutte** le `loaded_instances` del modello, non solo la prima (una `modello:2` residua non resta più in memoria); un solo scarico fallito basta a saltare il caricamento con avviso. Dopo il `load` si rilegge `/api/v1/models` e si avvisa se le istanze non sono esattamente una con contesto ≥ 16.384 (`config.context_length`), aggiornando il `contextWindow` registrato al valore reale invece che al valore atteso.
+- **Miglioramento #22 — contesto impostato dall'app Ollama.** `harness/avvia.ps1`: se ci sono modelli nascosti e `OLLAMA_CONTEXT_LENGTH` non è impostata, una riga aggiuntiva spiega il rimedio (variabile `OLLAMA_CONTEXT_LENGTH` oppure `INSTALLA.bat` per `workspace-agent`), perché il valore delle Impostazioni dell'app non è leggibile dall'esterno. Documentato in `harness/README.md` («Contesto di Ollama»). Non implementato il caricamento leggero `POST /api/generate` + `/api/ps` (opzione «in alternativa»): occuperebbe RAM/VRAM a ogni avvio.
+
+**Note per il Tester:** la sonda del ciclo 8 (`test_encoded_filter_bypass_cycle8`) ora fallisce per costruzione; le regressioni con asserzione invertita sono in `engine/tests/test_regressions_qa_ciclo8.py`. **Miglioramento #18** resta da riprovare dal vivo su LM Studio 0.4.x con la procedura in «Prova da eseguire su Windows»: la verifica interagisce con LM Studio (carico/scarico modelli) e va fatta a mano sulla macchina, non dall'automazione. Nella stessa sessione si possono controllare anche i casi limite del Miglioramento #21 (più istanze `lms load` dello stesso modello prima dell'avvio; atteso: tutte scaricate, una sola istanza a 16.384 dopo).

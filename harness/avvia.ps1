@@ -96,6 +96,12 @@ if ($Ollama) {
     if ($Nascosti.Count) {
         $alternativa = if ($Predefinito) { "usa $($Predefinito[1])" } else { 'rilancia INSTALLA.bat per creare workspace-agent' }
         Write-Host "    $(Grigio "Non offerti all'agente (contesto sotto 12.000 token): $($Nascosti -join ', '); $alternativa")"
+        # Miglioramento #22: un contesto ampio impostato dalle Impostazioni dell'app
+        # Ollama NON è leggibile dall'esterno (non è una variabile d'ambiente), quindi
+        # quei modelli risulterebbero nascosti per errore. Indica il rimedio.
+        if (-not $ctxServer) {
+            Write-Host "    $(Grigio "Se hai impostato un contesto più ampio nelle Impostazioni dell'app Ollama, imposta anche la variabile OLLAMA_CONTEXT_LENGTH oppure rilancia INSTALLA.bat per creare workspace-agent: quel valore non è leggibile dalla Harness.")"
+        }
     }
 }
 
@@ -127,25 +133,30 @@ if ($LmStudio) {
                 # Miglioramento #18 (corretto al ciclo 7): LM Studio 0.4.x richiede
                 # instance_id per lo scarico — verificato su 0.4.25: HTTP 400 "Missing
                 # required field 'instance_id'" se si passa il nome. L'id si legge da
-                # /api/v1/models → loaded_instances. Se NESSUNO dei due tentativi riesce
+                # /api/v1/models → loaded_instances. Se NON si riesce a scaricare
                 # NON si carica: una load senza scarico crea una seconda istanza
                 # (modello:2, doppia RAM/VRAM) e le richieste restano instradate sulla
                 # prima, ancora a contesto piccolo.
+                # Miglioramento #21: possono restare PIÙ istanze dello stesso modello
+                # (per esempio una "modello:2" lasciata da un avvio precedente):
+                # vanno scaricate TUTTE, non solo la prima.
                 $scaricato = -not $scelto.caricato
                 if ($scelto.caricato) {
-                    $istanza = $null
+                    $ids = @()
                     $elenco = Leggi 'http://127.0.0.1:1234/api/v1/models'
                     if ($elenco -and $elenco.models) {
                         $voce = @($elenco.models | Where-Object { $_.key -eq $scelto.id })[0]
-                        if ($voce -and $voce.loaded_instances) { $istanza = @($voce.loaded_instances)[0].id }
+                        if ($voce -and $voce.loaded_instances) { $ids = @($voce.loaded_instances | ForEach-Object { $_.id }) }
                     }
-                    foreach ($corpoUnload in @(@{ instance_id = $istanza }, @{ model = $scelto.id })) {
-                        if ($corpoUnload.ContainsKey('instance_id') -and -not $corpoUnload['instance_id']) { continue }
+                    $tentativi = @($ids | ForEach-Object { @{ instance_id = $_ } })
+                    if (-not $tentativi.Count) { $tentativi = @(@{ model = $scelto.id }) }   # versioni senza API v1: ripiego sul nome
+                    $scaricato = $true
+                    foreach ($corpoUnload in $tentativi) {
                         try {
                             Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/unload' -Method Post -Body ($corpoUnload | ConvertTo-Json) -ContentType 'application/json' -TimeoutSec 120 | Out-Null
-                            $scaricato = $true
-                            break
-                        } catch { }
+                        } catch {
+                            $scaricato = $false   # basta una istanza rimasta in memoria per rovinare il ricarico
+                        }
                     }
                 }
                 if (-not $scaricato) {
@@ -155,6 +166,25 @@ if ($LmStudio) {
                         $corpo = @{ model = $scelto.id; context_length = $ContestoAgente } | ConvertTo-Json
                         Invoke-RestMethod 'http://127.0.0.1:1234/api/v1/models/load' -Method Post -Body $corpo -ContentType 'application/json' -TimeoutSec 300 | Out-Null
                         $scelto.contextWindow = $ContestoAgente
+                        # Miglioramento #21: dopo il load si rilegge /api/v1/models e si
+                        # controlla l'esito reale: esattamente UNA istanza, con contesto
+                        # di almeno $ContestoAgente token. Altrimenti si avvisa.
+                        $dopo = Leggi 'http://127.0.0.1:1234/api/v1/models'
+                        if ($dopo -and $dopo.models) {
+                            $voceDopo = @($dopo.models | Where-Object { $_.key -eq $scelto.id })[0]
+                            $nIstanze = 0
+                            $ctxReale = 0
+                            if ($voceDopo -and $voceDopo.loaded_instances) {
+                                $nIstanze = @($voceDopo.loaded_instances).Count
+                                $ctxIstanza = @($voceDopo.loaded_instances)[0].config.context_length
+                                if ($ctxIstanza) { $ctxReale = [int]$ctxIstanza }
+                            }
+                            if ($nIstanze -ne 1 -or ($ctxReale -and $ctxReale -lt $ContestoAgente)) {
+                                $comeContesto = if ($ctxReale) { "$ctxReale" } else { 'sconosciuto' }
+                                Avviso "Esito inatteso dopo il caricamento di $($scelto.id): $nIstanze istanze, contesto $comeContesto (atteso: 1 istanza con almeno $ContestoAgente token). In LM Studio scarica tutte le istanze del modello e ricaricalo con almeno $ContestoAgente token di contesto."
+                                if ($ctxReale) { $scelto.contextWindow = $ctxReale }
+                            }
+                        }
                     } catch {
                         Avviso "Caricamento non riuscito: in LM Studio carica $($scelto.id) con almeno $ContestoAgente token di contesto."
                     }
