@@ -23,6 +23,109 @@
 
 ---
 
+## Segnalazione dal PC del responsabile (21/10/2026) – da correggere prima del ciclo 9
+
+Installazione reale su Windows: un Vault di 272 file (8.433 chunk, 281 pagine OCR, 186,9 MB), con chunking ricorsivo 1000/150, metrica cosine e **riassunto contestuale** attivo, mostra **23 errori**. Esempio:
+
+```
+C:\Users\Antonio Cavalli\OneDrive\Antiriciclaggio\Posizioni Aperte\0006 Wallace Trust\20260310-1988-amendments.pdf
+SHA-256 148b9ccabcd1a5cdd58dced37f00308fdcfbd29dac7a03bfdc7f6676d12bd49e · Indicizzato 21/10/2026 10:20:18
+Note: riassunto contestuale: chat qwen3:4b-instruct: HTTP 400: request (4236 tokens) exceeds the available context size (4096 tokens), try increasing it
+```
+
+- [ ] **Bug #32 (alta): il riassunto contestuale supera il contesto di 4.096 token del modello Ollama installato dall'installatore**
+  - **File:**
+    - `engine/vault_engine/pipeline.py` (`SUMMARY_PROMPT`, `SUMMARY_INPUT_CHARS = 12000`, `prepare_file`);
+    - `engine/vault_engine/providers.py` (`ProviderClient.chat`);
+    - `installer/installa.ps1` e `installer/ollama.ps1` (LLM predefinito `qwen3:4b-instruct`).
+  - **Causa:**
+    - Il riassunto invia al modello i primi **12.000 caratteri** del documento, più il prompt, e chiede fino a 300 token di risposta.
+    - Con testi legali, numeri e OCR siamo intorno a 2,8–3 caratteri per token, quindi la richiesta arriva a circa **4.200–4.300 token**: il caso reale ne conta 4.236.
+    - L'installatore configura come LLM dell'app `qwen3:4b-instruct`, che Ollama carica con il contesto predefinito di **4.096** token.
+    - La chiamata passa da `/v1/chat/completions` (API compatibile OpenAI), che **non** permette di passare `num_ctx`. L'unico modello con contesto ampio, `workspace-agent` (16.384), viene creato solo per la Harness.
+  - **Effetti:** i documenti lunghi e densi (contratti, atti, PDF scansionati) falliscono. I file brevi passano, per questo gli errori sono 23 su 272 e non tutti.
+  - **Come riprodurlo:**
+    - Vault con riassunto contestuale attivo e LLM `ollama/qwen3:4b-instruct` (configurazione dell'installatore): un PDF con più di circa 11.000 caratteri di testo fitto va in errore con il messaggio sopra;
+    - sonda `test_summary_input_exceeds_4096_token_context`.
+  - **Correzione proposta** (anche combinate):
+    1. per Ollama usare l'API nativa `/api/chat` con `options.num_ctx` (es. 8.192), come fa già `ensure_loaded` per `keep_alive`;
+    2. calcolare la lunghezza del testo in base al contesto reale del modello (`/api/show` → `num_ctx`, `/api/ps` → `context_length`; LM Studio → `loaded_context_length`), lasciando margine per prompt e risposta. Con 4.096 token restano circa 8.000 caratteri;
+    3. sull'errore "exceeds the available context size", riprovare una volta con metà del testo;
+    4. nell'installatore impostare come LLM dell'app `workspace-agent` quando esiste, oppure creare un modello con contesto ampio anche per l'app.
+
+- [ ] **Bug #33 (media): se il riassunto contestuale fallisce, l'intero documento resta fuori dal Vault**
+  - **File:** `engine/vault_engine/pipeline.py` (`prepare_file`, ramo `except` del riassunto).
+  - **Causa:** l'errore del riassunto, che è solo un arricchimento facoltativo, finisce in `_record_error`. Lo stato diventa `error`, i chunk del file vengono **cancellati** e il documento non viene indicizzato affatto.
+  - **Effetti:** i 23 documenti, tra cui atti della posizione "0006 Wallace Trust", **non sono ricercabili**, né dalla ricerca né dall'agente, anche se il testo è stato estratto correttamente (OCR compreso).
+  - **Come riprodurlo:** sonda `test_summary_failure_drops_whole_document`. Con `ProviderClient.chat` che solleva l'errore di contesto, il file risulta `error` e il Vault ha 0 chunk.
+  - **Correzione proposta:**
+    - in caso di errore del riassunto, proseguire **senza** riassunto (`summary=None`);
+    - indicizzare il documento con stato `indexed`, mettendo un avviso nel campo note (es. "indicizzato senza riassunto contestuale: …");
+    - lasciare `error` solo per i difetti di lettura o parsing.
+
+- [ ] **Miglioramento #23: avvisare quando l'LLM scelto ha poco contesto per il riassunto contestuale**
+  - **File:** `desktop/src/pages/Settings.tsx` e la pagina del Vault (opzione "Contestuale").
+  - **Proposta:**
+    - all'attivazione del riassunto contestuale, o alla scelta dell'LLM, mostrare il contesto del modello letto da Ollama o LM Studio;
+    - avvisare sotto gli 8.192 token, come già fa la Harness con la soglia dei 12.000.
+
+**Rimedio immediato per l'utente, in attesa della correzione** (poi "Sincronizza": i file in errore vengono rielaborati):
+- in Impostazioni scegli come LLM `workspace-agent`, se la Harness è installata (contesto 16.384);
+- oppure imposta `OLLAMA_CONTEXT_LENGTH=8192` (o `16384`) nelle variabili d'ambiente dell'utente e riavvia Ollama. Più contesto significa più RAM/VRAM.
+
+<details><summary>Codice delle sonde (salvarlo in <code>engine/tests/_probe_qa9.py</code>, file temporaneo)</summary>
+
+```python
+"""Sonde segnalazione 21/10 (riassunto contestuale): PASSANO se il difetto è presente."""
+import asyncio
+
+from vault_engine import pipeline
+from vault_engine.config import ModelRef, SettingsStore
+from vault_engine.events import EventBus
+from vault_engine.providers import ProviderError
+from vault_engine.vaults import VaultConfig, VaultRegistry
+
+
+def test_summary_input_exceeds_4096_token_context():
+    # 12.000 caratteri di testo legale/numerico ≈ 2,8-3 caratteri per token → ~4.000-4.300 token,
+    # più prompt e max_tokens=300: oltre i 4.096 del contesto predefinito di Ollama.
+    budget_tokens = pipeline.SUMMARY_INPUT_CHARS / 2.9 + len(pipeline.SUMMARY_PROMPT) / 4 + 300
+    assert budget_tokens > 4096
+
+
+def test_summary_failure_drops_whole_document(tmp_path, monkeypatch, fake_embeddings):
+    monkeypatch.setenv("WSOS_DATA_DIR", str(tmp_path / "data"))
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "contratto.txt").write_text("Contratto di trust Wallace, emendamenti 1988. " * 50)
+
+    async def too_long(self, *a, **k):
+        raise ProviderError("chat qwen3:4b-instruct: HTTP 400: request (4236 tokens) exceeds the available context size (4096 tokens)")
+    monkeypatch.setattr(pipeline.ProviderClient, "chat", too_long)
+
+    async def scenario():
+        events = EventBus(); events.bind(asyncio.get_running_loop())
+        settings = SettingsStore()
+        settings.update({"llm": {"provider": "ollama", "model": "qwen3:4b-instruct"}})
+        registry = VaultRegistry()
+        jobs = pipeline.JobManager(registry, settings, events)
+        vault = registry.create(VaultConfig(name="T", sources=[str(src)], embedding=ModelRef(provider="lmstudio", model="fake"), contextual_summary=True))
+        job = jobs.submit(vault.config.id, "sync")
+        while job.status in ("queued", "running"):
+            await asyncio.sleep(0.05)
+        await jobs.shutdown()
+        return vault
+    vault = asyncio.run(scenario())
+    rec = vault.file(str(src / "contratto.txt"))
+    # il documento è in errore e NON ha chunk: non è ricercabile affatto
+    assert rec.status == "error" and "riassunto contestuale" in rec.error
+    assert vault.count_chunks() == 0
+```
+
+</details>
+
+---
+
 ## Ciclo 8 – Bug
 
 - [x] **Bug #31 (bassa, sicurezza): il filtro su `-EncodedCommand` si aggira ancora con accento grave, operatore punto e `$env:ComSpec`**
