@@ -8,7 +8,7 @@ import pytest
 from vault_engine.agent import runner as runner_mod
 from vault_engine.agent.runner import AgentRunner
 from vault_engine.agent.store import AgentStore, Thread
-from vault_engine.config import ModelRef, SettingsStore
+from vault_engine.config import SettingsStore
 from vault_engine.events import EventBus
 from vault_engine.providers import StreamResult
 from vault_engine.vaults import VaultRegistry

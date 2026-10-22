@@ -44,6 +44,7 @@ export function VaultDialog({ open, vault, onClose }: { open: boolean; vault?: V
   const { settings, notify } = useStore();
   const embeddingModels = useModels("embedding");
   const visionModels = useModels("vision");
+  const llmModels = useModels("llm");
   const [form, setForm] = useState<VaultInput | null>(null);
   const [manualFolder, setManualFolder] = useState("");
   const [busy, setBusy] = useState(false);
@@ -242,6 +243,9 @@ export function VaultDialog({ open, vault, onClose }: { open: boolean; vault?: V
             {form.contextual_summary && !settings?.llm && (
               <Caption1>Seleziona un LLM in Impostazioni, altrimenti questa opzione viene ignorata.</Caption1>
             )}
+            {form.contextual_summary && settings?.llm && (
+              <ContestoLlmWarning llm={settings.llm} llmModels={llmModels} />
+            )}
             <Switch checked={form.watch} onChange={(_, d) => set({ watch: d.checked })} label="Live-watching delle cartelle" />
             <Switch
               checked={form.parser === "docling"}
@@ -266,5 +270,33 @@ export function VaultDialog({ open, vault, onClose }: { open: boolean; vault?: V
         </DialogBody>
       </DialogSurface>
     </Dialog>
+  );
+}
+
+// Miglioramento #23: sotto gli 8.192 token di contesto i documenti lunghi rischiano di
+// superare la finestra del modello durante il riassunto (Bug #32). Il contesto letto da
+// Ollama/LM Studio arriva in ModelInfo.context_length; se sconosciuto non si avvisa.
+function ContestoLlmWarning({
+  llm,
+  llmModels,
+}: {
+  llm: ModelRef;
+  llmModels: { provider: ModelRef["provider"]; model: string; loaded: boolean | null; context_length: number | null }[];
+}) {
+  const found = llmModels.find((m) => m.provider === llm.provider && m.model === llm.model);
+  const ctx = found?.context_length;
+  if (!ctx) return null;
+  if (ctx < 8192) {
+    return (
+      <Caption1>
+        Il modello {llm.model} ha un contesto di circa {ctx.toLocaleString("it-IT")} token: i documenti lunghi potrebbero
+        restare senza riassunto contestuale. Consigliato un modello con almeno 8.192 token (es. workspace-agent).
+      </Caption1>
+    );
+  }
+  return (
+    <Caption1>
+      Contesto del modello {llm.model}: circa {ctx.toLocaleString("it-IT")} token, sufficiente per il riassunto contestuale.
+    </Caption1>
   );
 }

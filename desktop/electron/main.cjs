@@ -188,8 +188,23 @@ ipcMain.handle("dialog:pick-folders", async () => {
   const result = await dialog.showOpenDialog(mainWindow, { properties: ["openDirectory", "multiSelections"] });
   return result.canceled ? [] : result.filePaths;
 });
-ipcMain.handle("shell:open-path", (_e, target) => shell.openPath(String(target)));
-ipcMain.handle("shell:show-in-folder", (_e, target) => shell.showItemInFolder(String(target)));
+// Only files inside a Vault's source folders may be opened: the renderer can be
+// fed arbitrary paths (prompt injection, corrupted state) and shell.openPath on an
+// executable would run it. The logic lives in openable.cjs (no Electron deps) so it
+// can be unit-tested with node --test (Miglioramento #13).
+const { assertOpenableTarget, makeSupportedExtensions } = require("./openable.cjs");
+const supportedExtensions = makeSupportedExtensions(engineFetch);
+
+ipcMain.handle("shell:open-path", async (_e, target) => {
+  const safe = await assertOpenableTarget(target, { forOpen: true, engineFetch, supportedExtensions });
+  if (!safe) throw new Error("apertura consentita solo per i documenti supportati dei Vault");
+  return shell.openPath(safe);
+});
+ipcMain.handle("shell:show-in-folder", async (_e, target) => {
+  const safe = await assertOpenableTarget(target, { engineFetch, supportedExtensions });
+  if (!safe) throw new Error("apertura consentita solo per i documenti dei Vault");
+  shell.showItemInFolder(safe);
+});
 ipcMain.handle("window:theme-overlay", (_e, symbolColor) => {
   try {
     mainWindow?.setTitleBarOverlay({ color: "#00000000", symbolColor: String(symbolColor), height: 40 });

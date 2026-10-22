@@ -1,0 +1,102 @@
+{
+  "appearance.title": {
+    "en": "Appearance",
+    "it": "Aspetto"
+  },
+  "appearance.light": {
+    "en": "Light",
+    "it": "Chiaro"
+  },
+  "appearance.dark": {
+    "en": "Dark",
+    "it": "Scuro"
+  },
+  "appearance.system": {
+    "en": "System",
+    "it": "Sistema"
+  },
+  "fontSize.text.title": {
+    "en": "Font size",
+    "it": "Dimensione del testo"
+  },
+  "fontSize.text.description": {
+    "en": "Only affects conversation content",
+    "it": "Riguarda solo il contenuto della conversazione"
+  },
+  "fontSize.text.increase": {
+    "en": "Increase font size",
+    "it": "Aumenta la dimensione del testo"
+  },
+  "fontSize.text.decrease": {
+    "en": "Decrease font size",
+    "it": "Riduci la dimensione del testo"
+  },
+  "fontSize.code.title": {
+    "en": "Code font size",
+    "it": "Dimensione del codice"
+  },
+  "fontSize.code.description": {
+    "en": "Used for code blocks, inline code, and tool output",
+    "it": "Usata per blocchi di codice, codice in linea e output degli strumenti"
+  },
+  "fontSize.code.increase": {
+    "en": "Increase code font size",
+    "it": "Aumenta la dimensione del codice"
+  },
+  "fontSize.code.decrease": {
+    "en": "Decrease code font size",
+    "it": "Riduci la dimensione del codice"
+  },
+  "fontSize.terminal.title": {
+    "en": "Terminal font size",
+    "it": "Dimensione del terminale"
+  },
+  "fontSize.terminal.description": {
+    "en": "Used for the sidebar terminal",
+    "it": "Usata per il terminale della barra laterale"
+  },
+  "fontSize.terminal.increase": {
+    "en": "Increase terminal font size",
+    "it": "Aumenta la dimensione del terminale"
+  },
+  "fontSize.terminal.decrease": {
+    "en": "Decrease terminal font size",
+    "it": "Riduci la dimensione del terminale"
+  },
+  "fontSize.unit": {
+    "en": "px",
+    "it": "px"
+  },
+  "fontFamily.text.title": {
+    "en": "Text font",
+    "it": "Carattere del testo"
+  },
+  "fontFamily.text.description": {
+    "en": "Used for the interface and conversation text. Separate fonts with commas; leave empty for the default",
+    "it": "Usato per l'interfaccia e il testo della conversazione. Separa i caratteri con virgole; lascia vuoto per il predefinito"
+  },
+  "fontFamily.code.title": {
+    "en": "Code font",
+    "it": "Carattere del codice"
+  },
+  "fontFamily.code.description": {
+    "en": "Used for code blocks, inline code, and tool output. Separate fonts with commas; leave empty for the default",
+    "it": "Usato per blocchi di codice, codice in linea e output degli strumenti. Separa i caratteri con virgole; lascia vuoto per il predefinito"
+  },
+  "fontFamily.terminal.title": {
+    "en": "Terminal font",
+    "it": "Carattere del terminale"
+  },
+  "fontFamily.terminal.description": {
+    "en": "Used for the sidebar terminal. Separate fonts with commas; leave empty for the default",
+    "it": "Usato per il terminale della barra laterale. Separa i caratteri con virgole; lascia vuoto per il predefinito"
+  },
+  "fontFamily.placeholder": {
+    "en": "Default",
+    "it": "Predefinito"
+  },
+  "fontSize.more": {
+    "en": "More font settings",
+    "it": "Altre impostazioni dei caratteri"
+  }
+}

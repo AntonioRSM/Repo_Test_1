@@ -1,0 +1,74 @@
+{
+  "run.title": {
+    "en": "{name}",
+    "it": "{name}"
+  },
+  "run.members.one": {
+    "en": "{count} member",
+    "it": "{count} membro"
+  },
+  "run.members.other": {
+    "en": "{count} members",
+    "it": "{count} membri"
+  },
+  "run.empty": {
+    "en": "No members started",
+    "it": "Nessun membro avviato"
+  },
+  "phase.unassigned": {
+    "en": "Unphased",
+    "it": "Senza fase"
+  },
+  "phase.empty": {
+    "en": "Empty phase name",
+    "it": "Nome della fase vuoto"
+  },
+  "statusCount.running": {
+    "en": "Running {count}",
+    "it": "In esecuzione {count}"
+  },
+  "statusCount.completed": {
+    "en": "Completed {count}",
+    "it": "Completati {count}"
+  },
+  "statusCount.failed": {
+    "en": "Failed {count}",
+    "it": "Non riusciti {count}"
+  },
+  "statusCount.cancelled": {
+    "en": "Cancelled {count}",
+    "it": "Annullati {count}"
+  },
+  "statusCount.interrupted": {
+    "en": "Interrupted {count}",
+    "it": "Interrotti {count}"
+  },
+  "member.empty": {
+    "en": "Empty member name",
+    "it": "Nome del membro vuoto"
+  },
+  "member.open": {
+    "en": "Open {name}",
+    "it": "Apri {name}"
+  },
+  "status.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "status.completed": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "status.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "status.cancelled": {
+    "en": "Cancelled",
+    "it": "Annullato"
+  },
+  "status.interrupted": {
+    "en": "Interrupted",
+    "it": "Interrotto"
+  }
+}

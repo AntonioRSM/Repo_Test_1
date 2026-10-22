@@ -9,10 +9,39 @@ modello locale e usa come strumenti i Vault, i file del PC, PowerShell, il web e
 Manuale interattivo in italiano: [`docs/Manuale-RAG-Vault-Studio.html`](docs/Manuale-RAG-Vault-Studio.html)
 (funziona offline).
 
+Facoltativo: **Workspace Harness**, un agente locale per programmazione, file, terminale e web basato
+su [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (MIT), interamente in italiano e
+con il marchio Workspace S.r.l. (vedi [`harness/README.md`](harness/README.md)).
+
 ```
 desktop/   Electron 33 + React 18 + Fluent UI v9 (Mica, tray, drag & drop)
 engine/    Python 3.12: FastAPI su 127.0.0.1, LanceDB, PyMuPDF, RapidOCR-ONNX, watchdog
+harness/   Workspace Harness: runtime DeepSeek Harness fissato + plugin Workspace (italiano, marchio, profilo)
 ```
+
+## Installazione rapida (Windows 11)
+
+1. Scarica il progetto: `git clone -b workspace-os https://github.com/AntonioRSM/Repo_Test_1.git WorkspaceOS`
+   (oppure il file ZIP del ramo, ma senza git l'aggiornamento automatico non è disponibile).
+2. Doppio clic su **`INSTALLA.bat`**. Se mancano installa con `winget` **uv** (che scarica Python 3.12) e
+   **Node.js LTS**, poi prepara il motore (`uv sync --no-build`) e compila l'interfaccia (`npm install`, `npm run build`).
+3. **Modelli locali.** Se LM Studio non è installato, l'installer installa **Ollama** con `winget`, lo avvia
+   e scarica `bge-m3` (embedding multilingue, ~1,2 GB) e `qwen3:4b-instruct` (LLM con tool calling per l'agente,
+   ~2,5 GB, funziona anche senza GPU). Poi li imposta come modelli predefiniti, ma solo dove in
+   Impostazioni non ne hai già scelto uno. Ollama parte con Windows; altri modelli si scaricano dalla
+   pagina **Modelli**.
+   - `INSTALLA.bat -Ollama` installa Ollama anche se LM Studio è presente;
+   - `INSTALLA.bat -SenzaModelli` salta questo passo.
+4. **Workspace Harness (facoltativo, ~830 MB).** L'installer chiede se installarlo; `INSTALLA.bat -Harness`
+   lo installa senza chiedere, `-SenzaHarness` lo salta. Con Ollama crea anche `workspace-agent`, lo stesso
+   LLM con un contesto di 16.384 token (il prompt dell'agente ne occupa circa 8.500).
+5. Nel **menu Start** compare la cartella **RAG Vault Studio** con:
+   - **RAG Vault Studio**: avvia l'app;
+   - **Workspace Harness** (se installato): avvia l'agente nel browser;
+   - **Manuale RAG Vault Studio**: il manuale d'uso;
+   - **Aggiorna RAG Vault Studio** (solo se la cartella è un clone git): `git pull` e reinstallazione.
+
+Per aggiornare, chiudi prima l'app (anche dall'icona vicino all'orologio).
 
 ## Avvio
 
@@ -39,6 +68,7 @@ Sviluppo dell'interfaccia: `npm run dev` (Vite su :5173) e, in un altro terminal
 | Area | Implementazione |
 |---|---|
 | Auto-discovery | Sonda LM Studio (`/api/v0/models`, fallback `/v1/models`) e Ollama (`/api/tags`, `/api/show` per le capability) su endpoint configurabili; ogni modello è classificato come embedding / LLM / vision e mostra se è caricato |
+| Modelli (Ollama) | Pagina **Modelli**: ricerca nella libreria pubblica, download con barra di avanzamento, caricamento in RAM/VRAM e rilascio manuale; i modelli mancanti vengono scaricati automaticamente quando un Vault o l'agente li richiedono (`ollama_auto_pull`), con tempo di residenza configurabile (`ollama_keep_alive_minutes`) |
 | Model Router | Embedding per Vault; LLM globale per riassunti contestuali, re-ranking e risposte RAG; modello vision per l'OCR. Le chiamate usano gli endpoint OpenAI-compatibili `/v1/embeddings` e `/v1/chat/completions`. I blocchi `<think>` dei modelli di ragionamento vengono rimossi |
 | Hardware | CPU/RAM con psutil; GPU e VRAM dai contatori Windows "GPU Engine" e "GPU Adapter Memory" (Intel, AMD e NVIDIA) oppure da `nvidia-smi`; grafici live nella Dashboard |
 | Formati | `.docx .xlsx .pptx .msg .pdf .png .jpg .jpeg .tif .tiff .bmp .webp .txt .md .json .csv`. I `.msg` includono gli allegati supportati |
@@ -167,4 +197,6 @@ quanti strumenti MCP sono attivi in totale.
 cd engine
 uv run pytest -m "not live"   # parser, OCR, chunking, pipeline con embedding finti
 uv run pytest -m live         # embedding reali da LM Studio/Ollama
+cd ..\harness
+npm test                      # traduzioni, plugin generati e profilo composto da dsh
 ```

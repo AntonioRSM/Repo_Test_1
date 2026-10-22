@@ -1,0 +1,3 @@
+# Radice del profilo dsh: elenco vuoto. L'albero si compone con le patch dei bundle elencati in
+# package.json (dsh.profile.bundles), poi cordis.patch.yml. Modifica cordis.patch.yml, non questo file.
+[]

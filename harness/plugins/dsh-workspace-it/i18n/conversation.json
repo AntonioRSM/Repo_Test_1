@@ -1,0 +1,1494 @@
+{
+  "shortcut.newline": {
+    "en": "New line",
+    "it": "A capo"
+  },
+  "shortcut.complementary": {
+    "en": "Use the complementary Queue / Steer action",
+    "it": "Usa l'azione complementare Accoda / Indirizza"
+  },
+  "shortcut.slash": {
+    "en": "Open command menu",
+    "it": "Apri il menu dei comandi"
+  },
+  "shortcut.mention": {
+    "en": "Open reference menu",
+    "it": "Apri il menu dei riferimenti"
+  },
+  "hint.plan": {
+    "en": "describe your task to generate plan",
+    "it": "descrivi l'attività per generare un piano"
+  },
+  "hint.goal": {
+    "en": "describe the objective for a long-running task",
+    "it": "descrivi l'obiettivo di un'attività lunga"
+  },
+  "hint.goal.active": {
+    "en": "goal active — edit / pause / resume / clear",
+    "it": "obiettivo attivo: modifica / pausa / riprendi / cancella"
+  },
+  "placeholder.plan": {
+    "en": "describe your task to generate plan",
+    "it": "descrivi l'attività per generare un piano"
+  },
+  "placeholder.default": {
+    "en": "Message or run a task, / commands, @ files or sessions",
+    "it": "Scrivi un messaggio o avvia un'attività, / comandi, @ file o sessioni"
+  },
+  "placeholder.unavailable": {
+    "en": "Session unavailable",
+    "it": "Sessione non disponibile"
+  },
+  "placeholder.parentOffline": {
+    "en": "Parent session offline; sending is unavailable but you can still stop the run",
+    "it": "Sessione principale offline: non puoi inviare, ma puoi ancora fermare l'esecuzione"
+  },
+  "placeholder.hero": {
+    "en": "Describe what you want to build, / commands, @ files or sessions",
+    "it": "Descrivi cosa vuoi realizzare, / comandi, @ file o sessioni"
+  },
+  "placeholder.workspace": {
+    "en": "Choose a workspace to start",
+    "it": "Scegli un workspace per iniziare"
+  },
+  "placeholder.steerQueue": {
+    "en": "Cmd/Ctrl+Enter steers all queued messages",
+    "it": "Cmd/Ctrl+Invio indirizza tutti i messaggi in coda"
+  },
+  "input.commands": {
+    "en": "Add files or run commands",
+    "it": "Aggiungi file o esegui comandi"
+  },
+  "input.file": {
+    "en": "File",
+    "it": "File"
+  },
+  "input.stop": {
+    "en": "Stop generating",
+    "it": "Interrompi la generazione"
+  },
+  "input.send": {
+    "en": "Send message",
+    "it": "Invia messaggio"
+  },
+  "input.send.queue": {
+    "en": "Queue message",
+    "it": "Accoda messaggio"
+  },
+  "input.send.steer": {
+    "en": "Steer message",
+    "it": "Indirizza con un messaggio"
+  },
+  "attachment.pending": {
+    "en": "Pending attachments",
+    "it": "Allegati in attesa"
+  },
+  "attachment.scrollLeft": {
+    "en": "Scroll attachments left",
+    "it": "Scorri gli allegati a sinistra"
+  },
+  "attachment.scrollRight": {
+    "en": "Scroll attachments right",
+    "it": "Scorri gli allegati a destra"
+  },
+  "attachment.dropTitle": {
+    "en": "Drag files or images here to add them",
+    "it": "Trascina qui file o immagini per aggiungerli"
+  },
+  "attachment.dropDesc": {
+    "en": "Image limit: up to {count} images, {size} each",
+    "it": "Limite immagini: fino a {count} immagini, {size} ciascuna"
+  },
+  "attachment.dropBlocked": {
+    "en": "Files and images cannot be added right now",
+    "it": "Al momento non si possono aggiungere file o immagini"
+  },
+  "attachment.directoryDesktopOnly": {
+    "en": "Folders can only be added in the desktop app; add individual files in the browser",
+    "it": "Le cartelle si possono aggiungere solo nell'app desktop; nel browser aggiungi i singoli file"
+  },
+  "attachment.pathUnavailable": {
+    "en": "Could not obtain the folder path; drag it in again",
+    "it": "Impossibile ottenere il percorso della cartella: trascinala di nuovo"
+  },
+  "attachment.pathUnsupported": {
+    "en": "The path contains characters a reference cannot carry; rename it and try again",
+    "it": "Il percorso contiene caratteri non utilizzabili in un riferimento: rinominalo e riprova"
+  },
+  "image.pending": {
+    "en": "Pending images",
+    "it": "Immagini in attesa"
+  },
+  "image.openOriginal": {
+    "en": "View original",
+    "it": "Vedi l'originale"
+  },
+  "image.openOriginalLabel": {
+    "en": "{label}, click to view original",
+    "it": "{label}, fai clic per vedere l'originale"
+  },
+  "image.remove": {
+    "en": "Remove image {name}",
+    "it": "Rimuovi l'immagine {name}"
+  },
+  "image.original": {
+    "en": "Original image",
+    "it": "Immagine originale"
+  },
+  "image.label": {
+    "en": "Image",
+    "it": "Immagine"
+  },
+  "image.loadFailed": {
+    "en": "Image failed to load; click to retry",
+    "it": "Caricamento dell'immagine non riuscito: fai clic per riprovare"
+  },
+  "image.loading": {
+    "en": "Loading image…",
+    "it": "Caricamento dell'immagine…"
+  },
+  "image.preview": {
+    "en": "Original image preview",
+    "it": "Anteprima dell'immagine originale"
+  },
+  "image.closePreview": {
+    "en": "Close original image preview",
+    "it": "Chiudi l'anteprima dell'immagine originale"
+  },
+  "image.unsupportedType": {
+    "en": "Only PNG, JPG, WebP, and GIF images are supported",
+    "it": "Sono supportate solo immagini PNG, JPG, WebP e GIF"
+  },
+  "image.tooMany": {
+    "en": "A message can include up to {count} images",
+    "it": "Un messaggio può contenere fino a {count} immagini"
+  },
+  "image.fileTooLarge": {
+    "en": "Each image must be smaller than {size}",
+    "it": "Ogni immagine deve essere più piccola di {size}"
+  },
+  "image.totalTooLarge": {
+    "en": "Images exceed {size} in total; remove some and try again",
+    "it": "Le immagini superano {size} in totale: rimuovine alcune e riprova"
+  },
+  "image.tooManyPixels": {
+    "en": "Image resolution is too high; compress it and try again",
+    "it": "La risoluzione dell'immagine è troppo alta: comprimila e riprova"
+  },
+  "image.dimensionTooLarge": {
+    "en": "Image sides must be at most {size}px; downscale it and try again",
+    "it": "I lati dell'immagine devono essere al massimo {size}px: riducila e riprova"
+  },
+  "image.modelUnsupported": {
+    "en": "The current model does not support images; switch to a model that does",
+    "it": "Il modello attuale non supporta le immagini: passa a un modello che le supporta"
+  },
+  "image.sendFailed": {
+    "en": "Sending images failed ({reason}); re-add them and try again",
+    "it": "Invio delle immagini non riuscito ({reason}): aggiungile di nuovo e riprova"
+  },
+  "file.pending": {
+    "en": "Pending files",
+    "it": "File in attesa"
+  },
+  "file.remove": {
+    "en": "Remove file {name}",
+    "it": "Rimuovi il file {name}"
+  },
+  "file.uploading": {
+    "en": "Uploading…",
+    "it": "Caricamento…"
+  },
+  "file.uploadFailed": {
+    "en": "Upload failed; click to retry",
+    "it": "Caricamento non riuscito: fai clic per riprovare"
+  },
+  "file.retry": {
+    "en": "Retry uploading {name}",
+    "it": "Riprova a caricare {name}"
+  },
+  "file.stillUploading": {
+    "en": "Files are still uploading; send after they finish",
+    "it": "I file sono ancora in caricamento: invia quando hanno finito"
+  },
+  "file.sessionUnavailable": {
+    "en": "Session unavailable; files cannot be uploaded",
+    "it": "Sessione non disponibile: impossibile caricare file"
+  },
+  "file.notStaged": {
+    "en": "The file has not finished uploading; re-add it and try again",
+    "it": "Il caricamento del file non è terminato: aggiungilo di nuovo e riprova"
+  },
+  "file.label": {
+    "en": "File",
+    "it": "File"
+  },
+  "context.aria": {
+    "en": "{percent} of context used",
+    "it": "{percent} del contesto usato"
+  },
+  "context.used": {
+    "en": "of context used",
+    "it": "del contesto usato"
+  },
+  "context.system": {
+    "en": "System prompt",
+    "it": "Prompt di sistema"
+  },
+  "context.tools": {
+    "en": "Tool definitions",
+    "it": "Definizioni degli strumenti"
+  },
+  "context.messages": {
+    "en": "Messages",
+    "it": "Messaggi"
+  },
+  "settings.enter.title": {
+    "en": "Send behavior while busy",
+    "it": "Invio mentre l'agente lavora"
+  },
+  "settings.enter.description": {
+    "en": "What Enter and the Send button do while the agent is running; Cmd/Ctrl+Enter uses the other behavior",
+    "it": "Cosa fanno Invio e il pulsante Invia mentre l'agente è in esecuzione; Cmd/Ctrl+Invio usa l'altro comportamento"
+  },
+  "settings.enter.queue": {
+    "en": "Queue",
+    "it": "Accoda"
+  },
+  "settings.enter.steer": {
+    "en": "Steer",
+    "it": "Indirizza"
+  },
+  "hero.headline": {
+    "en": "Into the Unknown",
+    "it": "Verso l'ignoto"
+  },
+  "hero.preview": {
+    "en": "Preview",
+    "it": "Anteprima"
+  },
+  "hero.chooseWorkspace": {
+    "en": "Choose workspace",
+    "it": "Scegli workspace"
+  },
+  "session.hierarchy": {
+    "en": "Session hierarchy",
+    "it": "Gerarchia della sessione"
+  },
+  "todo.title": {
+    "en": "To-dos",
+    "it": "Cose da fare"
+  },
+  "todo.progress.done": {
+    "en": "{done} completed",
+    "it": "{done} completate"
+  },
+  "todo.progress.active": {
+    "en": "{active} in progress",
+    "it": "{active} in corso"
+  },
+  "todo.progress.pending": {
+    "en": "{pending} pending",
+    "it": "{pending} in attesa"
+  },
+  "todo.status.completed": {
+    "en": "Completed",
+    "it": "Completata"
+  },
+  "todo.status.inProgress": {
+    "en": "In progress",
+    "it": "In corso"
+  },
+  "todo.status.pending": {
+    "en": "Pending",
+    "it": "In attesa"
+  },
+  "todo.rowTitle": {
+    "en": "Update to-do list",
+    "it": "Aggiorna l'elenco delle cose da fare"
+  },
+  "tool.title.createGoal": {
+    "en": "Create goal",
+    "it": "Crea obiettivo"
+  },
+  "tool.title.getGoal": {
+    "en": "View goal",
+    "it": "Vedi obiettivo"
+  },
+  "tool.title.updateGoal": {
+    "en": "Update goal",
+    "it": "Aggiorna obiettivo"
+  },
+  "tool.preparing.content": {
+    "en": "{kilobytes}KB",
+    "it": "{kilobytes} KB"
+  },
+  "tool.title.createSchedule": {
+    "en": "Create reminder",
+    "it": "Crea promemoria"
+  },
+  "tool.title.listSchedules": {
+    "en": "List reminders",
+    "it": "Elenca promemoria"
+  },
+  "tool.title.deleteSchedule": {
+    "en": "Delete reminder",
+    "it": "Elimina promemoria"
+  },
+  "tool.title.updateSchedule": {
+    "en": "Update reminder",
+    "it": "Aggiorna promemoria"
+  },
+  "detail.state": {
+    "en": "Status",
+    "it": "Stato"
+  },
+  "detail.todo.completed": {
+    "en": "Completed",
+    "it": "Completata"
+  },
+  "detail.todo.in_progress": {
+    "en": "In progress",
+    "it": "In corso"
+  },
+  "detail.todo.pending": {
+    "en": "Pending",
+    "it": "In attesa"
+  },
+  "detail.todo.empty": {
+    "en": "The to-do list is empty",
+    "it": "L'elenco delle cose da fare è vuoto"
+  },
+  "todo.diff.initial": {
+    "en": "Initial list",
+    "it": "Elenco iniziale"
+  },
+  "todo.diff.compare": {
+    "en": "Changes since the previous list",
+    "it": "Modifiche rispetto all'elenco precedente"
+  },
+  "todo.diff.unavailable": {
+    "en": "Previous list unavailable",
+    "it": "Elenco precedente non disponibile"
+  },
+  "todo.diff.noChanges": {
+    "en": "No changes to the list",
+    "it": "Nessuna modifica all'elenco"
+  },
+  "todo.diff.added": {
+    "en": "{count} added",
+    "it": "{count} aggiunte"
+  },
+  "todo.diff.updated": {
+    "en": "{count} updated",
+    "it": "{count} aggiornate"
+  },
+  "todo.diff.removed": {
+    "en": "{count} removed",
+    "it": "{count} rimosse"
+  },
+  "todo.diff.unchanged": {
+    "en": "{count} unchanged",
+    "it": "{count} invariate"
+  },
+  "todo.diff.addedItem": {
+    "en": "Added",
+    "it": "Aggiunta"
+  },
+  "todo.diff.updatedItem": {
+    "en": "Status changed",
+    "it": "Stato cambiato"
+  },
+  "todo.diff.movedItem": {
+    "en": "Reordered",
+    "it": "Riordinata"
+  },
+  "todo.diff.removedItem": {
+    "en": "Removed",
+    "it": "Rimossa"
+  },
+  "detail.goal.empty": {
+    "en": "No goal",
+    "it": "Nessun obiettivo"
+  },
+  "detail.goal.active": {
+    "en": "Active",
+    "it": "Attivo"
+  },
+  "detail.goal.disarmed": {
+    "en": "Awaiting continuation",
+    "it": "In attesa di prosecuzione"
+  },
+  "detail.goal.paused": {
+    "en": "Paused",
+    "it": "In pausa"
+  },
+  "detail.goal.blocked": {
+    "en": "Blocked",
+    "it": "Bloccato"
+  },
+  "detail.goal.complete": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "detail.goal.rounds": {
+    "en": "Rounds",
+    "it": "Giri"
+  },
+  "detail.goal.reason": {
+    "en": "Blocker",
+    "it": "Blocco"
+  },
+  "detail.days": {
+    "en": "{count} d",
+    "it": "{count} g"
+  },
+  "detail.hours": {
+    "en": "{count} h",
+    "it": "{count} h"
+  },
+  "detail.minutes": {
+    "en": "{count} min",
+    "it": "{count} min"
+  },
+  "detail.seconds": {
+    "en": "{count} s",
+    "it": "{count} s"
+  },
+  "detail.schedule.once": {
+    "en": "Once",
+    "it": "Una volta"
+  },
+  "detail.schedule.every": {
+    "en": "Every {interval}",
+    "it": "Ogni {interval}"
+  },
+  "detail.schedule.when": {
+    "en": "Scheduled for",
+    "it": "Pianificato per"
+  },
+  "detail.schedule.frequency": {
+    "en": "Repeat",
+    "it": "Ripetizione"
+  },
+  "detail.schedule.scheduled": {
+    "en": "Scheduled",
+    "it": "Pianificato"
+  },
+  "detail.schedule.overdue": {
+    "en": "Overdue, awaiting session resume",
+    "it": "In ritardo, in attesa che la sessione riprenda"
+  },
+  "detail.schedule.empty": {
+    "en": "No reminders",
+    "it": "Nessun promemoria"
+  },
+  "detail.schedule.deleted": {
+    "en": "Deleted",
+    "it": "Eliminato"
+  },
+  "detail.schedule.count": {
+    "en": "{count} reminders",
+    "it": "{count} promemoria"
+  },
+  "detail.schedule.daily": {
+    "en": "Every day at {time} ({zone})",
+    "it": "Ogni giorno alle {time} ({zone})"
+  },
+  "detail.schedule.weekly": {
+    "en": "Weekly on {days} at {time} ({zone})",
+    "it": "Ogni settimana il {days} alle {time} ({zone})"
+  },
+  "detail.schedule.cron": {
+    "en": "Cron {expression} ({zone})",
+    "it": "Cron {expression} ({zone})"
+  },
+  "detail.weekday.1": {
+    "en": "Mon",
+    "it": "lun"
+  },
+  "detail.weekday.2": {
+    "en": "Tue",
+    "it": "mar"
+  },
+  "detail.weekday.3": {
+    "en": "Wed",
+    "it": "mer"
+  },
+  "detail.weekday.4": {
+    "en": "Thu",
+    "it": "gio"
+  },
+  "detail.weekday.5": {
+    "en": "Fri",
+    "it": "ven"
+  },
+  "detail.weekday.6": {
+    "en": "Sat",
+    "it": "sab"
+  },
+  "detail.weekday.7": {
+    "en": "Sun",
+    "it": "dom"
+  },
+  "detail.weekday.join": {
+    "en": ", ",
+    "it": ", "
+  },
+  "tool.title.inspectProviders": {
+    "en": "Inspect providers",
+    "it": "Ispeziona i provider"
+  },
+  "tool.title.queryRuntime": {
+    "en": "Query runtime",
+    "it": "Interroga il runtime"
+  },
+  "tool.title.inspectPlugins": {
+    "en": "Inspect plugins",
+    "it": "Ispeziona i plugin"
+  },
+  "tool.title.workflow": {
+    "en": "Run workflow",
+    "it": "Esegui workflow"
+  },
+  "tool.title.ralph": {
+    "en": "Run ralph loop",
+    "it": "Esegui il ciclo ralph"
+  },
+  "tool.title.readEvent": {
+    "en": "Read event",
+    "it": "Leggi evento"
+  },
+  "tool.title.searchEvents": {
+    "en": "Search events",
+    "it": "Cerca eventi"
+  },
+  "tool.title.traceEvent": {
+    "en": "Trace event",
+    "it": "Traccia evento"
+  },
+  "tool.title.searchSessions": {
+    "en": "Search sessions",
+    "it": "Cerca sessioni"
+  },
+  "tool.title.traceSession": {
+    "en": "Trace session",
+    "it": "Traccia sessione"
+  },
+  "tool.title.listModels": {
+    "en": "List models",
+    "it": "Elenca modelli"
+  },
+  "tool.title.subagent": {
+    "en": "Create subagent",
+    "it": "Crea subagente"
+  },
+  "tool.title.listAgents": {
+    "en": "List subagents",
+    "it": "Elenca subagenti"
+  },
+  "tool.title.sendMessage": {
+    "en": "Send message",
+    "it": "Invia messaggio"
+  },
+  "tool.title.interruptAgent": {
+    "en": "Interrupt agent",
+    "it": "Interrompi agente"
+  },
+  "tool.title.listJobs": {
+    "en": "List background jobs",
+    "it": "Elenca processi in background"
+  },
+  "tool.title.readJob": {
+    "en": "Read job output",
+    "it": "Leggi l'output del processo"
+  },
+  "tool.title.killJob": {
+    "en": "Cancel background job",
+    "it": "Annulla processo in background"
+  },
+  "tool.title.openTerminal": {
+    "en": "Open terminal",
+    "it": "Apri terminale"
+  },
+  "tool.title.readTerminal": {
+    "en": "Read terminal",
+    "it": "Leggi terminale"
+  },
+  "tool.title.listTerminals": {
+    "en": "List terminals",
+    "it": "Elenca terminali"
+  },
+  "tool.title.signalTerminal": {
+    "en": "Signal terminal",
+    "it": "Invia segnale al terminale"
+  },
+  "tool.title.closeTerminal": {
+    "en": "Close terminal",
+    "it": "Chiudi terminale"
+  },
+  "tool.title.lsp": {
+    "en": "Query code symbols",
+    "it": "Interroga i simboli del codice"
+  },
+  "tool.title.findDefinition": {
+    "en": "Find definition",
+    "it": "Trova la definizione"
+  },
+  "tool.title.findReferences": {
+    "en": "Find references",
+    "it": "Trova i riferimenti"
+  },
+  "tool.title.findImplementation": {
+    "en": "Find implementation",
+    "it": "Trova l'implementazione"
+  },
+  "tool.title.hoverSymbol": {
+    "en": "Inspect symbol",
+    "it": "Ispeziona simbolo"
+  },
+  "tool.title.spawnTeammate": {
+    "en": "Create teammate",
+    "it": "Crea membro del team"
+  },
+  "tool.title.createTeamTask": {
+    "en": "Create team task",
+    "it": "Crea attività del team"
+  },
+  "tool.title.getTeamTask": {
+    "en": "Read team task",
+    "it": "Leggi attività del team"
+  },
+  "tool.title.updateTeamTask": {
+    "en": "Update team task",
+    "it": "Aggiorna attività del team"
+  },
+  "tool.title.listTeamTasks": {
+    "en": "List team tasks",
+    "it": "Elenca attività del team"
+  },
+  "tool.title.waitAgent": {
+    "en": "Wait for subagent",
+    "it": "Attendi il subagente"
+  },
+  "detail.recordedResult": {
+    "en": "Recorded result",
+    "it": "Risultato registrato"
+  },
+  "detail.empty": {
+    "en": "No results",
+    "it": "Nessun risultato"
+  },
+  "detail.none": {
+    "en": "None",
+    "it": "Nessuno"
+  },
+  "detail.yes": {
+    "en": "Yes",
+    "it": "Sì"
+  },
+  "detail.no": {
+    "en": "No",
+    "it": "No"
+  },
+  "detail.moreInInspect": {
+    "en": "{count} more items available in Inspect",
+    "it": "Altri {count} elementi disponibili in Ispeziona"
+  },
+  "detail.status.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "detail.status.idle": {
+    "en": "Idle",
+    "it": "Inattivo"
+  },
+  "detail.status.ready": {
+    "en": "Ready",
+    "it": "Pronto"
+  },
+  "detail.status.inactive": {
+    "en": "Inactive",
+    "it": "Inattivo"
+  },
+  "detail.status.provisioning": {
+    "en": "Provisioning",
+    "it": "In preparazione"
+  },
+  "detail.status.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "detail.status.completed": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "detail.status.deleted": {
+    "en": "Deleted",
+    "it": "Eliminato"
+  },
+  "detail.status.killed": {
+    "en": "Cancelled",
+    "it": "Annullato"
+  },
+  "detail.status.accepted": {
+    "en": "Accepted",
+    "it": "Accettato"
+  },
+  "detail.status.queued": {
+    "en": "Queued",
+    "it": "In coda"
+  },
+  "detail.status.exited": {
+    "en": "Exited",
+    "it": "Terminato"
+  },
+  "detail.field.id": {
+    "en": "ID",
+    "it": "ID"
+  },
+  "detail.field.revision": {
+    "en": "Revision",
+    "it": "Revisione"
+  },
+  "detail.field.platform": {
+    "en": "Platform",
+    "it": "Piattaforma"
+  },
+  "detail.field.provider": {
+    "en": "Provider",
+    "it": "Provider"
+  },
+  "detail.field.model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "detail.field.role": {
+    "en": "Role",
+    "it": "Ruolo"
+  },
+  "detail.field.context": {
+    "en": "Context",
+    "it": "Contesto"
+  },
+  "detail.field.owner": {
+    "en": "Owner",
+    "it": "Responsabile"
+  },
+  "detail.field.ready": {
+    "en": "Ready",
+    "it": "Pronto"
+  },
+  "detail.field.dependencies": {
+    "en": "Dependencies",
+    "it": "Dipendenze"
+  },
+  "detail.field.writeScopes": {
+    "en": "Write scopes",
+    "it": "Ambiti di scrittura"
+  },
+  "detail.field.warnings": {
+    "en": "Warnings",
+    "it": "Avvisi"
+  },
+  "detail.field.diagnostics": {
+    "en": "Diagnostics",
+    "it": "Diagnostica"
+  },
+  "detail.field.methods": {
+    "en": "Methods",
+    "it": "Metodi"
+  },
+  "detail.field.inputSchema": {
+    "en": "Input schema",
+    "it": "Schema di input"
+  },
+  "detail.field.outputSchema": {
+    "en": "Output schema",
+    "it": "Schema di output"
+  },
+  "detail.field.currentPackage": {
+    "en": "Current package",
+    "it": "Pacchetto attuale"
+  },
+  "detail.field.nextPackage": {
+    "en": "Next package",
+    "it": "Pacchetto successivo"
+  },
+  "detail.field.latestRun": {
+    "en": "Latest run",
+    "it": "Ultima esecuzione"
+  },
+  "detail.field.packages": {
+    "en": "Packages",
+    "it": "Pacchetti"
+  },
+  "detail.field.registrations": {
+    "en": "Registrations",
+    "it": "Registrazioni"
+  },
+  "detail.field.props": {
+    "en": "Props",
+    "it": "Proprietà"
+  },
+  "detail.field.data": {
+    "en": "Data",
+    "it": "Dati"
+  },
+  "detail.field.source": {
+    "en": "Source",
+    "it": "Origine"
+  },
+  "detail.field.content": {
+    "en": "Content",
+    "it": "Contenuto"
+  },
+  "detail.field.message": {
+    "en": "Message",
+    "it": "Messaggio"
+  },
+  "detail.field.messageId": {
+    "en": "Message ID",
+    "it": "ID del messaggio"
+  },
+  "detail.field.root": {
+    "en": "Root",
+    "it": "Radice"
+  },
+  "detail.field.pid": {
+    "en": "Process ID",
+    "it": "ID del processo"
+  },
+  "detail.field.type": {
+    "en": "Type",
+    "it": "Tipo"
+  },
+  "detail.field.time": {
+    "en": "Time",
+    "it": "Ora"
+  },
+  "detail.field.seq": {
+    "en": "Event sequence",
+    "it": "Sequenza dell'evento"
+  },
+  "detail.field.turn": {
+    "en": "Turn",
+    "it": "Turno"
+  },
+  "detail.field.step": {
+    "en": "Step",
+    "it": "Passo"
+  },
+  "detail.field.callId": {
+    "en": "Call ID",
+    "it": "ID della chiamata"
+  },
+  "detail.field.agents": {
+    "en": "Agents started",
+    "it": "Agenti avviati"
+  },
+  "detail.field.result": {
+    "en": "Result",
+    "it": "Risultato"
+  },
+  "detail.field.parent": {
+    "en": "Parent",
+    "it": "Padre"
+  },
+  "detail.field.depth": {
+    "en": "Depth",
+    "it": "Profondità"
+  },
+  "detail.field.exitCode": {
+    "en": "Exit code",
+    "it": "Codice di uscita"
+  },
+  "detail.field.signal": {
+    "en": "Signal",
+    "it": "Segnale"
+  },
+  "detail.field.previousStatus": {
+    "en": "Previous status",
+    "it": "Stato precedente"
+  },
+  "detail.field.agent": {
+    "en": "Agent ID",
+    "it": "ID dell'agente"
+  },
+  "detail.field.job": {
+    "en": "Job ID",
+    "it": "ID del processo"
+  },
+  "detail.field.task": {
+    "en": "Task",
+    "it": "Attività"
+  },
+  "detail.field.processGroup": {
+    "en": "Process group",
+    "it": "Gruppo di processi"
+  },
+  "detail.field.availability": {
+    "en": "Availability",
+    "it": "Disponibilità"
+  },
+  "detail.field.bestMatch": {
+    "en": "Best match",
+    "it": "Corrispondenza migliore"
+  },
+  "detail.field.target": {
+    "en": "Target event",
+    "it": "Evento di destinazione"
+  },
+  "detail.field.surface": {
+    "en": "Record status",
+    "it": "Stato del record"
+  },
+  "detail.agents.count": {
+    "en": "{count} agents",
+    "it": "{count} agenti"
+  },
+  "detail.jobs.count": {
+    "en": "{count} background jobs",
+    "it": "{count} processi in background"
+  },
+  "detail.terminals.count": {
+    "en": "{count} terminals",
+    "it": "{count} terminali"
+  },
+  "detail.tasks.count": {
+    "en": "{count} team tasks",
+    "it": "{count} attività del team"
+  },
+  "detail.tasks.nextPage": {
+    "en": "More tasks available; next cursor is {cursor}",
+    "it": "Ci sono altre attività; il cursore successivo è {cursor}"
+  },
+  "detail.locations.count": {
+    "en": "{count} locations",
+    "it": "{count} posizioni"
+  },
+  "detail.location": {
+    "en": "Line {line}, column {column}",
+    "it": "Riga {line}, colonna {column}"
+  },
+  "detail.receipt.delivered": {
+    "en": "Message delivered",
+    "it": "Messaggio consegnato"
+  },
+  "detail.receipt.interrupt": {
+    "en": "Interrupt requested",
+    "it": "Interruzione richiesta"
+  },
+  "detail.receipt.started": {
+    "en": "Started",
+    "it": "Avviato"
+  },
+  "detail.receipt.cancel": {
+    "en": "Cancellation requested",
+    "it": "Annullamento richiesto"
+  },
+  "detail.receipt.alreadyFinished": {
+    "en": "Already finished",
+    "it": "Già terminato"
+  },
+  "detail.receipt.signal": {
+    "en": "Signal delivered",
+    "it": "Segnale consegnato"
+  },
+  "detail.receipt.closed": {
+    "en": "Closed",
+    "it": "Chiuso"
+  },
+  "detail.receipt.closing": {
+    "en": "Closing",
+    "it": "Chiusura"
+  },
+  "detail.wait.noProgress": {
+    "en": "No active subagents",
+    "it": "Nessun subagente attivo"
+  },
+  "detail.wait.title": {
+    "en": "Subagent activity",
+    "it": "Attività dei subagenti"
+  },
+  "detail.wait.timeout": {
+    "en": "Wait timed out",
+    "it": "Attesa scaduta"
+  },
+  "detail.wait.changed": {
+    "en": "Change detected",
+    "it": "Rilevata una modifica"
+  },
+  "detail.agent.reply": {
+    "en": "Agent response",
+    "it": "Risposta dell'agente"
+  },
+  "detail.models.title": {
+    "en": "Available models",
+    "it": "Modelli disponibili"
+  },
+  "detail.output.lines": {
+    "en": "Lines {begin}–{end} of {total}",
+    "it": "Righe {begin}–{end} di {total}"
+  },
+  "detail.output.truncated": {
+    "en": "Output truncated",
+    "it": "Output troncato"
+  },
+  "detail.providers.count": {
+    "en": "{count} inspect providers",
+    "it": "{count} provider di ispezione"
+  },
+  "detail.plugins.count": {
+    "en": "{count} dynamic plugins",
+    "it": "{count} plugin dinamici"
+  },
+  "detail.workflow.script": {
+    "en": "Workflow script",
+    "it": "Script del workflow"
+  },
+  "detail.ralph.reportedComplete": {
+    "en": "Worker reported completion",
+    "it": "Il worker ha segnalato il completamento"
+  },
+  "detail.ralph.reportedBlocker": {
+    "en": "Worker reported a blocker",
+    "it": "Il worker ha segnalato un blocco"
+  },
+  "detail.ralph.limit": {
+    "en": "Round limit reached",
+    "it": "Raggiunto il limite di giri"
+  },
+  "detail.report.nextSteps": {
+    "en": "Remaining work",
+    "it": "Lavoro rimanente"
+  },
+  "detail.trace.replacedBy": {
+    "en": "Replaced by",
+    "it": "Sostituito da"
+  },
+  "detail.trace.replacementChain": {
+    "en": "Replacement chain",
+    "it": "Catena di sostituzione"
+  },
+  "detail.trace.replaces": {
+    "en": "Replaced events",
+    "it": "Eventi sostituiti"
+  },
+  "detail.trace.sources": {
+    "en": "Source events",
+    "it": "Eventi di origine"
+  },
+  "detail.trace.derived": {
+    "en": "Derived events",
+    "it": "Eventi derivati"
+  },
+  "detail.trace.ancestors": {
+    "en": "Ancestor sessions",
+    "it": "Sessioni antenate"
+  },
+  "detail.trace.descendants": {
+    "en": "Descendant sessions",
+    "it": "Sessioni discendenti"
+  },
+  "detail.matches.count": {
+    "en": "{count} matches",
+    "it": "{count} corrispondenze"
+  },
+  "detail.matches.capped": {
+    "en": "Result limit reached; narrow the search for more",
+    "it": "Raggiunto il limite di risultati: restringi la ricerca per vederne altri"
+  },
+  "detail.event.neighbors": {
+    "en": "Surrounding events",
+    "it": "Eventi circostanti"
+  },
+  "todo.completed": {
+    "en": "{done}/{total} completed",
+    "it": "{done}/{total} completate"
+  },
+  "command.attachmentsUnsupported": {
+    "en": "/{command} does not accept attachments; remove them first",
+    "it": "/{command} non accetta allegati: rimuovili prima"
+  },
+  "ask.rowTitle": {
+    "en": "Ask question",
+    "it": "Fai una domanda"
+  },
+  "ask.waiting": {
+    "en": "waiting",
+    "it": "in attesa"
+  },
+  "ask.pending": {
+    "en": "continued; answer still available",
+    "it": "proseguito; puoi ancora rispondere"
+  },
+  "ask.pendingDetail": {
+    "en": "These pending questions remain answerable from the composer.",
+    "it": "A queste domande in sospeso puoi ancora rispondere dall'area di scrittura."
+  },
+  "ask.reopen": {
+    "en": "Answer",
+    "it": "Rispondi"
+  },
+  "ask.review": {
+    "en": "View answers",
+    "it": "Vedi le risposte"
+  },
+  "ask.closed": {
+    "en": "closed",
+    "it": "chiusa"
+  },
+  "ask.closedDetail": {
+    "en": "This question is closed; its outcome is in the conversation below.",
+    "it": "Questa domanda è chiusa: l'esito è nella conversazione qui sotto."
+  },
+  "ask.cancelled": {
+    "en": "cancelled",
+    "it": "annullate"
+  },
+  "ask.cancelledDetail": {
+    "en": "This question set was cancelled before answers were submitted.",
+    "it": "Questo gruppo di domande è stato annullato prima dell'invio delle risposte."
+  },
+  "ask.interrupted": {
+    "en": "interrupted",
+    "it": "interrotte"
+  },
+  "ask.interruptedDetail": {
+    "en": "This question set was interrupted before answers were submitted.",
+    "it": "Questo gruppo di domande è stato interrotto prima dell'invio delle risposte."
+  },
+  "ask.answered": {
+    "en": "{answered}/{total} answered",
+    "it": "{answered}/{total} risposte date"
+  },
+  "ask.skipped": {
+    "en": "Not answered",
+    "it": "Senza risposta"
+  },
+  "bash.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "bash.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "bash.stopped": {
+    "en": "Stopped",
+    "it": "Interrotto"
+  },
+  "row.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "row.preparing": {
+    "en": "Preparing tool call",
+    "it": "Preparazione della chiamata allo strumento"
+  },
+  "row.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "row.stopped": {
+    "en": "Stopped",
+    "it": "Interrotto"
+  },
+  "row.commandArguments": {
+    "en": "Command arguments",
+    "it": "Argomenti del comando"
+  },
+  "row.input": {
+    "en": "IN",
+    "it": "IN"
+  },
+  "row.output": {
+    "en": "OUT",
+    "it": "OUT"
+  },
+  "row.inspect": {
+    "en": "Inspect",
+    "it": "Ispeziona"
+  },
+  "row.imageSize": {
+    "en": "{width}x{height}px, {bytes} bytes",
+    "it": "{width}x{height}px, {bytes} byte"
+  },
+  "row.imageSizeDownscaled": {
+    "en": "{width}x{height}px (downscaled from {originalWidth}x{originalHeight}px), {bytes} bytes",
+    "it": "{width}x{height}px (ridotta da {originalWidth}x{originalHeight}px), {bytes} byte"
+  },
+  "tool.title.search": {
+    "en": "Search",
+    "it": "Cerca"
+  },
+  "tool.title.read": {
+    "en": "Read",
+    "it": "Leggi"
+  },
+  "tool.title.bash": {
+    "en": "Bash",
+    "it": "Bash"
+  },
+  "tool.title.write": {
+    "en": "Write",
+    "it": "Scrivi"
+  },
+  "tool.title.edit": {
+    "en": "Edit",
+    "it": "Modifica"
+  },
+  "tool.title.code": {
+    "en": "Code",
+    "it": "Codice"
+  },
+  "tool.title.generic": {
+    "en": "Tool call",
+    "it": "Chiamata a strumento"
+  },
+  "tool.title.inspect": {
+    "en": "Query Cordis environment",
+    "it": "Interroga l'ambiente Cordis"
+  },
+  "tool.title.runCordis": {
+    "en": "Run Cordis Plugin",
+    "it": "Esegui plugin Cordis"
+  },
+  "tool.title.stopCordis": {
+    "en": "Stop Cordis Plugin",
+    "it": "Ferma plugin Cordis"
+  },
+  "tool.title.removeCordis": {
+    "en": "Remove Cordis Plugin",
+    "it": "Rimuovi plugin Cordis"
+  },
+  "tool.title.pwsh": {
+    "en": "Pwsh",
+    "it": "Pwsh"
+  },
+  "tool.title.readImage": {
+    "en": "Read image",
+    "it": "Leggi immagine"
+  },
+  "tool.title.grep": {
+    "en": "Grep",
+    "it": "Grep"
+  },
+  "tool.title.glob": {
+    "en": "Glob",
+    "it": "Glob"
+  },
+  "tool.title.webSearch": {
+    "en": "Search",
+    "it": "Cerca"
+  },
+  "tool.title.webFetch": {
+    "en": "Fetch",
+    "it": "Recupera"
+  },
+  "tool.autoReviewRejected": {
+    "en": "Rejected by Auto review",
+    "it": "Rifiutato dalla revisione automatica"
+  },
+  "tool.autoReviewNotExecuted": {
+    "en": "Tool was not executed. Reason: {reason}",
+    "it": "Lo strumento non è stato eseguito. Motivo: {reason}"
+  },
+  "tool.autoReviewReasonFallback": {
+    "en": "Auto review did not authorize this action",
+    "it": "La revisione automatica non ha autorizzato questa azione"
+  },
+  "diff.collapseAria": {
+    "en": "Collapse diff",
+    "it": "Comprimi le differenze"
+  },
+  "diff.expandAria": {
+    "en": "Expand {count} more diff lines",
+    "it": "Espandi altre {count} righe di differenze"
+  },
+  "diff.expandRest": {
+    "en": "… {count} more lines",
+    "it": "… altre {count} righe"
+  },
+  "read.window": {
+    "en": "Showing {shown} of {total} lines",
+    "it": "Mostrate {shown} di {total} righe"
+  },
+  "read.collapseAria": {
+    "en": "Collapse content",
+    "it": "Comprimi il contenuto"
+  },
+  "read.expandAria": {
+    "en": "Expand {count} more lines",
+    "it": "Espandi altre {count} righe"
+  },
+  "read.expandRest": {
+    "en": "… {count} more lines",
+    "it": "… altre {count} righe"
+  },
+  "search.paths": {
+    "en": "{shown} paths",
+    "it": "{shown} percorsi"
+  },
+  "search.paths.truncated": {
+    "en": "Showing {shown} of {total} paths",
+    "it": "Mostrati {shown} di {total} percorsi"
+  },
+  "search.matches": {
+    "en": "{shown} matches · {files} files",
+    "it": "{shown} corrispondenze · {files} file"
+  },
+  "search.matches.truncated": {
+    "en": "Showing {shown} of {total} matches · {files} files",
+    "it": "Mostrate {shown} di {total} corrispondenze · {files} file"
+  },
+  "search.noResults": {
+    "en": "No results",
+    "it": "Nessun risultato"
+  },
+  "search.collapseAria": {
+    "en": "Collapse results",
+    "it": "Comprimi i risultati"
+  },
+  "search.expandAria": {
+    "en": "Expand {count} more result lines",
+    "it": "Espandi altre {count} righe di risultati"
+  },
+  "search.expandRest": {
+    "en": "… {count} more lines",
+    "it": "… altre {count} righe"
+  },
+  "web.noResults": {
+    "en": "No results found",
+    "it": "Nessun risultato trovato"
+  },
+  "web.sourcesTruncated": {
+    "en": "Source list truncated",
+    "it": "Elenco delle fonti troncato"
+  },
+  "web.http": {
+    "en": "HTTP",
+    "it": "HTTP"
+  },
+  "web.contentTruncated": {
+    "en": "Content truncated",
+    "it": "Contenuto troncato"
+  },
+  "details.running": {
+    "en": "Running…",
+    "it": "In esecuzione…"
+  },
+  "queue.count": {
+    "en": "{n} queued messages",
+    "it": "{n} messaggi in coda"
+  },
+  "queue.sending": {
+    "en": "Sending…",
+    "it": "Invio…"
+  },
+  "queue.image": {
+    "en": "Queued message image",
+    "it": "Immagine del messaggio in coda"
+  },
+  "queue.file": {
+    "en": "Queued file {name}",
+    "it": "File in coda {name}"
+  },
+  "queue.edit": {
+    "en": "Edit queued message",
+    "it": "Modifica il messaggio in coda"
+  },
+  "queue.edit.unsupported": {
+    "en": "Contains non-text content; editing is not supported yet",
+    "it": "Contiene contenuti non testuali: la modifica non è ancora supportata"
+  },
+  "queue.save": {
+    "en": "Save queued message",
+    "it": "Salva il messaggio in coda"
+  },
+  "queue.cancelEdit": {
+    "en": "Cancel editing",
+    "it": "Annulla la modifica"
+  },
+  "queue.remove": {
+    "en": "Remove queued message",
+    "it": "Rimuovi il messaggio in coda"
+  },
+  "queue.steer": {
+    "en": "Steer queued message",
+    "it": "Usa il messaggio in coda per indirizzare"
+  },
+  "queue.steer.unavailable": {
+    "en": "Steering is available only while the agent is running",
+    "it": "Puoi indirizzare l'agente solo mentre è in esecuzione"
+  },
+  "error.sessionInUse": {
+    "en": "This session is already in use, possibly by another running DSH instance (such as dsh web or the desktop app). Quit other running DSH instances and try again.",
+    "it": "Questa sessione è già in uso, forse da un'altra istanza DSH in esecuzione (come dsh web o l'app desktop). Chiudi le altre istanze DSH e riprova."
+  },
+  "queue.editFailed": {
+    "en": "Edit failed: this message may have already started sending.",
+    "it": "Modifica non riuscita: il messaggio potrebbe essere già in invio."
+  },
+  "queue.removeFailed": {
+    "en": "Removal failed: this message may have already started sending.",
+    "it": "Rimozione non riuscita: il messaggio potrebbe essere già in invio."
+  },
+  "queue.steerFailed": {
+    "en": "Steering failed. Try again.",
+    "it": "Indirizzamento non riuscito. Riprova."
+  },
+  "terminal.signal": {
+    "en": "signal {signal}",
+    "it": "segnale {signal}"
+  },
+  "terminal.exitCode": {
+    "en": "exit code {code}",
+    "it": "codice di uscita {code}"
+  },
+  "terminal.noExitCode": {
+    "en": "no exit code",
+    "it": "nessun codice di uscita"
+  },
+  "terminal.commandLine": {
+    "en": "Command line {n}",
+    "it": "Riga di comando {n}"
+  },
+  "terminal.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "terminal.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "terminal.done": {
+    "en": "Done",
+    "it": "Fatto"
+  },
+  "terminal.noOutput": {
+    "en": "No output",
+    "it": "Nessun output"
+  },
+  "terminal.collapseAria": {
+    "en": "Collapse output",
+    "it": "Comprimi l'output"
+  },
+  "terminal.expandAria": {
+    "en": "Expand the remaining {n} output lines",
+    "it": "Espandi le restanti {n} righe di output"
+  },
+  "terminal.expandRest": {
+    "en": "… {n} more lines",
+    "it": "… altre {n} righe"
+  },
+  "terminal.sendInput": {
+    "en": "(send input)",
+    "it": "(invia input)"
+  },
+  "terminal.session": {
+    "en": "Terminal {sessionId}",
+    "it": "Terminale {sessionId}"
+  }
+}

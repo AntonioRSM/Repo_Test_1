@@ -87,16 +87,21 @@ class RapidOcrEngine:
 
     def _get(self):
         if self._engine is None:
-            from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415 - slow import
+            # Model creation is not thread-safe and loads ONNX sessions: build it once,
+            # under the same lock that serialises recognition.
+            with self._lock:
+                if self._engine is None:
+                    from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415 - slow import
 
-            self._engine = RapidOCR()
+                    self._engine = RapidOCR()
         return self._engine
 
     def recognize(self, png: bytes) -> OcrResult:
         image = np.array(Image.open(io.BytesIO(png)).convert("RGB"))
+        engine = self._get()  # builds under the lock if needed
         # The ONNX sessions are not documented as thread-safe; serialise calls.
         with self._lock:
-            result, _ = self._get()(image)
+            result, _ = engine(image)
         lines = []
         for box, text, score in result or []:
             xs = [p[0] for p in box]

@@ -1,0 +1,126 @@
+{
+  "error.incomplete": {
+    "en": "Please complete this question first.",
+    "it": "Completa prima questa domanda."
+  },
+  "error.unanswered": {
+    "en": "Please select an option or enter a custom answer.",
+    "it": "Scegli un'opzione o scrivi una risposta personalizzata."
+  },
+  "error.unavailable": {
+    "en": "Cannot submit right now; try again in a moment.",
+    "it": "Impossibile inviare ora: riprova tra un momento."
+  },
+  "error.resubmit": {
+    "en": "The answer did not arrive before work continued; submit it again.",
+    "it": "La risposta non è arrivata prima che il lavoro proseguisse: inviala di nuovo."
+  },
+  "status.sent": {
+    "en": "Reply sent; the panel could not close.",
+    "it": "Risposta inviata; il pannello non si è potuto chiudere."
+  },
+  "wait.takeTime": {
+    "en": "Take time",
+    "it": "Prenditi tempo"
+  },
+  "wait.countdown": {
+    "en": "Continuing in {seconds}s",
+    "it": "Si prosegue tra {seconds} s"
+  },
+  "wait.paused": {
+    "en": "Paused · {seconds}s remaining",
+    "it": "In pausa · {seconds} s rimanenti"
+  },
+  "wait.held": {
+    "en": "Waiting until you answer",
+    "it": "In attesa della tua risposta"
+  },
+  "wait.continued": {
+    "en": "Work continued — you can still answer",
+    "it": "Il lavoro è proseguito: puoi comunque rispondere"
+  },
+  "review.status": {
+    "en": "Answered",
+    "it": "Risposta data"
+  },
+  "review.skipped": {
+    "en": "This question was skipped.",
+    "it": "Questa domanda è stata saltata."
+  },
+  "reply.label": {
+    "en": "Reply to earlier pending questions",
+    "it": "Rispondi alle domande in sospeso precedenti"
+  },
+  "reply.open": {
+    "en": "Open question details",
+    "it": "Apri i dettagli della domanda"
+  },
+  "reply.close": {
+    "en": "Close question details",
+    "it": "Chiudi i dettagli della domanda"
+  },
+  "reply.answerLabel": {
+    "en": "Answer: ",
+    "it": "Risposta: "
+  },
+  "reply.skipped": {
+    "en": "Skipped",
+    "it": "Saltata"
+  },
+  "nav.prev": {
+    "en": "Previous question",
+    "it": "Domanda precedente"
+  },
+  "nav.next": {
+    "en": "Next question",
+    "it": "Domanda successiva"
+  },
+  "nav.minimize": {
+    "en": "Collapse the question card",
+    "it": "Comprimi la scheda della domanda"
+  },
+  "nav.maximize": {
+    "en": "Expand the question card",
+    "it": "Espandi la scheda della domanda"
+  },
+  "nav.cancel": {
+    "en": "Dismiss all questions",
+    "it": "Ignora tutte le domande"
+  },
+  "nav.close": {
+    "en": "Close the panel — reopen it from the tool call",
+    "it": "Chiudi il pannello (riaprilo dalla chiamata allo strumento)"
+  },
+  "option.recommended": {
+    "en": "Recommended",
+    "it": "Consigliata"
+  },
+  "custom.placeholder": {
+    "en": "Type your answer",
+    "it": "Scrivi la tua risposta"
+  },
+  "action.skip": {
+    "en": "Skip",
+    "it": "Salta"
+  },
+  "action.next": {
+    "en": "Next",
+    "it": "Avanti"
+  },
+  "plan.header": {
+    "en": "Plan review",
+    "it": "Revisione del piano"
+  },
+  "plan.approve": {
+    "en": "Approve",
+    "it": "Approva"
+  },
+  "plan.decline": {
+    "en": "Refuse",
+    "it": "Rifiuta"
+  },
+  "plan.discuss": {
+    "en": "Request changes",
+    "it": "Chiedi modifiche"
+  }
+}

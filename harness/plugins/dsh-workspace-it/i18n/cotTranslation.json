@@ -1,0 +1,130 @@
+{
+  "provider": {
+    "en": "Translation service",
+    "it": "Servizio di traduzione"
+  },
+  "google": {
+    "en": "Google",
+    "it": "Google"
+  },
+  "bing": {
+    "en": "Bing",
+    "it": "Bing"
+  },
+  "deepseekAccount": {
+    "en": "DeepSeek Flash — Account (paid)",
+    "it": "DeepSeek Flash — Account (a pagamento)"
+  },
+  "deepseekOfficial": {
+    "en": "DeepSeek Flash — Official API (paid)",
+    "it": "DeepSeek Flash — API ufficiale (a pagamento)"
+  },
+  "providerUnavailableOption": {
+    "en": "{provider} — unavailable",
+    "it": "{provider} — non disponibile"
+  },
+  "providerUnavailable": {
+    "en": "This provider is unavailable. Configure your DeepSeek account or Official API provider, or choose an available service.",
+    "it": "Questo provider non è disponibile. Configura il tuo account DeepSeek o l'API ufficiale, oppure scegli un servizio disponibile."
+  },
+  "paidNotice": {
+    "en": "Each uncached fragment sends a separate paid DeepSeek Flash request through the selected account or Official API credentials. Reopening reasoning reuses saved results; changing the provider, language, source text, or request settings may send a new paid request.",
+    "it": "Ogni frammento non in cache invia una richiesta DeepSeek Flash a pagamento con le credenziali dell'account o dell'API ufficiale scelte. Riaprire il ragionamento riusa i risultati salvati; cambiare provider, lingua, testo sorgente o impostazioni della richiesta può inviare una nuova richiesta a pagamento."
+  },
+  "anonymousNotice": {
+    "en": "Bing and Google need no translation login or API key. Their anonymous endpoints may reject or limit requests.",
+    "it": "Bing e Google non richiedono accesso né chiave API per la traduzione. I loro endpoint anonimi possono rifiutare o limitare le richieste."
+  },
+  "targetLanguage": {
+    "en": "Target language",
+    "it": "Lingua di destinazione"
+  },
+  "targetLanguageHint": {
+    "en": "auto follows the UI language; language codes such as zh, en, and ja also work.",
+    "it": "auto segue la lingua dell'interfaccia; funzionano anche codici come zh, en e ja."
+  },
+  "privacy": {
+    "en": "Expanded reasoning is sent to the selected service. It may contain private code or conversation details.",
+    "it": "Il ragionamento espanso viene inviato al servizio scelto e può contenere codice privato o dettagli della conversazione."
+  },
+  "translation": {
+    "en": "View translation",
+    "it": "Vedi la traduzione"
+  },
+  "original": {
+    "en": "View original",
+    "it": "Vedi l'originale"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "failed": {
+    "en": "Translation failed. Showing the original.",
+    "it": "Traduzione non riuscita: è mostrato l'originale."
+  },
+  "translating": {
+    "en": "Translating reasoning",
+    "it": "Traduzione del ragionamento"
+  },
+  "invalidProvider": {
+    "en": "Choose a translation service.",
+    "it": "Scegli un servizio di traduzione."
+  },
+  "invalidLanguage": {
+    "en": "Enter auto or a language code, such as zh, en, or ja.",
+    "it": "Inserisci auto o un codice lingua, come zh, en o ja."
+  },
+  "overridden": {
+    "en": "Overridden",
+    "it": "Personalizzato"
+  },
+  "reset": {
+    "en": "Reset to default",
+    "it": "Ripristina il predefinito"
+  },
+  "unavailable": {
+    "en": "Translation preferences are unavailable.",
+    "it": "Le preferenze di traduzione non sono disponibili."
+  },
+  "readOnly": {
+    "en": "This deployment stores settings read-only.",
+    "it": "Questa installazione salva le impostazioni in sola lettura."
+  },
+  "saveFailed": {
+    "en": "The deployment did not accept these values; they were left for you to correct.",
+    "it": "L'installazione non ha accettato questi valori: sono rimasti da correggere."
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "copy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "codeTitle": {
+    "en": "Code block",
+    "it": "Blocco di codice"
+  },
+  "wrap": {
+    "en": "Wrap lines",
+    "it": "A capo automatico"
+  },
+  "unwrap": {
+    "en": "Unwrap lines",
+    "it": "Senza a capo automatico"
+  },
+  "footnotes": {
+    "en": "Footnotes",
+    "it": "Note"
+  }
+}

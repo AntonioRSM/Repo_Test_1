@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import logging
 import os
-import socket
 import threading
 import time
 
 import psutil
 import uvicorn
+
+LOCALHOST = ("127.0.0.1", "::1", "localhost")
 
 
 def exit_with_parent() -> None:
@@ -27,24 +29,43 @@ def exit_with_parent() -> None:
     threading.Thread(target=watch, name="parent-watchdog", daemon=True).start()
 
 
+async def _serve(args: argparse.Namespace) -> None:
+    config = uvicorn.Config("vault_engine.app:app", host=args.host, port=args.port, log_level=args.log_level)
+    server = uvicorn.Server(config)
+
+    async def announce_port() -> None:
+        # Wait until uvicorn has bound its socket(s), then publish the real port.
+        # Binding happens exactly once inside uvicorn.run: no probe socket, no TOCTOU race.
+        while not server.started:
+            await asyncio.sleep(0.05)
+        for http_server in server.servers:
+            for sock in http_server.sockets:
+                print(f"VAULT_ENGINE_PORT={sock.getsockname()[1]}", flush=True)
+                return
+
+    await asyncio.gather(server.serve(), announce_port())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="vault_engine")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=0, help="0 picks a free port")
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="interfaccia di ascolto: solo 127.0.0.1 (consigliato, default) o localhost; "
+        "valori di rete espongono l'API a ogni host raggiungibile",
+    )
+    parser.add_argument("--port", type=int, default=0, help="0 = porta libera scelta dal sistema")
     parser.add_argument("--log-level", default="info")
     args = parser.parse_args()
 
-    port = args.port
-    if port == 0:
-        with socket.socket() as probe:
-            probe.bind((args.host, 0))
-            port = probe.getsockname()[1]
+    if args.host not in LOCALHOST:
+        logging.getLogger(__name__).warning(
+            "--host %s espone l'API fuori dal loopback: assicurati che WSOS_TOKEN sia impostato", args.host
+        )
 
     logging.basicConfig(level=args.log_level.upper(), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     exit_with_parent()
-    # The desktop app reads this line to learn where to connect.
-    print(f"VAULT_ENGINE_PORT={port}", flush=True)
-    uvicorn.run("vault_engine.app:app", host=args.host, port=port, log_level=args.log_level)
+    asyncio.run(_serve(args))
 
 
 if __name__ == "__main__":

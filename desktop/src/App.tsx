@@ -15,6 +15,7 @@ import {
 import {
   BoardRegular,
   BotRegular,
+  CloudArrowDownRegular,
   DatabaseRegular,
   DataScatterRegular,
   SearchRegular,
@@ -25,6 +26,7 @@ import { isDesktop } from "./api";
 import AgentPage from "./pages/Agent";
 import Dashboard from "./pages/Dashboard";
 import Explorer from "./pages/Explorer";
+import ModelsPage from "./pages/Models";
 import SearchPage from "./pages/Search";
 import SettingsPage from "./pages/Settings";
 import VaultDetail from "./pages/VaultDetail";
@@ -38,6 +40,7 @@ export type Route =
   | { page: "vault"; id: string }
   | { page: "explorer"; id?: string }
   | { page: "search"; id?: string }
+  | { page: "models" }
   | { page: "settings" };
 
 const useStyles = makeStyles({
@@ -102,6 +105,7 @@ export default function App({ dark }: { dark: boolean }) {
           </Tab>
           <Tab value="explorer" icon={<DataScatterRegular />}>Esplora vettori</Tab>
           <Tab value="search" icon={<SearchRegular />}>Search &amp; Retrieval</Tab>
+          <Tab value="models" icon={<CloudArrowDownRegular />}>Modelli</Tab>
           <Tab value="settings" icon={<SettingsRegular />}>Impostazioni</Tab>
         </TabList>
         <div className={styles.footer}>
@@ -121,6 +125,7 @@ export default function App({ dark }: { dark: boolean }) {
         {route.page === "vault" && <VaultDetail id={route.id} go={setRoute} />}
         {route.page === "explorer" && <Explorer initialId={route.id} />}
         {route.page === "search" && <SearchPage initialId={route.id} />}
+        {route.page === "models" && <ModelsPage />}
         {route.page === "settings" && <SettingsPage />}
       </main>
       <Toaster toasterId={toasterId} position="bottom-end" />

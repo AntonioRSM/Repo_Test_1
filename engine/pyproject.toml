@@ -45,3 +45,8 @@ package = false
 testpaths = ["tests"]
 pythonpath = ["."]
 markers = ["live: needs a running LM Studio or Ollama server"]
+
+# Miglioramento #14: senza target-version ruff non riconosce Python 3.12 e segnala
+# falsi positivi come BaseExceptionGroup (F821) in agent/mcp.py.
+[tool.ruff]
+target-version = "py312"

@@ -1,0 +1,22 @@
+{
+  "title": {
+    "en": "NodeJS Inspector",
+    "it": "Inspector NodeJS"
+  },
+  "toggle": {
+    "en": "Toggle NodeJS Inspector",
+    "it": "Mostra/nascondi l'Inspector NodeJS"
+  },
+  "close": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "resize": {
+    "en": "Resize NodeJS Inspector panel",
+    "it": "Ridimensiona il pannello dell'Inspector NodeJS"
+  },
+  "frameTitle": {
+    "en": "NodeJS Inspector",
+    "it": "Inspector NodeJS"
+  }
+}

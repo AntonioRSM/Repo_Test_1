@@ -1,0 +1,210 @@
+{
+  "tab.title": {
+    "en": "Session Log",
+    "it": "Log della sessione"
+  },
+  "tab.description": {
+    "en": "Analyze raw logs and grouped chat messages for the current session in the sidebar.",
+    "it": "Analizza nella barra laterale i log grezzi e i messaggi raggruppati della sessione corrente."
+  },
+  "view.presentation": {
+    "en": "Presentation",
+    "it": "Presentazione"
+  },
+  "view.sessionLog": {
+    "en": "Raw Log",
+    "it": "Log grezzo"
+  },
+  "view.chatNode": {
+    "en": "Chat Group",
+    "it": "Gruppo chat"
+  },
+  "picker.pick": {
+    "en": "Pick an element in Chat View",
+    "it": "Scegli un elemento nella vista Chat"
+  },
+  "picker.cancel": {
+    "en": "Cancel picking (Esc)",
+    "it": "Annulla la selezione (Esc)"
+  },
+  "picker.instructions": {
+    "en": "Hover in the main Chat to preview, then click to select. Esc cancels.",
+    "it": "Passa il mouse sulla Chat principale per l'anteprima, poi fai clic per selezionare. Esc annulla."
+  },
+  "picker.noMatch": {
+    "en": "No matching record in this table. Pick another element or press Esc to cancel.",
+    "it": "Nessun record corrispondente in questa tabella. Scegli un altro elemento o premi Esc per annullare."
+  },
+  "picker.noChat": {
+    "en": "Open this Session in the main Chat before picking.",
+    "it": "Apri questa sessione nella Chat principale prima di selezionare."
+  },
+  "table.id": {
+    "en": "Index",
+    "it": "Indice"
+  },
+  "table.type": {
+    "en": "Type",
+    "it": "Tipo"
+  },
+  "filter.title": {
+    "en": "Filter types",
+    "it": "Filtra i tipi"
+  },
+  "filter.input": {
+    "en": "Type keyword",
+    "it": "Scrivi una parola chiave"
+  },
+  "filter.placeholder": {
+    "en": "Type a fragment, e.g. delta",
+    "it": "Scrivi una parte, ad es. delta"
+  },
+  "filter.help": {
+    "en": "Contains matching (*keyword*). Enter confirms; Esc cancels.",
+    "it": "Ricerca per contenuto (*parola*). Invio conferma, Esc annulla."
+  },
+  "filter.candidates": {
+    "en": "Type suggestions",
+    "it": "Tipi suggeriti"
+  },
+  "filter.loading": {
+    "en": "Finding suggestions…",
+    "it": "Ricerca dei suggerimenti…"
+  },
+  "filter.failed": {
+    "en": "Type suggestions could not be loaded.",
+    "it": "Impossibile caricare i tipi suggeriti."
+  },
+  "filter.noCandidates": {
+    "en": "No suggestions. You can still apply this keyword.",
+    "it": "Nessun suggerimento. Puoi comunque applicare questa parola chiave."
+  },
+  "filter.clear": {
+    "en": "Clear",
+    "it": "Cancella"
+  },
+  "filter.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "filter.apply": {
+    "en": "Apply filter",
+    "it": "Applica il filtro"
+  },
+  "filter.context": {
+    "en": "Parent context of a matching record",
+    "it": "Contesto padre di un record corrispondente"
+  },
+  "table.location": {
+    "en": "T/S",
+    "it": "T/S"
+  },
+  "table.time": {
+    "en": "Time (UTC)",
+    "it": "Ora (UTC)"
+  },
+  "table.data": {
+    "en": "Data",
+    "it": "Dati"
+  },
+  "table.older": {
+    "en": "Load earlier",
+    "it": "Carica precedenti"
+  },
+  "table.loading": {
+    "en": "Loading…",
+    "it": "Caricamento…"
+  },
+  "table.latest": {
+    "en": "Follow Latest",
+    "it": "Segui i più recenti"
+  },
+  "table.empty": {
+    "en": "No records",
+    "it": "Nessun record"
+  },
+  "table.raw": {
+    "en": "Raw data",
+    "it": "Dati grezzi"
+  },
+  "table.rawError": {
+    "en": "This record could not be serialized. Select another record to continue.",
+    "it": "Impossibile serializzare questo record. Selezionane un altro per continuare."
+  },
+  "table.resizeDetails": {
+    "en": "Resize raw data panel",
+    "it": "Ridimensiona il pannello dei dati grezzi"
+  },
+  "table.close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "table.expand": {
+    "en": "Expand children",
+    "it": "Espandi i figli"
+  },
+  "table.collapse": {
+    "en": "Collapse children",
+    "it": "Comprimi i figli"
+  },
+  "table.removed": {
+    "en": "This record was removed or settled. Select a current record.",
+    "it": "Questo record è stato rimosso o chiuso. Seleziona un record attuale."
+  },
+  "object.node": {
+    "en": "Node",
+    "it": "Nodo"
+  },
+  "object.nodeData": {
+    "en": "Node Data",
+    "it": "Dati del nodo"
+  },
+  "object.group": {
+    "en": "Group",
+    "it": "Gruppo"
+  },
+  "object.groupData": {
+    "en": "Group Data",
+    "it": "Dati del gruppo"
+  },
+  "object.turn": {
+    "en": "Turn",
+    "it": "Turno"
+  },
+  "object.turnData": {
+    "en": "Turn Data",
+    "it": "Dati del turno"
+  },
+  "object.step": {
+    "en": "Step",
+    "it": "Passo"
+  },
+  "object.stepData": {
+    "en": "Step Data",
+    "it": "Dati del passo"
+  },
+  "object.accessor": {
+    "en": "[Getter / Setter, not evaluated]",
+    "it": "[Getter / Setter, non valutato]"
+  },
+  "object.empty": {
+    "en": "Empty",
+    "it": "Vuoto"
+  },
+  "object.absent": {
+    "en": "[Empty slot]",
+    "it": "[Posizione vuota]"
+  },
+  "object.properties": {
+    "en": "Other properties",
+    "it": "Altre proprietà"
+  },
+  "object.more": {
+    "en": "Show more",
+    "it": "Mostra di più"
+  },
+  "object.navigation": {
+    "en": "Raw data navigation",
+    "it": "Navigazione nei dati grezzi"
+  }
+}

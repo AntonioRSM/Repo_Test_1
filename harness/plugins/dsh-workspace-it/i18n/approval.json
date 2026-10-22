@@ -1,0 +1,22 @@
+{
+  "waiting": {
+    "en": "Waiting for approval",
+    "it": "In attesa di approvazione"
+  },
+  "detail.aria": {
+    "en": "Approval details",
+    "it": "Dettagli dell'approvazione"
+  },
+  "escalation": {
+    "en": "Tool {toolName} requests privileged execution",
+    "it": "Lo strumento {toolName} chiede un'esecuzione con privilegi"
+  },
+  "reject": {
+    "en": "Reject",
+    "it": "Rifiuta"
+  },
+  "allowOnce": {
+    "en": "Allow once",
+    "it": "Consenti una volta"
+  }
+}

@@ -1,0 +1,770 @@
+{
+  "view.trajectory": {
+    "en": "Trajectory",
+    "it": "Traiettoria"
+  },
+  "toolbar.aria": {
+    "en": "Trajectory toolbar",
+    "it": "Barra della traiettoria"
+  },
+  "toolbar.duration": {
+    "en": "Duration",
+    "it": "Durata"
+  },
+  "toolbar.useActualDuration": {
+    "en": "Use actual duration",
+    "it": "Usa la durata reale"
+  },
+  "toolbar.useEqualWidth": {
+    "en": "Use equal-width operations",
+    "it": "Operazioni a larghezza uguale"
+  },
+  "toolbar.actualTime": {
+    "en": "Actual time",
+    "it": "Tempo reale"
+  },
+  "toolbar.turns": {
+    "en": "Turns",
+    "it": "Turni"
+  },
+  "toolbar.expandTurns": {
+    "en": "Expand turns",
+    "it": "Espandi i turni"
+  },
+  "toolbar.collapseTurns": {
+    "en": "Collapse turns",
+    "it": "Comprimi i turni"
+  },
+  "toolbar.calls": {
+    "en": "Calls",
+    "it": "Chiamate"
+  },
+  "toolbar.expandCalls": {
+    "en": "Expand calls",
+    "it": "Espandi le chiamate"
+  },
+  "toolbar.collapseCalls": {
+    "en": "Collapse calls",
+    "it": "Comprimi le chiamate"
+  },
+  "toolbar.search": {
+    "en": "Search trajectory",
+    "it": "Cerca nella traiettoria"
+  },
+  "toolbar.searchPlaceholder": {
+    "en": "Search",
+    "it": "Cerca"
+  },
+  "kind.system": {
+    "en": "SYSTEM",
+    "it": "SISTEMA"
+  },
+  "kind.user": {
+    "en": "USER",
+    "it": "UTENTE"
+  },
+  "kind.context": {
+    "en": "CONTEXT",
+    "it": "CONTESTO"
+  },
+  "kind.compacted": {
+    "en": "COMPACTED",
+    "it": "COMPATTATO"
+  },
+  "kind.message": {
+    "en": "Message",
+    "it": "Messaggio"
+  },
+  "kind.assistant": {
+    "en": "ASSISTANT",
+    "it": "ASSISTENTE"
+  },
+  "kind.tool": {
+    "en": "TOOL",
+    "it": "STRUMENTO"
+  },
+  "kind.subtool": {
+    "en": "SUBTOOL",
+    "it": "SOTTOSTRUMENTO"
+  },
+  "kind.sub": {
+    "en": "Sub",
+    "it": "Sub"
+  },
+  "column.input": {
+    "en": "Input",
+    "it": "Input"
+  },
+  "column.output": {
+    "en": "Output",
+    "it": "Output"
+  },
+  "column.think": {
+    "en": "Think",
+    "it": "Ragionamento"
+  },
+  "column.time": {
+    "en": "Time",
+    "it": "Tempo"
+  },
+  "column.model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "column.tools": {
+    "en": "Tools",
+    "it": "Strumenti"
+  },
+  "turn.label": {
+    "en": "Turn {turn}",
+    "it": "Turno {turn}"
+  },
+  "section.betweenTurns": {
+    "en": "Between turns",
+    "it": "Tra un turno e l'altro"
+  },
+  "group.message": {
+    "en": "Message",
+    "it": "Messaggio"
+  },
+  "group.step": {
+    "en": "Step {step}",
+    "it": "Passo {step}"
+  },
+  "group.compaction": {
+    "en": "Compaction {seq}",
+    "it": "Compattazione {seq}"
+  },
+  "status.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "status.pending": {
+    "en": "Pending",
+    "it": "In attesa"
+  },
+  "status.completed": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "timing.notAvailable": {
+    "en": "Not available",
+    "it": "Non disponibile"
+  },
+  "timing.notRecorded": {
+    "en": "Not recorded",
+    "it": "Non registrato"
+  },
+  "timing.stepStartUnavailable": {
+    "en": "Step start unavailable",
+    "it": "Inizio del passo non disponibile"
+  },
+  "timing.firstTokenUnavailable": {
+    "en": "First token unavailable",
+    "it": "Primo token non disponibile"
+  },
+  "timing.usageUnavailable": {
+    "en": "Usage unavailable",
+    "it": "Consumo non disponibile"
+  },
+  "timing.outputTokensUnavailable": {
+    "en": "Output tokens unavailable",
+    "it": "Token di output non disponibili"
+  },
+  "timing.durationTooShort": {
+    "en": "Duration too short",
+    "it": "Durata troppo breve"
+  },
+  "timing.showLocalTime": {
+    "en": "Show local time",
+    "it": "Mostra l'ora locale"
+  },
+  "timing.showUnixTimestamp": {
+    "en": "Show Unix timestamp",
+    "it": "Mostra il timestamp Unix"
+  },
+  "timing.started": {
+    "en": "Started",
+    "it": "Inizio"
+  },
+  "timing.totalDuration": {
+    "en": "Total duration",
+    "it": "Durata totale"
+  },
+  "timing.ttft": {
+    "en": "TTFT",
+    "it": "TTFT"
+  },
+  "timing.generation": {
+    "en": "Generation",
+    "it": "Generazione"
+  },
+  "timing.throughput": {
+    "en": "Throughput",
+    "it": "Velocità"
+  },
+  "timing.duration": {
+    "en": "Duration",
+    "it": "Durata"
+  },
+  "timing.source": {
+    "en": "Timing source",
+    "it": "Origine dei tempi"
+  },
+  "timing.sessionTimestamps": {
+    "en": "Session timestamps",
+    "it": "Timestamp della sessione"
+  },
+  "timing.sessionTimestampsRunning": {
+    "en": "Session timestamps (running)",
+    "it": "Timestamp della sessione (in corso)"
+  },
+  "timing.request": {
+    "en": "Request Timing",
+    "it": "Tempi della richiesta"
+  },
+  "unit.milliseconds": {
+    "en": "{value} ms",
+    "it": "{value} ms"
+  },
+  "unit.seconds": {
+    "en": "{value} s",
+    "it": "{value} s"
+  },
+  "unit.tokens": {
+    "en": "{value} tok",
+    "it": "{value} token"
+  },
+  "unit.tokensPerSecond": {
+    "en": "{value} tok/s",
+    "it": "{value} token/s"
+  },
+  "usage.tokens": {
+    "en": "Tokens",
+    "it": "Token"
+  },
+  "usage.reasoning": {
+    "en": "Reasoning",
+    "it": "Ragionamento"
+  },
+  "usage.content": {
+    "en": "Content",
+    "it": "Contenuto"
+  },
+  "usage.notReported": {
+    "en": "Usage not reported",
+    "it": "Consumo non riportato"
+  },
+  "usage.input": {
+    "en": "Input",
+    "it": "Input"
+  },
+  "usage.cached": {
+    "en": "Cached",
+    "it": "In cache"
+  },
+  "usage.cacheCreated": {
+    "en": "Cache created",
+    "it": "Cache creata"
+  },
+  "usage.other": {
+    "en": "Other",
+    "it": "Altro"
+  },
+  "usage.output": {
+    "en": "Output",
+    "it": "Output"
+  },
+  "usage.thisRequest": {
+    "en": "This request",
+    "it": "Questa richiesta"
+  },
+  "usage.sessionCumulative": {
+    "en": "Session cumulative",
+    "it": "Totale della sessione"
+  },
+  "options.notRecorded": {
+    "en": "Options not recorded",
+    "it": "Opzioni non registrate"
+  },
+  "options.json": {
+    "en": "Request options JSON",
+    "it": "JSON delle opzioni della richiesta"
+  },
+  "source.unknown": {
+    "en": "Unknown",
+    "it": "Sconosciuta"
+  },
+  "source.user": {
+    "en": "User",
+    "it": "Utente"
+  },
+  "source.plugin": {
+    "en": "Plugin",
+    "it": "Plugin"
+  },
+  "source.pluginNamed": {
+    "en": "Plugin · {plugin}",
+    "it": "Plugin · {plugin}"
+  },
+  "source.goal": {
+    "en": "Goal",
+    "it": "Obiettivo"
+  },
+  "source.goalRound": {
+    "en": "Goal · Round {round}",
+    "it": "Obiettivo · Giro {round}"
+  },
+  "source.notRecorded": {
+    "en": "Source not recorded",
+    "it": "Origine non registrata"
+  },
+  "source.messageJson": {
+    "en": "Message source JSON",
+    "it": "JSON dell'origine del messaggio"
+  },
+  "tab.summary": {
+    "en": "Summary",
+    "it": "Riepilogo"
+  },
+  "tab.rawOutput": {
+    "en": "Raw Output",
+    "it": "Output grezzo"
+  },
+  "tab.preview": {
+    "en": "Preview",
+    "it": "Anteprima"
+  },
+  "tab.raw": {
+    "en": "Raw",
+    "it": "Grezzo"
+  },
+  "tab.source": {
+    "en": "Source",
+    "it": "Sorgente"
+  },
+  "tab.payload": {
+    "en": "Payload",
+    "it": "Payload"
+  },
+  "tab.result": {
+    "en": "Result",
+    "it": "Risultato"
+  },
+  "tab.schema": {
+    "en": "Schema",
+    "it": "Schema"
+  },
+  "tab.timing": {
+    "en": "Timing",
+    "it": "Tempi"
+  },
+  "tab.diff": {
+    "en": "Diff",
+    "it": "Differenze"
+  },
+  "tab.systemPrompt": {
+    "en": "System Prompt",
+    "it": "Prompt di sistema"
+  },
+  "tab.tools": {
+    "en": "Tools",
+    "it": "Strumenti"
+  },
+  "tab.options": {
+    "en": "Options",
+    "it": "Opzioni"
+  },
+  "tab.usage": {
+    "en": "Usage",
+    "it": "Consumo"
+  },
+  "record.toolCallOnly": {
+    "en": "(tool call only)",
+    "it": "(solo chiamata a strumento)"
+  },
+  "record.noContent": {
+    "en": "No content",
+    "it": "Nessun contenuto"
+  },
+  "record.noPayload": {
+    "en": "No payload captured",
+    "it": "Nessun payload registrato"
+  },
+  "record.noResult": {
+    "en": "No result captured",
+    "it": "Nessun risultato registrato"
+  },
+  "record.noOutput": {
+    "en": "No output",
+    "it": "Nessun output"
+  },
+  "record.schemaUnavailable": {
+    "en": "Schema unavailable",
+    "it": "Schema non disponibile"
+  },
+  "record.parameters": {
+    "en": "Parameters",
+    "it": "Parametri"
+  },
+  "record.resultJson": {
+    "en": "Result JSON",
+    "it": "JSON del risultato"
+  },
+  "record.json": {
+    "en": "JSON",
+    "it": "JSON"
+  },
+  "record.parametersJson": {
+    "en": "parameters JSON",
+    "it": "JSON dei parametri"
+  },
+  "record.namedParametersJson": {
+    "en": "{name} parameters JSON",
+    "it": "JSON dei parametri di {name}"
+  },
+  "record.payloadJson": {
+    "en": "Payload JSON",
+    "it": "JSON del payload"
+  },
+  "record.outputJson": {
+    "en": "Result JSON",
+    "it": "JSON del risultato"
+  },
+  "record.thinking": {
+    "en": "Thinking",
+    "it": "Ragionamento"
+  },
+  "record.wrapLines": {
+    "en": "Wrap lines",
+    "it": "A capo automatico"
+  },
+  "code.source": {
+    "en": "Code",
+    "it": "Codice"
+  },
+  "code.output": {
+    "en": "Output",
+    "it": "Output"
+  },
+  "code.copySource": {
+    "en": "Copy code",
+    "it": "Copia il codice"
+  },
+  "code.copyOutput": {
+    "en": "Copy output",
+    "it": "Copia l'output"
+  },
+  "code.originalJson": {
+    "en": "Original JSON",
+    "it": "JSON originale"
+  },
+  "code.running": {
+    "en": "Running…",
+    "it": "In esecuzione…"
+  },
+  "record.systemPromptMissing": {
+    "en": "No system prompt in this request",
+    "it": "Nessun prompt di sistema in questa richiesta"
+  },
+  "record.toolsMissing": {
+    "en": "No tools in this request",
+    "it": "Nessuno strumento in questa richiesta"
+  },
+  "record.systemPrompt": {
+    "en": "System Prompt",
+    "it": "Prompt di sistema"
+  },
+  "record.tools": {
+    "en": "Tools",
+    "it": "Strumenti"
+  },
+  "block.openSummary": {
+    "en": "Open Block #{index} tool call summary",
+    "it": "Apri il riepilogo della chiamata del blocco #{index}"
+  },
+  "block.openSummaryTitle": {
+    "en": "Open tool call summary",
+    "it": "Apri il riepilogo della chiamata"
+  },
+  "block.label": {
+    "en": "Block #{index} {type}",
+    "it": "Blocco #{index} {type}"
+  },
+  "history.loadingTrajectory": {
+    "en": "Loading trajectory…",
+    "it": "Caricamento della traiettoria…"
+  },
+  "history.loadingEarlier": {
+    "en": "Loading earlier history…",
+    "it": "Caricamento della cronologia precedente…"
+  },
+  "history.loadingEarlierAria": {
+    "en": "Loading earlier history…",
+    "it": "Caricamento della cronologia precedente…"
+  },
+  "history.loadEarlier": {
+    "en": "Load earlier history",
+    "it": "Carica la cronologia precedente"
+  },
+  "history.clickToLoadEarlier": {
+    "en": "Click to load earlier history",
+    "it": "Fai clic per caricare la cronologia precedente"
+  },
+  "request.label": {
+    "en": "Request #{request}",
+    "it": "Richiesta n. {request}"
+  },
+  "request.labelCompaction": {
+    "en": "Request #{request} · Compaction",
+    "it": "Richiesta n. {request} · Compattazione"
+  },
+  "request.compaction": {
+    "en": "Compaction · {section}",
+    "it": "Compattazione · {section}"
+  },
+  "request.compactionPurpose": {
+    "en": "Compaction",
+    "it": "Compattazione"
+  },
+  "request.retryProgress": {
+    "en": "{retry} of {maximum}",
+    "it": "{retry} di {maximum}"
+  },
+  "request.collapsedSummary": {
+    "en": "Collapsed {kind} summary, {summary}",
+    "it": "Riepilogo compresso di {kind}, {summary}"
+  },
+  "request.collapsedTurn": {
+    "en": "turn",
+    "it": "turno"
+  },
+  "request.collapsedAssistant": {
+    "en": "assistant",
+    "it": "assistente"
+  },
+  "request.rowAria": {
+    "en": "{request}{kind}, {content}",
+    "it": "{request}{kind}, {content}"
+  },
+  "request.rowPrefix": {
+    "en": "Request {request}, ",
+    "it": "Richiesta {request}, "
+  },
+  "request.rowAriaCompaction": {
+    "en": "Request {request}, compaction",
+    "it": "Richiesta {request}, compattazione"
+  },
+  "request.noContent": {
+    "en": "no content",
+    "it": "nessun contenuto"
+  },
+  "summary.toolCalls.one": {
+    "en": "{count} tool call",
+    "it": "{count} chiamata a strumento"
+  },
+  "summary.toolCalls.other": {
+    "en": "{count} tool calls",
+    "it": "{count} chiamate a strumenti"
+  },
+  "summary.steps.one": {
+    "en": "{count} step",
+    "it": "{count} passo"
+  },
+  "summary.steps.other": {
+    "en": "{count} steps",
+    "it": "{count} passi"
+  },
+  "details.event": {
+    "en": "Event details",
+    "it": "Dettagli dell'evento"
+  },
+  "details.resize": {
+    "en": "Resize event details",
+    "it": "Ridimensiona i dettagli dell'evento"
+  },
+  "details.resizeTitle": {
+    "en": "Drag to resize. Double-click to reset.",
+    "it": "Trascina per ridimensionare. Doppio clic per ripristinare."
+  },
+  "details.close": {
+    "en": "Close details",
+    "it": "Chiudi i dettagli"
+  },
+  "details.status": {
+    "en": "Status",
+    "it": "Stato"
+  },
+  "details.purpose": {
+    "en": "Purpose",
+    "it": "Scopo"
+  },
+  "details.provider": {
+    "en": "Provider",
+    "it": "Provider"
+  },
+  "details.model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "details.toolCalls": {
+    "en": "Tool calls",
+    "it": "Chiamate a strumenti"
+  },
+  "details.subtoolCalls": {
+    "en": "Subtool calls",
+    "it": "Chiamate a sottostrumenti"
+  },
+  "details.error": {
+    "en": "Error",
+    "it": "Errore"
+  },
+  "details.lastAttemptError": {
+    "en": "Last attempt error",
+    "it": "Errore dell'ultimo tentativo"
+  },
+  "details.failure.auth": {
+    "en": "API key is invalid",
+    "it": "La chiave API non è valida"
+  },
+  "details.retry": {
+    "en": "Retry",
+    "it": "Nuovo tentativo"
+  },
+  "details.retryDelay": {
+    "en": "Retry delay",
+    "it": "Attesa prima del nuovo tentativo"
+  },
+  "details.result": {
+    "en": "Result",
+    "it": "Risultato"
+  },
+  "details.compacted": {
+    "en": "Compacted",
+    "it": "Compattato"
+  },
+  "details.assistantMessage": {
+    "en": "Assistant Message",
+    "it": "Messaggio dell'assistente"
+  },
+  "details.source": {
+    "en": "Source",
+    "it": "Origine"
+  },
+  "details.hierarchy": {
+    "en": "Hierarchy",
+    "it": "Gerarchia"
+  },
+  "details.toolCall": {
+    "en": "Tool Call",
+    "it": "Chiamata a strumento"
+  },
+  "timeline.aria": {
+    "en": "Trajectory timeline",
+    "it": "Cronologia della traiettoria"
+  },
+  "timeline.overviewAria": {
+    "en": "Timeline overview; drag horizontally to focus events",
+    "it": "Panoramica della cronologia; trascina in orizzontale per mettere a fuoco gli eventi"
+  },
+  "timeline.noTimingData": {
+    "en": "No timing data",
+    "it": "Nessun dato sui tempi"
+  },
+  "timeline.total": {
+    "en": "Total {duration}",
+    "it": "Totale {duration}"
+  },
+  "timeline.started": {
+    "en": "Started {time}",
+    "it": "Iniziato {time}"
+  },
+  "timeline.ttftDecoding": {
+    "en": "TTFT {ttft} · Decoding {decoding}",
+    "it": "TTFT {ttft} · Decodifica {decoding}"
+  },
+  "layout.compacting": {
+    "en": "Compacting context…",
+    "it": "Compattazione del contesto…"
+  },
+  "layout.compactionFailed": {
+    "en": "Compaction failed",
+    "it": "Compattazione non riuscita"
+  },
+  "layout.compacted": {
+    "en": "Context compacted",
+    "it": "Contesto compattato"
+  },
+  "layout.toolCallOnly": {
+    "en": "Tool call only",
+    "it": "Solo chiamata a strumento"
+  },
+  "attachment.list": {
+    "en": "Attachments",
+    "it": "Allegati"
+  },
+  "attachment.imageName": {
+    "en": "Image {index}",
+    "it": "Immagine {index}"
+  },
+  "layout.imageCount": {
+    "en": "Images ×{count}",
+    "it": "Immagini ×{count}"
+  },
+  "layout.fileAttachments": {
+    "en": "Files ×{count}",
+    "it": "File ×{count}"
+  },
+  "layout.initialSystemPrompt": {
+    "en": "Initial System Prompt",
+    "it": "Prompt di sistema iniziale"
+  },
+  "layout.systemPromptUpdated": {
+    "en": "System Prompt Updated",
+    "it": "Prompt di sistema aggiornato"
+  },
+  "layout.toolsUpdated": {
+    "en": "Tools Updated",
+    "it": "Strumenti aggiornati"
+  },
+  "layout.toolAdded": {
+    "en": "Tool added: {name}",
+    "it": "Strumento aggiunto: {name}"
+  },
+  "layout.toolRemoved": {
+    "en": "Tool removed: {name}",
+    "it": "Strumento rimosso: {name}"
+  },
+  "layout.toolUpdateNotice": {
+    "en": "Tools updated",
+    "it": "Strumenti aggiornati"
+  },
+  "layout.toolsAdded": {
+    "en": "Added: {names}",
+    "it": "Aggiunti: {names}"
+  },
+  "layout.toolsAddedCount": {
+    "en": "{count} added",
+    "it": "{count} aggiunti"
+  },
+  "layout.toolsChanged": {
+    "en": "{added} added, {removed} removed",
+    "it": "{added} aggiunti, {removed} rimossi"
+  },
+  "layout.toolsRemoved": {
+    "en": "Removed: {names}",
+    "it": "Rimossi: {names}"
+  },
+  "layout.toolsRemovedCount": {
+    "en": "{count} removed",
+    "it": "{count} rimossi"
+  },
+  "layout.systemPromptAndToolsUpdated": {
+    "en": "System Prompt and Tools Updated",
+    "it": "Prompt di sistema e strumenti aggiornati"
+  },
+  "layout.compactionInterrupted": {
+    "en": "Compaction was interrupted before completion.",
+    "it": "La compattazione è stata interrotta prima di finire."
+  }
+}

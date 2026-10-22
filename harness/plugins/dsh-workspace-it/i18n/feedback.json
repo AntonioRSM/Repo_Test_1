@@ -1,0 +1,82 @@
+{
+  "action.like": {
+    "en": "Good response",
+    "it": "Risposta utile"
+  },
+  "action.likeActive": {
+    "en": "Remove rating",
+    "it": "Rimuovi valutazione"
+  },
+  "action.dislike": {
+    "en": "Bad response",
+    "it": "Risposta non utile"
+  },
+  "action.dislikeActive": {
+    "en": "Remove rating",
+    "it": "Rimuovi valutazione"
+  },
+  "dialog.title": {
+    "en": "Submit feedback",
+    "it": "Invia feedback"
+  },
+  "dialog.categories": {
+    "en": "Feedback category",
+    "it": "Categoria del feedback"
+  },
+  "dialog.detail": {
+    "en": "Feedback details",
+    "it": "Dettagli del feedback"
+  },
+  "dialog.hint": {
+    "en": "Add details to help us improve. Your submission will include the current conversation log.",
+    "it": "Aggiungi dettagli per aiutarci a migliorare. L'invio includerà il log della conversazione corrente."
+  },
+  "category.task-result": {
+    "en": "Task result",
+    "it": "Risultato dell'attività"
+  },
+  "category.instruction-following": {
+    "en": "Instruction understanding and following",
+    "it": "Comprensione e rispetto delle istruzioni"
+  },
+  "category.product-interaction": {
+    "en": "Product features and interaction",
+    "it": "Funzioni e interazione del prodotto"
+  },
+  "category.service-stability": {
+    "en": "Stability and speed",
+    "it": "Stabilità e velocità"
+  },
+  "category.resource-cost": {
+    "en": "Resource usage and cost",
+    "it": "Uso delle risorse e costi"
+  },
+  "category.security-privacy-permission": {
+    "en": "Security, privacy, and permissions",
+    "it": "Sicurezza, privacy e permessi"
+  },
+  "category.other": {
+    "en": "Other",
+    "it": "Altro"
+  },
+  "toast.recorded": {
+    "en": "Thanks for your feedback",
+    "it": "Grazie per il feedback"
+  },
+  "error.conflict": {
+    "en": "This feedback changed elsewhere; the latest state is shown",
+    "it": "Questo feedback è stato modificato altrove: è mostrato lo stato più recente"
+  },
+  "error.load": {
+    "en": "Could not load feedback",
+    "it": "Impossibile caricare il feedback"
+  },
+  "error.generic": {
+    "en": "Could not save feedback",
+    "it": "Impossibile salvare il feedback"
+  },
+  "error.noteTooLarge": {
+    "en": "The description is too long; shorten it and submit again",
+    "it": "La descrizione è troppo lunga: accorciala e invia di nuovo"
+  }
+}

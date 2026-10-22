@@ -1,0 +1,166 @@
+{
+  "trigger": {
+    "en": "Settings",
+    "it": "Impostazioni"
+  },
+  "shortcut.open": {
+    "en": "Open settings",
+    "it": "Apri le impostazioni"
+  },
+  "desktop.update.available": {
+    "en": "Update",
+    "it": "Aggiorna"
+  },
+  "desktop.update.checking": {
+    "en": "Checking for updates…",
+    "it": "Ricerca di aggiornamenti…"
+  },
+  "desktop.update.progress": {
+    "en": "{percent}%",
+    "it": "{percent}%"
+  },
+  "desktop.update.verifying": {
+    "en": "Verifying update files…",
+    "it": "Verifica dei file dell'aggiornamento…"
+  },
+  "desktop.update.installing": {
+    "en": "Preparing to restart…",
+    "it": "Preparazione al riavvio…"
+  },
+  "desktop.update.ready": {
+    "en": "Install and Restart",
+    "it": "Installa e riavvia"
+  },
+  "desktop.update.retry": {
+    "en": "Retry update",
+    "it": "Riprova l'aggiornamento"
+  },
+  "desktop.update.versionDetail": {
+    "en": "{label}: {version}",
+    "it": "{label}: {version}"
+  },
+  "desktop.update.downloadDetail": {
+    "en": "Downloading update: {percent}%\nTarget version: {version}",
+    "it": "Download dell'aggiornamento: {percent}%\nVersione di destinazione: {version}"
+  },
+  "desktop.update.checkFailed": {
+    "en": "Could not check for updates. Please try again later.",
+    "it": "Impossibile cercare aggiornamenti. Riprova più tardi."
+  },
+  "desktop.update.downloadFailed": {
+    "en": "Could not download the update. Please try again.",
+    "it": "Impossibile scaricare l'aggiornamento. Riprova."
+  },
+  "desktop.update.installFailed": {
+    "en": "Could not install the update. Please try again later.",
+    "it": "Impossibile installare l'aggiornamento. Riprova più tardi."
+  },
+  "desktop.update.checkNetworkFailed": {
+    "en": "Could not check for updates. Check your connection and try again.",
+    "it": "Impossibile cercare aggiornamenti. Controlla la connessione e riprova."
+  },
+  "desktop.update.downloadNetworkFailed": {
+    "en": "Could not download the update. Check your connection and try again.",
+    "it": "Impossibile scaricare l'aggiornamento. Controlla la connessione e riprova."
+  },
+  "desktop.update.installNetworkFailed": {
+    "en": "Could not install the update. Check your connection and try again.",
+    "it": "Impossibile installare l'aggiornamento. Controlla la connessione e riprova."
+  },
+  "desktop.update.stopFailed": {
+    "en": "Could not safely stop the tasks. The update has not been installed. Please try again later.",
+    "it": "Impossibile fermare le attività in sicurezza: l'aggiornamento non è stato installato. Riprova più tardi."
+  },
+  "desktop.update.tasksChanged": {
+    "en": "New tasks have started. Confirm again to stop the tasks and update.",
+    "it": "Sono partite nuove attività. Conferma di nuovo per fermarle e aggiornare."
+  },
+  "desktop.update.tasksUnavailable": {
+    "en": "Task status is unavailable. Try updating again when the workspace is ready.",
+    "it": "Lo stato delle attività non è disponibile. Riprova l'aggiornamento quando il workspace è pronto."
+  },
+  "title": {
+    "en": "Settings",
+    "it": "Impostazioni"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "openDocument": {
+    "en": "Open configuration file",
+    "it": "Apri il file di configurazione"
+  },
+  "openDocument.error": {
+    "en": "Could not open configuration file",
+    "it": "Impossibile aprire il file di configurazione"
+  },
+  "general.nav": {
+    "en": "General",
+    "it": "Generali"
+  },
+  "general.currentVersion": {
+    "en": "Current version: {version}",
+    "it": "Versione attuale: {version}"
+  },
+  "developerTools.title": {
+    "en": "Show coding view",
+    "it": "Mostra la vista per sviluppatori"
+  },
+  "developerTools.error": {
+    "en": "Could not save. Please try again.",
+    "it": "Impossibile salvare. Riprova."
+  },
+  "developerTools.description": {
+    "en": "Shows trajectory, code diffs, and all Agent presets",
+    "it": "Mostra la traiettoria, le differenze nel codice e tutti i preset dell'agente"
+  },
+  "connection.error": {
+    "en": "Disconnected",
+    "it": "Disconnesso"
+  },
+  "connection.connecting": {
+    "en": "Reconnecting",
+    "it": "Riconnessione"
+  },
+  "connection.connected": {
+    "en": "Connected",
+    "it": "Connesso"
+  },
+  "connection.reconnect": {
+    "en": "Disconnected, reconnect now",
+    "it": "Disconnesso, riconnetti ora"
+  },
+  "connection.restart": {
+    "en": "Reconnecting, reconnect now",
+    "it": "Riconnessione in corso, riconnetti ora"
+  },
+  "hostRelease.title": {
+    "en": "Service version changed",
+    "it": "Versione del servizio cambiata"
+  },
+  "hostRelease.description": {
+    "en": "The service version changed. This page paused live updates; reload to load the new version.",
+    "it": "La versione del servizio è cambiata. Questa pagina ha sospeso gli aggiornamenti dal vivo: ricaricala per usare la nuova versione."
+  },
+  "hostRelease.service": {
+    "en": "Service",
+    "it": "Servizio"
+  },
+  "hostRelease.page": {
+    "en": "Page",
+    "it": "Pagina"
+  },
+  "hostRelease.unknown": {
+    "en": "Unknown",
+    "it": "Sconosciuta"
+  },
+  "hostRelease.reload": {
+    "en": "Reload to load the new version",
+    "it": "Ricarica per usare la nuova versione"
+  },
+  "hostRelease.later": {
+    "en": "Not now",
+    "it": "Non ora"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "title": {
+    "en": "Upload Session Log when using the official model API",
+    "it": "Carica il log della sessione quando usi l'API dei modelli ufficiali"
+  },
+  "description": {
+    "en": "Help improve DeepSeek models and products.",
+    "it": "Aiuta a migliorare i modelli e i prodotti DeepSeek."
+  },
+  "saved": {
+    "en": "Preference saved",
+    "it": "Preferenza salvata"
+  },
+  "failed": {
+    "en": "Could not save preference",
+    "it": "Impossibile salvare la preferenza"
+  }
+}

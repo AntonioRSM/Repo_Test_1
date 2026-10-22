@@ -1,0 +1,886 @@
+{
+  "panel": {
+    "en": "Plugins",
+    "it": "Plugin"
+  },
+  "title": {
+    "en": "Plugins",
+    "it": "Plugin"
+  },
+  "intro": {
+    "en": "Install, enable, and configure plugins",
+    "it": "Installa, attiva e configura i plugin"
+  },
+  "infoLabel": {
+    "en": "About plugins",
+    "it": "Informazioni sui plugin"
+  },
+  "infoDescription": {
+    "en": "Configure official plugins and install or manage other plugins here. View the built-in plugin list and runtime status in Settings → Built-in plugins.",
+    "it": "Qui configuri i plugin ufficiali e installi o gestisci gli altri plugin. L'elenco dei plugin integrati e il loro stato sono in Impostazioni → Plugin integrati."
+  },
+  "loading": {
+    "en": "Reading plugins…",
+    "it": "Lettura dei plugin…"
+  },
+  "error": {
+    "en": "Could not read all plugins, possibly due to a network problem",
+    "it": "Impossibile leggere tutti i plugin, forse per un problema di rete"
+  },
+  "unavailable": {
+    "en": "This deployment runs without a manageable profile, so plugins cannot be installed or switched here.",
+    "it": "Questa installazione non ha un profilo gestibile: qui non si possono installare o cambiare plugin."
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "refresh": {
+    "en": "Refresh",
+    "it": "Aggiorna"
+  },
+  "refreshError": {
+    "en": "Refresh failed. Please try again.",
+    "it": "Aggiornamento non riuscito. Riprova."
+  },
+  "empty": {
+    "en": "No plugins are installed yet.",
+    "it": "Ancora nessun plugin installato."
+  },
+  "addPlugin": {
+    "en": "Add plugin",
+    "it": "Aggiungi plugin"
+  },
+  "chooseAddMethod": {
+    "en": "Choose how to add a plugin",
+    "it": "Scegli come aggiungere un plugin"
+  },
+  "installExisting": {
+    "en": "Install a third-party plugin",
+    "it": "Installa un plugin di terze parti"
+  },
+  "installExistingDescription": {
+    "en": "Supports npm packages, Git repositories, and local directories",
+    "it": "Supporta pacchetti npm, repository Git e cartelle locali"
+  },
+  "restartNotice": {
+    "en": "Restart DSH to apply the change. {reason}",
+    "it": "Riavvia DSH per applicare la modifica. {reason}"
+  },
+  "restartReasonNoHmr": {
+    "en": "This profile applies changes only at startup.",
+    "it": "Questo profilo applica le modifiche solo all'avvio."
+  },
+  "restartReasonPackageMoved": {
+    "en": "An installed package now resolves to another directory, or the change replaces a package the DSH installation provides. Uninstall a package before installing it from another location.",
+    "it": "Un pacchetto installato ora punta a un'altra cartella, oppure la modifica sostituisce un pacchetto fornito dall'installazione DSH. Disinstalla il pacchetto prima di installarlo da un'altra posizione."
+  },
+  "restartReasonHostModule": {
+    "en": "The change reaches modules DSH itself loaded.",
+    "it": "La modifica riguarda moduli caricati da DSH stesso."
+  },
+  "restartReasonUnmanagedPlugin": {
+    "en": "The change reaches a plugin running outside the plugin list.",
+    "it": "La modifica riguarda un plugin in esecuzione fuori dall'elenco dei plugin."
+  },
+  "restartReasonModuleComparison": {
+    "en": "DSH could not compare the loaded plugins with their files.",
+    "it": "DSH non è riuscito a confrontare i plugin caricati con i loro file."
+  },
+  "overriddenNotice": {
+    "en": "{name} was saved, but a higher-priority configuration overrides it, so it is not in effect",
+    "it": "{name} è stato salvato, ma una configurazione con priorità più alta lo sovrascrive e quindi non è attivo"
+  },
+  "bundlesTitle": {
+    "en": "Installed plugins",
+    "it": "Plugin installati"
+  },
+  "basicTitle": {
+    "en": "Built-in plugin settings",
+    "it": "Impostazioni dei plugin integrati"
+  },
+  "extensionsTitle": {
+    "en": "Experimental plugins",
+    "it": "Plugin sperimentali"
+  },
+  "moreTitle": {
+    "en": "Experimental plugins",
+    "it": "Plugin sperimentali"
+  },
+  "moreAction": {
+    "en": "More",
+    "it": "Altro"
+  },
+  "tabsLabel": {
+    "en": "Plugin views",
+    "it": "Viste dei plugin"
+  },
+  "installedTab": {
+    "en": "Installed",
+    "it": "Installati"
+  },
+  "statusProblem": {
+    "en": "Problem",
+    "it": "Problema"
+  },
+  "statusBeta": {
+    "en": "Experimental",
+    "it": "Sperimentale"
+  },
+  "reasonLabel": {
+    "en": "Reason",
+    "it": "Motivo"
+  },
+  "metadataError": {
+    "en": "Package metadata error: {error}",
+    "it": "Errore nei metadati del pacchetto: {error}"
+  },
+  "previewAlt": {
+    "en": "{name} feature preview",
+    "it": "Anteprima della funzione {name}"
+  },
+  "previewUnavailable": {
+    "en": "Could not display feature preview",
+    "it": "Impossibile mostrare l'anteprima della funzione"
+  },
+  "versionTag": {
+    "en": "v{version}",
+    "it": "v{version}"
+  },
+  "partsLabel": {
+    "en": "Components",
+    "it": "Componenti"
+  },
+  "sourceTitle": {
+    "en": "Source",
+    "it": "Origine"
+  },
+  "sourceSpec": {
+    "en": "Code source",
+    "it": "Origine del codice"
+  },
+  "sourceBuiltIn": {
+    "en": "Built in",
+    "it": "Integrato"
+  },
+  "sourceVersion": {
+    "en": "Current version",
+    "it": "Versione attuale"
+  },
+  "partsEmpty": {
+    "en": "This plugin pack contains no components.",
+    "it": "Questo pacchetto di plugin non contiene componenti."
+  },
+  "partsCountTotal": {
+    "en": "{count} total",
+    "it": "{count} in totale"
+  },
+  "partsCountRunning": {
+    "en": "{count} running",
+    "it": "{count} in esecuzione"
+  },
+  "partsCountOff": {
+    "en": "{count} off",
+    "it": "{count} disattivati"
+  },
+  "partOff": {
+    "en": "Off",
+    "it": "Disattivato"
+  },
+  "partsCountFailed": {
+    "en": "{count} failed",
+    "it": "{count} non riusciti"
+  },
+  "partsFilter": {
+    "en": "Filter components",
+    "it": "Filtra i componenti"
+  },
+  "partsFilterEmpty": {
+    "en": "No component matches.",
+    "it": "Nessun componente corrispondente."
+  },
+  "partToggle": {
+    "en": "Enable component {name}",
+    "it": "Attiva il componente {name}"
+  },
+  "rowPhasePending": {
+    "en": "Waiting for dependencies",
+    "it": "In attesa delle dipendenze"
+  },
+  "rowPhaseLoading": {
+    "en": "Loading",
+    "it": "Caricamento"
+  },
+  "rowPhaseActive": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "rowPhaseFailed": {
+    "en": "Problem",
+    "it": "Problema"
+  },
+  "rowPhaseUnloading": {
+    "en": "Unloading",
+    "it": "Scaricamento"
+  },
+  "enableToggle": {
+    "en": "Enable {name}",
+    "it": "Attiva {name}"
+  },
+  "openDetail": {
+    "en": "View {name}",
+    "it": "Vedi {name}"
+  },
+  "backToList": {
+    "en": "Back to plugins",
+    "it": "Torna ai plugin"
+  },
+  "crumbRoot": {
+    "en": "Plugins",
+    "it": "Plugin"
+  },
+  "backToPackage": {
+    "en": "Back to {name}",
+    "it": "Torna a {name}"
+  },
+  "configureRow": {
+    "en": "Configure {name}",
+    "it": "Configura {name}"
+  },
+  "rowStateIdle": {
+    "en": "Not running",
+    "it": "Non in esecuzione"
+  },
+  "uninstall": {
+    "en": "Uninstall",
+    "it": "Disinstalla"
+  },
+  "uninstallLabel": {
+    "en": "Uninstall {name}",
+    "it": "Disinstalla {name}"
+  },
+  "installTitle": {
+    "en": "Add plugin",
+    "it": "Aggiungi plugin"
+  },
+  "installDescription": {
+    "en": "Enter the plugin's package name, GitHub repository address, or local directory path.",
+    "it": "Inserisci il nome del pacchetto del plugin, l'indirizzo del repository GitHub o il percorso della cartella locale."
+  },
+  "installSpecLabel": {
+    "en": "Package name or address",
+    "it": "Nome del pacchetto o indirizzo"
+  },
+  "installSpecPlaceholder": {
+    "en": "for example dsh-plugin-whale-pet",
+    "it": "ad esempio dsh-plugin-whale-pet"
+  },
+  "installGuideToggle": {
+    "en": "Install guide and examples",
+    "it": "Guida all'installazione ed esempi"
+  },
+  "installGuideHide": {
+    "en": "Hide the guide",
+    "it": "Nascondi la guida"
+  },
+  "installGuideIdTitle": {
+    "en": "Enter the plugin's npm package name",
+    "it": "Inserisci il nome del pacchetto npm del plugin"
+  },
+  "installGuideIdExample": {
+    "en": "dsh-plugin-whale-pet",
+    "it": "dsh-plugin-whale-pet"
+  },
+  "installGuideIdHint": {
+    "en": "The plugin package name is the npm package name (like dsh-xxx or @author/plugin): the part after dsh plugin add or pnpm add in a community plugin's README install command.",
+    "it": "Il nome del pacchetto del plugin è il nome del pacchetto npm (come dsh-xxx o @autore/plugin): la parte dopo dsh plugin add o pnpm add nel comando di installazione del README di un plugin della comunità."
+  },
+  "installGuideExampleLabel": {
+    "en": "Example: ",
+    "it": "Esempio: "
+  },
+  "installGitTemplateHint": {
+    "en": "Replace this with the actual Git repository address.",
+    "it": "Sostituiscilo con l'indirizzo reale del repository Git."
+  },
+  "installPathTemplateHint": {
+    "en": "Replace this with the actual path to your local plugin directory.",
+    "it": "Sostituiscilo con il percorso reale della cartella del plugin locale."
+  },
+  "installGuideFill": {
+    "en": "Use example",
+    "it": "Usa l'esempio"
+  },
+  "installGuideFillAria": {
+    "en": "Use the example {example}",
+    "it": "Usa l'esempio {example}"
+  },
+  "installGuideSafety": {
+    "en": "Install only plugins you trust: they run with your permissions and can damage DeepSeek Harness or leak your data.",
+    "it": "Installa solo plugin di cui ti fidi: girano con i tuoi permessi e possono danneggiare Workspace Harness o esporre i tuoi dati."
+  },
+  "installUpgradeNotice": {
+    "en": "On-demand Official plugins offer Update when their version differs from DSH. To update other plugins, uninstall and reinstall them.",
+    "it": "I plugin ufficiali su richiesta propongono Aggiorna quando la loro versione è diversa da quella di DSH. Per aggiornare gli altri plugin, disinstallali e reinstallali."
+  },
+  "registryToggle": {
+    "en": "Registry",
+    "it": "Registro"
+  },
+  "registryLegend": {
+    "en": "The npm registry the plugin is downloaded from",
+    "it": "Il registro npm da cui viene scaricato il plugin"
+  },
+  "registryDefault": {
+    "en": "Default registry",
+    "it": "Registro predefinito"
+  },
+  "registryOfficial": {
+    "en": "Official npm registry",
+    "it": "Registro npm ufficiale"
+  },
+  "registryNpmmirror": {
+    "en": "Mainland China mirror",
+    "it": "Mirror per la Cina continentale"
+  },
+  "registryCustom": {
+    "en": "Custom address",
+    "it": "Indirizzo personalizzato"
+  },
+  "registryCustomPlaceholder": {
+    "en": "https://npm.example.com/",
+    "it": "https://npm.example.com/"
+  },
+  "registryCustomHint": {
+    "en": "Enter an internal or private npm registry address starting with http:// or https://. If it requires a login, store the credentials in ~/.npmrc on this machine.",
+    "it": "Inserisci l'indirizzo di un registro npm interno o privato che inizia con http:// o https://. Se richiede l'accesso, salva le credenziali in ~/.npmrc su questo computer."
+  },
+  "registryCustomInvalid": {
+    "en": "Enter an address starting with http:// or https://",
+    "it": "Inserisci un indirizzo che inizia con http:// o https://"
+  },
+  "registryListSeparator": {
+    "en": ", ",
+    "it": ", "
+  },
+  "sentenceSeparator": {
+    "en": " ",
+    "it": " "
+  },
+  "installRun": {
+    "en": "Install",
+    "it": "Installa"
+  },
+  "installChecking": {
+    "en": "Checking…",
+    "it": "Verifica…"
+  },
+  "installConfirmedTitle": {
+    "en": "Install plugin",
+    "it": "Installa plugin"
+  },
+  "installConfirmedRefused": {
+    "en": "This plugin cannot be installed",
+    "it": "Questo plugin non si può installare"
+  },
+  "installProblemInvalid": {
+    "en": "This is not a package name or address that can be installed: {reason}",
+    "it": "Non è un nome di pacchetto o un indirizzo installabile: {reason}"
+  },
+  "installProblemInstalled": {
+    "en": "This plugin is already installed. To upgrade it, uninstall it and install it again",
+    "it": "Questo plugin è già installato. Per aggiornarlo, disinstallalo e installalo di nuovo"
+  },
+  "installProblemShipped": {
+    "en": "This plugin ships with DSH; upgrading DSH updates it",
+    "it": "Questo plugin è incluso in DSH: si aggiorna aggiornando DSH"
+  },
+  "installProblemNotFound": {
+    "en": "No such plugin was found",
+    "it": "Plugin non trovato"
+  },
+  "installProblemNotPackage": {
+    "en": "The path does not exist or is not a valid plugin package",
+    "it": "Il percorso non esiste o non è un pacchetto di plugin valido"
+  },
+  "installProblemNotBundle": {
+    "en": "This package declares no bundle, so it cannot be installed as a plugin: {reason}",
+    "it": "Questo pacchetto non dichiara un bundle e non si può installare come plugin: {reason}"
+  },
+  "installProblemNetwork": {
+    "en": "The plugin registry could not be reached; check the network and try again",
+    "it": "Impossibile raggiungere il registro dei plugin: controlla la rete e riprova"
+  },
+  "installProblemNetworkAll": {
+    "en": "No registry could be reached (tried: {registries}); check the network or proxy settings, or change the registry",
+    "it": "Nessun registro raggiungibile (provati: {registries}): controlla la rete o il proxy, oppure cambia registro"
+  },
+  "installProblemUnknown": {
+    "en": "The plugin could not be looked up: {reason}",
+    "it": "Impossibile cercare il plugin: {reason}"
+  },
+  "installingTitle": {
+    "en": "Installing the plugin…",
+    "it": "Installazione del plugin…"
+  },
+  "installedTitle": {
+    "en": "Installed",
+    "it": "Installato"
+  },
+  "statusNotInstalled": {
+    "en": "Not installed",
+    "it": "Non installato"
+  },
+  "statusMissingFiles": {
+    "en": "Package unavailable",
+    "it": "Pacchetto non disponibile"
+  },
+  "statusUpdateAvailable": {
+    "en": "Update available",
+    "it": "Aggiornamento disponibile"
+  },
+  "sourceNotInstalled": {
+    "en": "Not installed",
+    "it": "Non installato"
+  },
+  "sourceTargetSpec": {
+    "en": "Source for this DSH",
+    "it": "Origine per questo DSH"
+  },
+  "sourceTargetVersion": {
+    "en": "Version for this DSH",
+    "it": "Versione per questo DSH"
+  },
+  "update": {
+    "en": "Update",
+    "it": "Aggiorna"
+  },
+  "updateLabel": {
+    "en": "Update {name}",
+    "it": "Aggiorna {name}"
+  },
+  "installFailedTitle": {
+    "en": "The plugin could not be installed",
+    "it": "Impossibile installare il plugin"
+  },
+  "installGithubFailedTitle": {
+    "en": "Cannot access GitHub",
+    "it": "Impossibile accedere a GitHub"
+  },
+  "installGithubTimeoutTitle": {
+    "en": "GitHub connection timed out",
+    "it": "Connessione a GitHub scaduta"
+  },
+  "installGithubFailedDescription": {
+    "en": "Try another installation source.",
+    "it": "Prova un'altra fonte di installazione."
+  },
+  "installUseGithubMirror": {
+    "en": "Use mainland China mirror",
+    "it": "Usa il mirror per la Cina continentale"
+  },
+  "installTryAnotherWay": {
+    "en": "Try another way",
+    "it": "Prova in un altro modo"
+  },
+  "installPackageLabel": {
+    "en": "Plugin package name",
+    "it": "Nome del pacchetto del plugin"
+  },
+  "installEdit": {
+    "en": "Edit",
+    "it": "Modifica"
+  },
+  "installEditAria": {
+    "en": "Back to editing",
+    "it": "Torna alla modifica"
+  },
+  "installCancelAndEdit": {
+    "en": "Cancel installation and return to editing",
+    "it": "Annulla l'installazione e torna alla modifica"
+  },
+  "installApplyingCancellationError": {
+    "en": "Cancellation was not confirmed. Installation is being applied; wait for its result. {reason}",
+    "it": "L'annullamento non è stato confermato: l'installazione è in corso di applicazione, attendi il risultato. {reason}"
+  },
+  "installReconcile": {
+    "en": "Check installation status",
+    "it": "Verifica lo stato dell'installazione"
+  },
+  "installUnknownTitle": {
+    "en": "Installation result unavailable",
+    "it": "Risultato dell'installazione non disponibile"
+  },
+  "installUnknownDescription": {
+    "en": "The Host has no active installation with this request id. Check the plugin list before trying again.",
+    "it": "L'host non ha un'installazione attiva con questo ID di richiesta. Controlla l'elenco dei plugin prima di riprovare."
+  },
+  "installResultUnconfirmed": {
+    "en": "The installation result was not received. Check installation status. {reason}",
+    "it": "Il risultato dell'installazione non è arrivato. Verifica lo stato dell'installazione. {reason}"
+  },
+  "installAwaitingAcceptance": {
+    "en": "Waiting for the Host to accept installation. Cancellation will retry automatically after confirmation.",
+    "it": "In attesa che l'host accetti l'installazione. Dopo la conferma l'annullamento verrà ritentato automaticamente."
+  },
+  "installBackgroundUnknown": {
+    "en": "Installation result unavailable. Check the plugin list.",
+    "it": "Risultato dell'installazione non disponibile. Controlla l'elenco dei plugin."
+  },
+  "installCancel": {
+    "en": "Cancel install",
+    "it": "Annulla l'installazione"
+  },
+  "installCloseCancels": {
+    "en": "Cancel install and close",
+    "it": "Annulla l'installazione e chiudi"
+  },
+  "installViewTask": {
+    "en": "View installation",
+    "it": "Vedi l'installazione"
+  },
+  "installUnconfirmedTitle": {
+    "en": "Installation status unconfirmed",
+    "it": "Stato dell'installazione non confermato"
+  },
+  "installBackgroundDone": {
+    "en": "Installation finished. View installation details.",
+    "it": "Installazione terminata. Vedi i dettagli dell'installazione."
+  },
+  "installBackgroundFailed": {
+    "en": "Installation failed. View installation details.",
+    "it": "Installazione non riuscita. Vedi i dettagli dell'installazione."
+  },
+  "installBackgroundUnconfirmed": {
+    "en": "Installation status is unconfirmed. View the installation for details.",
+    "it": "Lo stato dell'installazione non è confermato. Apri l'installazione per i dettagli."
+  },
+  "installBackgroundApplying": {
+    "en": "Installation is being applied and cannot be cancelled. View installation progress.",
+    "it": "L'installazione è in corso di applicazione e non si può annullare. Vedi l'avanzamento."
+  },
+  "installStarting": {
+    "en": "Preparing installation…",
+    "it": "Preparazione dell'installazione…"
+  },
+  "installCancelling": {
+    "en": "Stopping installation…",
+    "it": "Arresto dell'installazione…"
+  },
+  "installApplying": {
+    "en": "Applying configuration, please wait…",
+    "it": "Applicazione della configurazione, attendi…"
+  },
+  "installCancelledShort": {
+    "en": "Cancelled",
+    "it": "Annullata"
+  },
+  "installCancelled": {
+    "en": "Installation cancelled; the plugin is not enabled, and downloaded files may remain",
+    "it": "Installazione annullata: il plugin non è attivo e potrebbero restare file scaricati"
+  },
+  "installCancelUnconfirmed": {
+    "en": "Installation has not been confirmed stopped. Retry cancellation or wait for the installation result. {reason}",
+    "it": "Non è confermato che l'installazione sia stata fermata. Riprova l'annullamento o attendi il risultato. {reason}"
+  },
+  "installEnableNow": {
+    "en": "Enable now",
+    "it": "Attiva ora"
+  },
+  "installDetailsShow": {
+    "en": "Show install details",
+    "it": "Mostra i dettagli dell'installazione"
+  },
+  "installDetailsHide": {
+    "en": "Hide install details",
+    "it": "Nascondi i dettagli dell'installazione"
+  },
+  "installVersion": {
+    "en": "Version {version}",
+    "it": "Versione {version}"
+  },
+  "installSubjectPath": {
+    "en": "Local directory",
+    "it": "Cartella locale"
+  },
+  "installSubjectGit": {
+    "en": "Git repository",
+    "it": "Repository Git"
+  },
+  "installSubjectTarball": {
+    "en": "Tarball",
+    "it": "Archivio tarball"
+  },
+  "installLocation": {
+    "en": "Installs into {dir}",
+    "it": "Installa in {dir}"
+  },
+  "installRetry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "installChangeRegistry": {
+    "en": "Change registry",
+    "it": "Cambia registro"
+  },
+  "installAttempt": {
+    "en": "{previous} could not serve the package; retrying through {registry} (registry {index} of {total})",
+    "it": "{previous} non ha fornito il pacchetto; nuovo tentativo tramite {registry} (registro {index} di {total})"
+  },
+  "installAttemptBadge": {
+    "en": "Attempt {index} · {registry}",
+    "it": "Tentativo {index} · {registry}"
+  },
+  "installFailureNetwork": {
+    "en": "The network connection failed",
+    "it": "Connessione di rete non riuscita"
+  },
+  "installFailureNetworkAll": {
+    "en": "No registry could be reached (tried: {registries}). Check the network or proxy settings, or change the registry and retry.",
+    "it": "Nessun registro raggiungibile (provati: {registries}). Controlla la rete o il proxy, oppure cambia registro e riprova."
+  },
+  "installFailureNetworkHost": {
+    "en": "{host} could not be reached. A GitHub address or a .tgz link is not fetched through the registry: this machine must reach it directly or through a proxy. If the plugin is also published to npm, enter its package name instead.",
+    "it": "{host} non è raggiungibile. Un indirizzo GitHub o un link .tgz non passa dal registro: questo computer deve raggiungerlo direttamente o tramite proxy. Se il plugin è pubblicato anche su npm, inserisci invece il nome del pacchetto."
+  },
+  "installFailureNotFound": {
+    "en": "No such plugin was found",
+    "it": "Plugin non trovato"
+  },
+  "installFailureNoMatchingVersion": {
+    "en": "No version matches the request",
+    "it": "Nessuna versione corrisponde alla richiesta"
+  },
+  "installFailureDiskFull": {
+    "en": "The disk is full; the install stopped",
+    "it": "Il disco è pieno: l'installazione si è fermata"
+  },
+  "installFailurePermission": {
+    "en": "No write permission; the plugin cannot be installed",
+    "it": "Permessi di scrittura mancanti: impossibile installare il plugin"
+  },
+  "installFailureBuildBlocked": {
+    "en": "A dependency's install scripts need your permission before the install can continue",
+    "it": "Gli script di installazione di una dipendenza richiedono il tuo permesso per continuare"
+  },
+  "installFailureBuildBlockedManual": {
+    "en": "pnpm blocked install scripts; allow them under allowBuilds in pnpm-workspace.yaml and retry",
+    "it": "pnpm ha bloccato gli script di installazione: consentili in allowBuilds in pnpm-workspace.yaml e riprova"
+  },
+  "installFailureIntegrity": {
+    "en": "The downloaded package failed its integrity check",
+    "it": "Il pacchetto scaricato non ha superato il controllo di integrità"
+  },
+  "installFailureTimeout": {
+    "en": "The install timed out",
+    "it": "L'installazione ha superato il tempo massimo"
+  },
+  "installFailurePnpmMissing": {
+    "en": "pnpm was not found, so nothing can be installed",
+    "it": "pnpm non trovato: non si può installare nulla"
+  },
+  "installFailureGeneric": {
+    "en": "Something went wrong during the install; the details say what",
+    "it": "Qualcosa è andato storto durante l'installazione: i dettagli spiegano cosa"
+  },
+  "terminalCommandLine": {
+    "en": "Command line {n}",
+    "it": "Riga di comando {n}"
+  },
+  "terminalRunning": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "terminalFailed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "terminalDone": {
+    "en": "Done",
+    "it": "Fatto"
+  },
+  "terminalCopy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "terminalCopied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "terminalNoOutput": {
+    "en": "No output",
+    "it": "Nessun output"
+  },
+  "terminalCollapseAria": {
+    "en": "Collapse output",
+    "it": "Comprimi l'output"
+  },
+  "terminalCollapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "terminalExpandAria": {
+    "en": "Expand the remaining {n} output lines",
+    "it": "Espandi le restanti {n} righe di output"
+  },
+  "terminalExpand": {
+    "en": "… {n} more lines",
+    "it": "… altre {n} righe"
+  },
+  "terminalExitCode": {
+    "en": "exit code {code}",
+    "it": "codice di uscita {code}"
+  },
+  "terminalSignal": {
+    "en": "signal {signal}",
+    "it": "segnale {signal}"
+  },
+  "terminalNoExitCode": {
+    "en": "no exit code",
+    "it": "nessun codice di uscita"
+  },
+  "installDoneNothing": {
+    "en": "Install finished with no new dependency.",
+    "it": "Installazione terminata senza nuove dipendenze."
+  },
+  "installDoneRestart": {
+    "en": "Installed; restart DSH to load it. {reason}",
+    "it": "Installato: riavvia DSH per caricarlo. {reason}"
+  },
+  "installDoneApproved": {
+    "en": "Install scripts allowed for {names}",
+    "it": "Script di installazione consentiti per {names}"
+  },
+  "installDoneOtherVersion": {
+    "en": "Under pnpm's supply-chain security policy (minimumReleaseAge), versions published more recently than the required age are not installed automatically, so this installation used {installed} instead of the latest version {version}. A newly published version has not completed this waiting period and may contain undetected malicious code or defects. If you need {version}, uninstall the current version and then install {exact} to request that version.",
+    "it": "Per la politica di sicurezza della supply chain di pnpm (minimumReleaseAge), le versioni pubblicate più di recente dell'età richiesta non vengono installate automaticamente: questa installazione ha usato {installed} invece dell'ultima versione {version}. Una versione appena pubblicata non ha completato il periodo di attesa e potrebbe contenere codice malevolo o difetti non ancora scoperti. Se ti serve {version}, disinstalla la versione attuale e poi installa {exact} per richiedere quella versione."
+  },
+  "installApprovalTitle": {
+    "en": "Install scripts need permission",
+    "it": "Gli script di installazione richiedono il permesso"
+  },
+  "installApprovalDescription": {
+    "en": "These packages have install scripts that pnpm did not run.",
+    "it": "Questi pacchetti hanno script di installazione che pnpm non ha eseguito."
+  },
+  "installApprovalConsequence": {
+    "en": "Once allowed, the scripts run here with your permissions, and the permission is saved in this profile.",
+    "it": "Una volta consentiti, gli script girano qui con i tuoi permessi e il permesso viene salvato in questo profilo."
+  },
+  "installApprovalCaution": {
+    "en": "Allow only packages you trust.",
+    "it": "Consenti solo i pacchetti di cui ti fidi."
+  },
+  "installApproveAndRetry": {
+    "en": "Allow these scripts and retry",
+    "it": "Consenti questi script e riprova"
+  },
+  "installClose": {
+    "en": "Done",
+    "it": "Fatto"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "confirmUninstallTitle": {
+    "en": "Uninstall \"{name}\"?",
+    "it": "Disinstallare \"{name}\"?"
+  },
+  "confirmUninstallDescription": {
+    "en": "What it provides goes away once it is uninstalled.",
+    "it": "Disinstallandolo, ciò che fornisce non sarà più disponibile."
+  },
+  "confirmUninstall": {
+    "en": "Uninstall",
+    "it": "Disinstalla"
+  },
+  "failedEnable": {
+    "en": "Could not enable: {reason}",
+    "it": "Impossibile attivare: {reason}"
+  },
+  "failedDisable": {
+    "en": "Could not disable: {reason}",
+    "it": "Impossibile disattivare: {reason}"
+  },
+  "failedUninstall": {
+    "en": "Could not uninstall: {reason}",
+    "it": "Impossibile disinstallare: {reason}"
+  },
+  "failedRowEnable": {
+    "en": "Could not enable the component: {reason}",
+    "it": "Impossibile attivare il componente: {reason}"
+  },
+  "failedRowDisable": {
+    "en": "Could not disable the component: {reason}",
+    "it": "Impossibile disattivare il componente: {reason}"
+  },
+  "reasonManagementRequired": {
+    "en": "Plugin management needs it; it cannot be switched off or uninstalled.",
+    "it": "Serve alla gestione dei plugin: non si può disattivare né disinstallare."
+  },
+  "reasonUnaddressable": {
+    "en": "The profile patch cannot address this one uniquely.",
+    "it": "La patch del profilo non può identificarlo in modo univoco."
+  },
+  "reasonUnknownPlugin": {
+    "en": "No such plugin.",
+    "it": "Plugin inesistente."
+  },
+  "reasonInvalidSpec": {
+    "en": "Enter a valid package name or address.",
+    "it": "Inserisci un nome di pacchetto o un indirizzo valido."
+  },
+  "reasonAlreadyInstalled": {
+    "en": "This package is already installed; uninstall it before installing another version.",
+    "it": "Questo pacchetto è già installato: disinstallalo prima di installarne un'altra versione."
+  },
+  "reasonAmbiguousInstall": {
+    "en": "Which package was installed cannot be told from the dependency change.",
+    "it": "Dalla modifica delle dipendenze non si capisce quale pacchetto sia stato installato."
+  },
+  "reasonNotBundle": {
+    "en": "This package declares no bundle, so it cannot be managed as a plugin.",
+    "it": "Questo pacchetto non dichiara un bundle e non si può gestire come plugin."
+  },
+  "reasonNotRemovable": {
+    "en": "This package is not owned by the profile, or plugin management needs it.",
+    "it": "Questo pacchetto non appartiene al profilo, oppure serve alla gestione dei plugin."
+  },
+  "reasonStopProfile": {
+    "en": "This profile runs without HMR; stop it and uninstall the package with dsh plugin.",
+    "it": "Questo profilo gira senza HMR: fermalo e disinstalla il pacchetto con dsh plugin."
+  },
+  "reasonBundleInUse": {
+    "en": "Other configuration still uses this bundle's components; switch them off first.",
+    "it": "Altre configurazioni usano ancora i componenti di questo bundle: disattivale prima."
+  },
+  "reasonStaleApproval": {
+    "en": "The pending script approvals changed; install again to refresh them.",
+    "it": "Le approvazioni degli script in sospeso sono cambiate: installa di nuovo per aggiornarle."
+  },
+  "reasonIncompatibleVersion": {
+    "en": "{plugin} is incompatible with DSH {runtime} (requires {requirements}); running it may cause crashes or data loss.",
+    "it": "{plugin} non è compatibile con DSH {runtime} (richiede {requirements}); eseguirlo può causare blocchi o perdita di dati."
+  },
+  "reasonIncompatibleVersionUnnamed": {
+    "en": "This plugin is incompatible with the running DSH version; running it may cause crashes or data loss.",
+    "it": "Questo plugin non è compatibile con la versione di DSH in esecuzione; eseguirlo può causare blocchi o perdita di dati."
+  },
+  "reasonIncompatibleInstall": {
+    "en": "Install a plugin version compatible with this DSH.",
+    "it": "Installa una versione del plugin compatibile con questo DSH."
+  },
+  "reasonIncompatibleInstalled": {
+    "en": "Uninstall it and install a version compatible with this DSH.",
+    "it": "Disinstallalo e installa una versione compatibile con questo DSH."
+  },
+  "reasonOperationError": {
+    "en": "The Host reported an error.",
+    "it": "L'host ha segnalato un errore."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "phase.active": {
+    "en": "Ongoing Goal",
+    "it": "Obiettivo in corso"
+  },
+  "phase.active.disarmed": {
+    "en": "Inactive Goal",
+    "it": "Obiettivo inattivo"
+  },
+  "phase.paused": {
+    "en": "Paused Goal",
+    "it": "Obiettivo in pausa"
+  },
+  "phase.blocked": {
+    "en": "Blocked Goal",
+    "it": "Obiettivo bloccato"
+  },
+  "objective.aria": {
+    "en": "Goal objective",
+    "it": "Obiettivo"
+  },
+  "commandInput.aria": {
+    "en": "Command input",
+    "it": "Inserimento comando"
+  },
+  "action.save": {
+    "en": "Save goal",
+    "it": "Salva obiettivo"
+  },
+  "action.cancel": {
+    "en": "Cancel edit",
+    "it": "Annulla modifica"
+  },
+  "action.pause": {
+    "en": "Pause goal",
+    "it": "Metti in pausa l'obiettivo"
+  },
+  "action.resume": {
+    "en": "Resume goal",
+    "it": "Riprendi l'obiettivo"
+  },
+  "action.edit": {
+    "en": "Edit goal",
+    "it": "Modifica obiettivo"
+  },
+  "action.clear": {
+    "en": "Clear goal",
+    "it": "Cancella obiettivo"
+  }
+}

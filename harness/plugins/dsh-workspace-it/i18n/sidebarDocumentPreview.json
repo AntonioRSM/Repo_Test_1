@@ -1,0 +1,90 @@
+{
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "loadMore": {
+    "en": "Load more",
+    "it": "Carica altro"
+  },
+  "changed": {
+    "en": "The file has changed, showing the previous content.",
+    "it": "Il file è cambiato: è mostrato il contenuto precedente."
+  },
+  "reloadNow": {
+    "en": "Reload",
+    "it": "Ricarica"
+  },
+  "reload": {
+    "en": "Read the file again",
+    "it": "Rileggi il file"
+  },
+  "autoRefresh": {
+    "en": "Auto refresh",
+    "it": "Aggiornamento automatico"
+  },
+  "autoRefresh.enable": {
+    "en": "Enable auto refresh",
+    "it": "Attiva l'aggiornamento automatico"
+  },
+  "autoRefresh.disable": {
+    "en": "Disable auto refresh",
+    "it": "Disattiva l'aggiornamento automatico"
+  },
+  "wrap.enable": {
+    "en": "Turn on line wrap",
+    "it": "Attiva l'a capo automatico"
+  },
+  "wrap.disable": {
+    "en": "Turn off line wrap",
+    "it": "Disattiva l'a capo automatico"
+  },
+  "wrap.aria": {
+    "en": "Line wrap",
+    "it": "A capo automatico"
+  },
+  "openWith": {
+    "en": "Open with",
+    "it": "Apri con"
+  },
+  "viewer.text": {
+    "en": "Plain text",
+    "it": "Testo semplice"
+  },
+  "resourceUnavailable": {
+    "en": "The file resource service is unavailable.",
+    "it": "Il servizio delle risorse file non è disponibile."
+  },
+  "rendererUnavailable": {
+    "en": "The {name} preview is unavailable.",
+    "it": "L'anteprima {name} non è disponibile."
+  },
+  "unsupportedFile": {
+    "en": "Preview is not available for this file type yet.",
+    "it": "L'anteprima non è ancora disponibile per questo tipo di file."
+  },
+  "error.notFound": {
+    "en": "File not found. It may have been moved or deleted.",
+    "it": "File non trovato: potrebbe essere stato spostato o eliminato."
+  },
+  "error.tooLarge": {
+    "en": "This page exceeds the {limit} limit and cannot be read.",
+    "it": "Questa pagina supera il limite di {limit} e non si può leggere."
+  },
+  "error.notText": {
+    "en": "Preview is not available for this file type yet.",
+    "it": "L'anteprima non è ancora disponibile per questo tipo di file."
+  },
+  "error.notRegularFile": {
+    "en": "Not a regular file, nothing to display.",
+    "it": "Non è un file normale: niente da mostrare."
+  },
+  "error.unavailable": {
+    "en": "Read failed: {message}",
+    "it": "Lettura non riuscita: {message}"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  }
+}

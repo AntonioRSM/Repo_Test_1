@@ -1,0 +1,206 @@
+{
+  "row.defineTitle": {
+    "en": "Register Cordis Plugin",
+    "it": "Registra plugin Cordis"
+  },
+  "a11y.preparing": {
+    "en": "Preparing a Cordis tool call",
+    "it": "Preparazione di una chiamata a uno strumento Cordis"
+  },
+  "row.runTitle": {
+    "en": "Run Cordis Plugin",
+    "it": "Esegui plugin Cordis"
+  },
+  "row.updateTitle": {
+    "en": "Update Cordis Plugin",
+    "it": "Aggiorna plugin Cordis"
+  },
+  "row.stopTitle": {
+    "en": "Stop Cordis Plugin",
+    "it": "Ferma plugin Cordis"
+  },
+  "row.removeTitle": {
+    "en": "Remove Cordis Plugin",
+    "it": "Rimuovi plugin Cordis"
+  },
+  "purpose.missing": {
+    "en": "(no purpose given)",
+    "it": "(scopo non indicato)"
+  },
+  "status.idle": {
+    "en": "Ready",
+    "it": "Pronto"
+  },
+  "status.awaitingApproval": {
+    "en": "Awaiting approval",
+    "it": "In attesa di approvazione"
+  },
+  "status.failed": {
+    "en": "Run failed",
+    "it": "Esecuzione non riuscita"
+  },
+  "status.clientPending": {
+    "en": "Client ready to activate",
+    "it": "Client pronto per l'attivazione"
+  },
+  "status.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "status.removed": {
+    "en": "Removed",
+    "it": "Rimosso"
+  },
+  "status.superseded": {
+    "en": "Newer run available",
+    "it": "Disponibile un'esecuzione più recente"
+  },
+  "run.removed": {
+    "en": "This package no longer exists",
+    "it": "Questo pacchetto non esiste più"
+  },
+  "run.superseded": {
+    "en": "A newer run card is available below",
+    "it": "Più in basso c'è una scheda di esecuzione più recente"
+  },
+  "panel.hint": {
+    "en": "Run controls live in the Cordis panel above Settings",
+    "it": "I controlli di esecuzione sono nel pannello Cordis sopra le Impostazioni"
+  },
+  "panel.plugins.aria": {
+    "en": "Cordis plugins",
+    "it": "Plugin Cordis"
+  },
+  "panel.approvals.aria": {
+    "en": "Cordis approvals",
+    "it": "Approvazioni Cordis"
+  },
+  "panel.trigger": {
+    "en": "Cordis Plugin",
+    "it": "Plugin Cordis"
+  },
+  "panel.runningCount": {
+    "en": "{count} running",
+    "it": "{count} in esecuzione"
+  },
+  "panel.title": {
+    "en": "Cordis plugins",
+    "it": "Plugin Cordis"
+  },
+  "panel.empty": {
+    "en": "No plugins defined yet",
+    "it": "Ancora nessun plugin definito"
+  },
+  "panel.loading": {
+    "en": "Reading…",
+    "it": "Lettura…"
+  },
+  "panel.readFailed": {
+    "en": "Reading the plugin inventory failed: {message}",
+    "it": "Lettura dell'inventario dei plugin non riuscita: {message}"
+  },
+  "panel.group.current": {
+    "en": "This session",
+    "it": "Questa sessione"
+  },
+  "panel.group.others": {
+    "en": "Other sessions",
+    "it": "Altre sessioni"
+  },
+  "panel.version": {
+    "en": "Version",
+    "it": "Versione"
+  },
+  "panel.current": {
+    "en": "Current: {packageId}",
+    "it": "Attuale: {packageId}"
+  },
+  "panel.next": {
+    "en": "Next: {packageId}",
+    "it": "Successiva: {packageId}"
+  },
+  "action.approve": {
+    "en": "Allow",
+    "it": "Consenti"
+  },
+  "action.approveOnce": {
+    "en": "Allow this version only",
+    "it": "Consenti solo questa versione"
+  },
+  "action.approvePlugin": {
+    "en": "Allow future versions of this plugin",
+    "it": "Consenti le versioni future di questo plugin"
+  },
+  "action.decline": {
+    "en": "Decline",
+    "it": "Rifiuta"
+  },
+  "action.run": {
+    "en": "Run",
+    "it": "Esegui"
+  },
+  "action.stop": {
+    "en": "Stop",
+    "it": "Ferma"
+  },
+  "action.remove": {
+    "en": "Remove",
+    "it": "Rimuovi"
+  },
+  "action.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "action.rollback": {
+    "en": "Roll back",
+    "it": "Ripristina"
+  },
+  "action.inspect": {
+    "en": "Inspect",
+    "it": "Ispeziona"
+  },
+  "render.failedAbdicated": {
+    "en": "Rendering failed in {slot}; the default UI was restored:",
+    "it": "Rendering non riuscito in {slot}; è stata ripristinata l'interfaccia predefinita:"
+  },
+  "render.failedHeld": {
+    "en": "Rendering failed in {slot}:",
+    "it": "Rendering non riuscito in {slot}:"
+  },
+  "a11y.defining": {
+    "en": "Defining the plugin",
+    "it": "Definizione del plugin"
+  },
+  "a11y.failed": {
+    "en": "Definition failed",
+    "it": "Definizione non riuscita"
+  },
+  "a11y.stopped": {
+    "en": "Definition interrupted",
+    "it": "Definizione interrotta"
+  },
+  "body.source": {
+    "en": "Plugin source",
+    "it": "Sorgente del plugin"
+  },
+  "body.hostCode": {
+    "en": "Host",
+    "it": "Host"
+  },
+  "body.clientCode": {
+    "en": "Client",
+    "it": "Client"
+  },
+  "body.output": {
+    "en": "Result",
+    "it": "Risultato"
+  },
+  "body.copy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "body.copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  }
+}

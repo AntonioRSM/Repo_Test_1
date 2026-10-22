@@ -5,9 +5,10 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Awaitable, Callable
 
 from ..config import SettingsStore
@@ -116,19 +117,103 @@ async def _vault_search(ctx: ToolContext, args: dict) -> dict:
 # ---------------------------------------------------------------------- files
 
 
-async def _list_directory(ctx: ToolContext, args: dict) -> dict:
-    path = _path(args.get("path", ""))
-    if not path.is_dir():
-        raise ToolError(f"cartella inesistente: {path}")
-    pattern = args.get("pattern") or "*"
+# Miglioramento #4: a sparse pattern must not walk an entire (possibly network) disk,
+# and the scan must stay off the event-loop thread so /health and SSE keep answering.
+SCAN_VISITED_LIMIT = 20_000
+
+
+def _glob_match(rel: str, pattern: str) -> bool:
+    """glob semantics on a POSIX relative path: `*` and `?` do not cross '/',
+    `**/` matches zero or more directories, `**` matches anything."""
+    out = []
+    i, n = 0, len(pattern)
+    while i < n:
+        char = pattern[i]
+        if char == "*":
+            if pattern[i : i + 3] == "**/":
+                out.append("(?:.*/)?")
+                i += 3
+            elif pattern[i : i + 2] == "**":
+                out.append(".*")
+                i += 2
+            else:
+                out.append("[^/]*")
+                i += 1
+        elif char == "?":
+            out.append("[^/]")
+            i += 1
+        elif char == "[":
+            end = pattern.find("]", i + 1)
+            if end == -1:
+                out.append(r"\[")
+                i += 1
+            else:
+                cls = pattern[i : end + 1]
+                out.append(cls.replace("[!", "[^"))  # glob negation -> regex negation
+                i = end + 1
+        else:
+            out.append(re.escape(char))
+            i += 1
+    # Bug #14: on Windows the file system is case-insensitive and Path.glob (used up
+    # to ciclo 2) matched *.pdf → Contratto.PDF; keep that behavior.
+    flags = re.IGNORECASE if os.name == "nt" else 0
+    return re.fullmatch("".join(out), rel, flags=flags) is not None
+
+
+def _pattern_max_depth(pattern: str) -> int | None:
+    """How deep (in path segments) a pattern can match: `*` or `*.pdf` only reach the
+    top level, `sub/*.txt` two levels; `**` means unlimited (Bug #13)."""
+    segments = [s for s in pattern.split("/") if s not in ("", ".")]
+    if any("**" in s for s in segments):
+        return None
+    return max(1, len(segments))
+
+
+def _scan_directory(path: Path, pattern: str) -> dict:
+    """Sync scan executed in a worker thread (asyncio.to_thread). Visits at most
+    SCAN_VISITED_LIMIT entries; `truncated` is True when either the visit budget or
+    the 300-entry result budget is exhausted. Subtrees deeper than the pattern can
+    reach are pruned away instead of walked and budgeted (Bug #13): with `*` a
+    20.000-file subfolder must neither be traversed nor mark the list truncated."""
+    rel_pattern = pattern.replace("\\", "/")
+    max_depth = _pattern_max_depth(rel_pattern)
+    matches: list[Path] = []
+    visited = 0
+    budget_exhausted = False
+    for dirpath, dirnames, filenames in os.walk(path):
+        names = (*dirnames, *filenames)
+        if max_depth is not None:
+            depth = len(Path(dirpath).relative_to(path).parts)
+            if depth >= max_depth - 1:
+                # Entries here sit at max_depth; their children cannot match.
+                dirnames[:] = []
+        for name in names:
+            visited += 1
+            if visited > SCAN_VISITED_LIMIT:
+                budget_exhausted = True
+                break
+            full = Path(dirpath) / name
+            rel = full.relative_to(path).as_posix()
+            if _glob_match(rel, rel_pattern):
+                matches.append(full)
+        if budget_exhausted:
+            break
     entries = []
-    for entry in sorted(path.glob(pattern), key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
+    for entry in sorted(matches, key=lambda p: (not p.is_dir(), p.name.lower()))[:300]:
         try:
             stat = entry.stat()
         except OSError:
             continue
         entries.append({"name": entry.name, "type": "dir" if entry.is_dir() else "file", "size": None if entry.is_dir() else stat.st_size})
-    return {"path": str(path), "entries": entries, "truncated": len(entries) >= 300}
+    return {"path": str(path), "entries": entries, "truncated": budget_exhausted or len(matches) > 300}
+
+
+async def _list_directory(ctx: ToolContext, args: dict) -> dict:
+    path = _path(args.get("path", ""))
+    if not path.is_dir():
+        raise ToolError(f"cartella inesistente: {path}")
+    pattern = args.get("pattern") or "*"
+    return await asyncio.to_thread(_scan_directory, path, pattern)
 
 
 async def _read_file(ctx: ToolContext, args: dict) -> dict:
@@ -182,11 +267,175 @@ async def _edit_file(ctx: ToolContext, args: dict) -> dict:
 # ---------------------------------------------------------------------- shell
 
 
+# powershell.exe/pwsh accept -EncodedCommand (and -EncodedArguments) under abbreviated
+# forms: every prefix (-e, -enc, -enco…), the aliases -ec/-ea, and the '/' or Unicode
+# dash prefixes (–, —, ―). The check applies ONLY to tokens following an explicit
+# powershell/pwsh invocation: `node -e …` or `Get-Content -Enc UTF8` are legitimate
+# and must not be flagged. Quoted tokens still count: PowerShell strips the quotes and
+# treats '-e' as the switch anyway. This guard is a tripwire, not a sandbox.
+_PWSH_NAMES = {"powershell", "powershell.exe", "pwsh", "pwsh.exe"}
+_PWSH_DASHES = ("-", "/", "\u2013", "\u2014", "\u2015")
+_ENCODED_PARAM = ("encodedcommand", "encodedarguments")
+_TOKEN = re.compile(r'"[^"\r\n]*"|\'[^\'\r\n]*\'|\S+')
+# Bug #28: anche ( ) { } chiudono un comando e ne aprono un altro — in PowerShell un
+# comando può iniziare dopo ( $( { } (blocchi, sottoespressioni) e dentro le parole
+# chiave di blocco (if/try/foreach/…), non solo dopo ; | & && || come al Bug #17.
+# Gruppo di cattura esterno: re.split deve RESTITUIRE i separatori come pezzi.
+_BLOCK_BOUNDARY = re.compile(r"(&&|\|\||[;|&(){}])")
+_BLOCK_KEYWORD = re.compile(r"^(?:if|elseif|else|try|catch|finally|foreach|while|for|do|switch)$", re.IGNORECASE)
+# Gruppo di cattura: re.split deve RESTITUIRE le parti quotate, non scartarle.
+_QUOTED_SPAN = re.compile(r'(\"[^\"\r\n]*\"|\'[^\'\r\n]*\')')
+# Bug #28: `&"C:\…\pwsh.exe"` con & attaccato alla virgoletta veniva spezzato dal
+# tokenizzatore in `&"C:\Program` + `Files\…`: separando & dal percorso la testa
+# torna intera. Vale solo fuori dalle virgolette e per il & singolo (non &&).
+_ATTACHED_CALL = re.compile(r'(?<!&)&(?=["\'])')
+# Un `(` attaccato al token precedente (@(, Write-Host() non apre una posizione di
+# comando nuova: va tenuto nel token, altrimenti `@('-e',…)` spezzerebbe l'elenco
+# degli argomenti di Start-Process. `$(` invece resta separatore (sottoespressione).
+_ATTACHED_PAREN = re.compile(r"(?<=[^\s$])\(")
+_PAREN_PLACEHOLDER = "\x00"
+# Programmi che avviano un altro processo: il programma avviato va trattato come
+# comando in posizione di testa, con i propri argomenti (Bug #16, Start-Process;
+# Bug #28: saps è l'alias predefinito di Start-Process).
+_LAUNCHER_NAMES = {"start-process", "start-process.exe", "start", "saps"}
+# Bug #31: in PowerShell l'accento grave (`) è il carattere di escape. Davanti a
+# n t r 0 a b f v è una sequenza di controllo; a fine riga unisce le due righe;
+# davanti a qualunque altro carattere viene semplicemente IGNORATO — la tecnica di
+# offuscamento nota per cui `power`shell` è `powershell` e `-e`nc` si spezza in
+# `-e` + a capo + `nc`. Per confrontare il testo come lo vede davvero PowerShell,
+# prima di tokenizzare si traducono le sequenze reali e si tolgono gli altri `.
+_PWSH_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "0": "\0", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
+_BACKTICK_ANY = re.compile(r"`(.)", re.DOTALL)
+
+
+def _deobfuscate_backticks(text: str) -> str:
+    """Bug #31: riscrive il testo come lo interpreta PowerShell."""
+
+    def repl(match: re.Match) -> str:
+        ch = match.group(1)
+        low = ch.lower()
+        if low in _PWSH_ESCAPES:
+            return _PWSH_ESCAPES[low]
+        if ch in "\r\n":
+            return ""  # accento grave a fine riga: continuazione di riga
+        return ch  # `` resta un ` letterale, ogni altro `X diventa X
+
+    return _BACKTICK_ANY.sub(repl, text)
+
+
+def _segment_tokens(command: str) -> list[list[str]]:
+    """Divide il comando in segmenti di comando. Separatori: ; | & && || e anche
+    ( ) { } e le parole chiave di blocco (Bug #28); le stringhe tra virgolette
+    restano intere: un separatore o una parentesi dentro virgolette è testo."""
+    segments: list[list[str]] = []
+    current: list[str] = []
+
+    def boundary() -> None:
+        nonlocal current
+        if current:
+            segments.append(current)
+            current = []
+
+    for span in _QUOTED_SPAN.split(command):
+        if not span:
+            continue
+        if span[:1] in "\"'":
+            current.append(span)
+            continue
+        span = _ATTACHED_CALL.sub("& ", span)
+        span = _ATTACHED_PAREN.sub(_PAREN_PLACEHOLDER, span)
+        for piece in _BLOCK_BOUNDARY.split(span):
+            bare = piece.strip()
+            if not bare:
+                continue
+            if bare in (";", "|", "&", "&&", "||", "(", ")", "{", "}"):
+                boundary()
+                continue
+            for token in _TOKEN.findall(piece):
+                token = token.replace(_PAREN_PLACEHOLDER, "(")
+                if _BLOCK_KEYWORD.match(token.strip("\"'")):
+                    boundary()  # la parola chiave chiude il comando precedente
+                    continue
+                current.append(token)
+    boundary()
+    return [s for s in segments if s]
+
+
+def _encoded_switch(word: str) -> bool:
+    if not word.startswith(_PWSH_DASHES):
+        return False
+    name = word.lstrip("".join(_PWSH_DASHES)).lower()
+    # "encoded…" starts with "en": -ec/-ea are two-letter aliases, not prefixes.
+    return bool(name) and (name in ("ec", "ea") or any(param.startswith(name) for param in _ENCODED_PARAM))
+
+
+def _scan_pwsh_args(args: list[str]) -> bool:
+    """Bug #16: si controlla OGNI parola di OGNI argomento, non solo la prima:
+    gli argomenti vanno divisi su spazi E virgole, tolti virgolette, @( e ). Così
+    `-ArgumentList '-NoProfile','-e','<b64>'` e `@('-e','<b64>')` non passano più."""
+    for arg in args:
+        text = arg.replace("@(", " ").replace(")", " ")
+        for word in re.split(r"[,\s]+", text):
+            word = word.strip("\"'")
+            if word and _encoded_switch(word):
+                return True
+    return False
+
+
+def _uses_encoded_command(command: str) -> bool:
+    command = _deobfuscate_backticks(command)  # Bug #31
+    for segment in _segment_tokens(command):
+        # Bug #28: l'operatore di invocazione & ora è un token a sé (anche `& "percorso"`):
+        # la testa del comando è il token successivo.
+        # Bug #31: anche l'operatore punto (dot-source) avvia un programma come &.
+        while segment and segment[0] in ("&", "."):
+            segment = segment[1:]
+        if not segment:
+            continue
+        # Bug #11: una riga di comando annidata può nascondersi dentro un token
+        # quotato (cmd /c "powershell -e …") — riesaminarlo come comando.
+        for token in segment:
+            inner = token.strip("\"'")
+            if token[:1] in "\"'" and " " in inner and _uses_encoded_command(inner):
+                return True
+        head = segment[0].strip("\"'").lstrip("&").strip()
+        # Bug #17: powershell/pwsh conta SOLO in posizione di comando (primo token
+        # del segmento). Come argomento di un altro cmdlet (`Get-Process pwsh -ea
+        # SilentlyContinue`) non attiva la scansione: -ea è -ErrorAction.
+        head_name = PureWindowsPath(head).name.lower() if head else ""
+        if head_name in _PWSH_NAMES:
+            if _scan_pwsh_args(segment[1:]):
+                return True
+        elif head_name in _LAUNCHER_NAMES:
+            # Bug #16: per Start-Process il programma avviato è il primo token non
+            # switch (posizionale o dopo -FilePath); gli argomenti scansionati sono
+            # solo i suoi, fino al separatore di comando successivo.
+            rest = segment[1:]
+            for j, token in enumerate(rest):
+                candidate = token.strip("\"'")
+                if candidate.startswith(_PWSH_DASHES):
+                    continue
+                if PureWindowsPath(candidate).name.lower() in _PWSH_NAMES and _scan_pwsh_args(rest[j + 1 :]):
+                    return True
+                break
+        elif head_name in ("cmd", "cmd.exe") or head.lower() in ("$env:comspec", "${env:comspec}"):
+            # cmd /c (o /k) esegue il resto della riga come nuovo comando: anche senza
+            # virgolette (`cmd /c powershell.exe -encodedcommand …`) va riesaminato.
+            # Bug #31: cmd può essere richiamato anche tramite $env:ComSpec.
+            for j, token in enumerate(segment[1:]):
+                if token.strip("\"'").lower() in ("/c", "/k"):
+                    remainder = " ".join(segment[j + 2 :])
+                    if remainder and _uses_encoded_command(remainder):
+                        return True
+                    break
+    return False
+
+
 async def _run_powershell(ctx: ToolContext, args: dict) -> dict:
     command = (args.get("command") or "").strip()
     if not command:
         raise ToolError("comando mancante")
-    if "-encodedcommand" in command.lower() or " -enc " in command.lower():
+    if _uses_encoded_command(command):
         raise ToolError("comandi codificati non ammessi: scrivi il comando in chiaro")
     cwd = _path(args["cwd"]) if args.get("cwd") else Path.home()
     if not cwd.is_dir():

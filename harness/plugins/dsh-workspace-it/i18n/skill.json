@@ -1,0 +1,34 @@
+{
+  "row.title": {
+    "en": "Skill",
+    "it": "Skill"
+  },
+  "row.running": {
+    "en": "Loading skill",
+    "it": "Caricamento della skill"
+  },
+  "row.preparing": {
+    "en": "Preparing to load a skill",
+    "it": "Preparazione al caricamento di una skill"
+  },
+  "row.failed": {
+    "en": "Skill load failed",
+    "it": "Caricamento della skill non riuscito"
+  },
+  "row.stopped": {
+    "en": "Skill load stopped",
+    "it": "Caricamento della skill interrotto"
+  },
+  "row.instructions": {
+    "en": "Instructions",
+    "it": "Istruzioni"
+  },
+  "row.inspect": {
+    "en": "Inspect",
+    "it": "Ispeziona"
+  },
+  "menu.userOnly": {
+    "en": "user-only",
+    "it": "solo utente"
+  }
+}
