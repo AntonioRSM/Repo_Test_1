@@ -1,0 +1,48 @@
+# Livello di profilo Workspace OS per DeepSeek Harness.
+# Si applica dopo dsh-base e dsh-web-app e prima del cordis.patch.yml del profilo, quindi le
+# scelte fatte dall'utente nelle Impostazioni (che finiscono nel profilo) restano prioritarie.
+# Una patch sostituisce l'intero `config` della riga a cui si riferisce: ogni riga qui sotto
+# riporta tutte le chiavi che possiede.
+
+# ── Lingua e aspetto ─────────────────────────────────────────────────────────
+
+# Italiano come lingua iniziale (registrata dal plugin dsh-workspace-it).
+- id: locale
+  config:
+    preference: it
+
+# Lexend, il carattere istituzionale Workspace (caricato dal plugin dsh-workspace-brand).
+- id: ui-theme
+  config:
+    textFontFamily: Lexend
+
+# Il marchio ufficiale DeepSeek lascia gli slot della barra laterale e della conversazione
+# al plugin Workspace: è il percorso previsto da dsh per le installazioni con identità propria.
+- id: ui-brand-official
+  disabled: true
+
+- insert:
+    - id: workspace-brand
+      name: '@workspace-sm/dsh-workspace-brand'
+    - id: workspace-it
+      name: '@workspace-sm/dsh-workspace-it'
+
+# ── Modelli locali ───────────────────────────────────────────────────────────
+
+# Rotte OpenAI-compatibili verso Ollama e LM Studio. L'avvio (harness/avvia.ps1) rileva i
+# modelli installati e li passa in WSOS_DSH_PROVIDERS; senza modelli locali la rotta resta vuota
+# e si possono configurare provider cloud dalla pagina Modelli.
+- id: llm-pi-ai
+  config:
+    providers: !!js "JSON.parse(process.env.WSOS_DSH_PROVIDERS || '{}')"
+
+- id: agent-default-model
+  config:
+    provider: !!js "process.env.WSOS_DSH_PROVIDER || 'deepseek-official'"
+    model: !!js "process.env.WSOS_DSH_MODEL || 'deepseek-flash'"
+
+- id: system-prompt
+  config:
+    personaPrefix: >-
+      You are a coding agent powered by the {{model}} model, running inside Workspace OS.
+      Rispondi sempre in italiano, salvo che l'utente chieda un'altra lingua.

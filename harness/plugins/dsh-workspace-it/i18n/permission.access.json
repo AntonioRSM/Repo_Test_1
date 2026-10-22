@@ -1,0 +1,70 @@
+{
+  "mode": {
+    "en": "Access mode, current: {name}",
+    "it": "Modalità di accesso, attuale: {name}"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "preset.readOnly": {
+    "en": "Read Only",
+    "it": "Sola lettura"
+  },
+  "preset.workspaceWrite": {
+    "en": "Workspace Write",
+    "it": "Scrittura nel workspace"
+  },
+  "preset.fullAccess": {
+    "en": "Full access",
+    "it": "Accesso completo"
+  },
+  "confirm.title": {
+    "en": "Enable Full access?",
+    "it": "Attivare l'accesso completo?"
+  },
+  "confirm.description": {
+    "en": "Full access reduces confirmation steps and lets the agent perform more actions directly, including sensitive operations, file changes, or external commands. Only use it when you trust the current task.",
+    "it": "L'accesso completo riduce le conferme e lascia all'agente più azioni dirette, comprese operazioni sensibili, modifiche ai file o comandi esterni. Usalo solo se ti fidi dell'attività corrente."
+  },
+  "confirm.acknowledge": {
+    "en": "I understand the risks and want to continue",
+    "it": "Ho compreso i rischi e voglio continuare"
+  },
+  "confirm.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "confirm.enable": {
+    "en": "Enable Full access",
+    "it": "Attiva l'accesso completo"
+  },
+  "auto.label": {
+    "en": "Auto review",
+    "it": "Revisione automatica"
+  },
+  "auto.badge": {
+    "en": "EXP",
+    "it": "SPERIM."
+  },
+  "auto.description": {
+    "en": "Run without a sandbox after an experimental same-model review of every native tool call and PTC inner call.",
+    "it": "Esegue senza sandbox dopo una revisione sperimentale, fatta dallo stesso modello, di ogni chiamata nativa agli strumenti e di ogni chiamata interna PTC."
+  },
+  "auto.confirm.title": {
+    "en": "Enable Auto review (experimental)?",
+    "it": "Attivare la revisione automatica (sperimentale)?"
+  },
+  "auto.confirm.description": {
+    "en": "Auto review runs without a sandbox. Before every native tool call and PTC inner call, the same model as the current agent reviews whether to allow it; you approve or reject each call it denies. This feature is experimental, can falsely allow or deny actions, and uses additional tokens.",
+    "it": "La revisione automatica esegue senza sandbox. Prima di ogni chiamata nativa agli strumenti e di ogni chiamata interna PTC, lo stesso modello dell'agente corrente valuta se consentirla; tu approvi o rifiuti ogni chiamata che nega. La funzione è sperimentale, può consentire o negare azioni per errore e consuma token aggiuntivi."
+  },
+  "auto.confirm.acknowledge": {
+    "en": "I understand these risks and want to continue",
+    "it": "Ho compreso questi rischi e voglio continuare"
+  },
+  "auto.confirm.enable": {
+    "en": "Enable Auto review",
+    "it": "Attiva la revisione automatica"
+  }
+}

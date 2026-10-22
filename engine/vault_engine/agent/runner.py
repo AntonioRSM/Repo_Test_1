@@ -24,6 +24,45 @@ log = logging.getLogger(__name__)
 
 Decision = Literal["allow", "allow_always", "deny"]
 
+TRUNCATION_MARK = "…[troncato]"
+
+
+def _fit_result(value: object, budget: int) -> object:
+    """Shrinks the tool result *structure* (strings, list tails, dict entries) so its
+    JSON serialisation stays within `budget` chars and remains parseable for the UI.
+    A plain text cut would produce invalid JSON in the message history."""
+
+    def dump(v: object) -> str:
+        return json.dumps(v, ensure_ascii=False, default=str)
+
+    if isinstance(value, str):
+        return value if len(value) <= budget else value[: max(0, budget - len(TRUNCATION_MARK))] + TRUNCATION_MARK
+    if isinstance(value, dict):
+        out: dict = {}
+        used = 2  # {}
+        for key, item in value.items():
+            fitted = _fit_result(item, max(32, (budget - used) // 2))
+            entry = dump({str(key): fitted})
+            if used + len(entry) > budget:
+                out["…"] = "[campi omessi]"
+                break
+            out[str(key)] = fitted
+            used += len(entry) + 1
+        return out
+    if isinstance(value, (list, tuple, set)):
+        out = []
+        used = 2  # []
+        for item in value:
+            fitted = _fit_result(item, max(32, (budget - used) // 2))
+            encoded = dump(fitted)
+            if used + len(encoded) > budget:
+                out.append("[elementi omessi]")
+                break
+            out.append(fitted)
+            used += len(encoded) + 1
+        return out
+    return value
+
 # Small local models drift on long contexts and every token costs seconds on CPU.
 CONTEXT_CHAR_BUDGET = 48000
 STORED_RESULT_CHARS = 8000
@@ -204,7 +243,13 @@ class AgentRunner:
             if model is None:
                 raise ProviderError("nessun LLM configurato: sceglilo in Impostazioni")
             vault_models = [(v.config.embedding, "embedding") for v in self.registry.list() if not thread.vault_ids or v.config.id in thread.vault_ids]
-            await ensure_loaded(settings.endpoints, [(model, "llm"), *vault_models])
+            await ensure_loaded(
+                settings.endpoints,
+                [(model, "llm"), *vault_models],
+                events=self.events,
+                auto_pull=settings.ollama_auto_pull,
+                keep_alive_minutes=settings.ollama_keep_alive_minutes,
+            )
             tools = [t.schema() for t in self.tools().values()]
             for step in range(1, settings.agent_max_steps + 2):
                 run.step = step
@@ -285,7 +330,7 @@ class AgentRunner:
             self._emit(thread.id, "tool_started", call_id=call.id, name=call.name)
             ctx = ToolContext(self.registry, self.settings, thread, self.store.save_thread)
             output = await tool.run(ctx, args)
-            content = json.dumps(output, ensure_ascii=False, default=str)
+            content = json.dumps(_fit_result(output, STORED_RESULT_CHARS), ensure_ascii=False, default=str)
             meta["ok"] = True
         except ToolError as exc:
             content = json.dumps({"error": str(exc)}, ensure_ascii=False)
@@ -297,6 +342,6 @@ class AgentRunner:
             meta["ok"] = False
             meta["error"] = str(exc)
         meta["seconds"] = round(time.time() - started, 2)
-        if len(content) > STORED_RESULT_CHARS:
-            content = content[:STORED_RESULT_CHARS] + "…[troncato]"
+        if len(content) > STORED_RESULT_CHARS:  # backstop: _fit_result guarantees this rarely fires
+            content = content[:STORED_RESULT_CHARS] + TRUNCATION_MARK
         return self.store.append(Message(thread_id=thread.id, role="tool", content=content, tool_call_id=call.id, name=call.name, meta=meta))

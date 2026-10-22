@@ -1,0 +1,538 @@
+{
+  "nav": {
+    "en": "Models",
+    "it": "Modelli"
+  },
+  "deepSeekAccount": {
+    "en": "DeepSeek Account",
+    "it": "Account DeepSeek"
+  },
+  "title": {
+    "en": "Models",
+    "it": "Modelli"
+  },
+  "intro": {
+    "en": "Enter your API keys to use models from the following providers.",
+    "it": "Inserisci le tue chiavi API per usare i modelli dei provider seguenti."
+  },
+  "edit": {
+    "en": "Edit",
+    "it": "Modifica"
+  },
+  "editProvider": {
+    "en": "Edit {provider}",
+    "it": "Modifica {provider}"
+  },
+  "remove": {
+    "en": "Delete",
+    "it": "Elimina"
+  },
+  "removeProvider": {
+    "en": "Delete {provider}",
+    "it": "Elimina {provider}"
+  },
+  "deleteTitle": {
+    "en": "Delete {provider}?",
+    "it": "Eliminare {provider}?"
+  },
+  "deleteDescription": {
+    "en": "Deleting {provider} removes its configuration. Any credential it uses is managed elsewhere and will be kept.",
+    "it": "Eliminando {provider} se ne rimuove la configurazione. Le credenziali che usa sono gestite altrove e restano."
+  },
+  "deleteDescriptionWithCredential": {
+    "en": "Deleting {provider} removes its configuration and stored API key.",
+    "it": "Eliminando {provider} se ne rimuovono la configurazione e la chiave API salvata."
+  },
+  "deleteConfirm": {
+    "en": "Delete {provider}",
+    "it": "Elimina {provider}"
+  },
+  "deleting": {
+    "en": "Deleting {provider}…",
+    "it": "Eliminazione di {provider}…"
+  },
+  "add": {
+    "en": "Add model provider",
+    "it": "Aggiungi provider di modelli"
+  },
+  "addMode": {
+    "en": "How to add",
+    "it": "Come aggiungere"
+  },
+  "addCatalog": {
+    "en": "Third-party model provider",
+    "it": "Provider di modelli di terze parti"
+  },
+  "addCustom": {
+    "en": "Custom model API",
+    "it": "API di modelli personalizzata"
+  },
+  "addCatalogHint": {
+    "en": "Pick OpenAI, Anthropic, Kimi, or another provider from the built-in catalog and enter its API key.",
+    "it": "Scegli OpenAI, Anthropic, Kimi o un altro provider dal catalogo integrato e inserisci la sua chiave API."
+  },
+  "addCustomHint": {
+    "en": "Connect a relay, a self-hosted server, or any other OpenAI- or Anthropic-compatible endpoint by its base URL, protocol, and models.",
+    "it": "Collega un relay, un server in proprio (es. Ollama o LM Studio) o qualsiasi altro endpoint compatibile con OpenAI o Anthropic indicando URL di base, protocollo e modelli."
+  },
+  "addCatalogExhausted": {
+    "en": "Every catalog provider is already configured.",
+    "it": "Tutti i provider del catalogo sono già configurati."
+  },
+  "addCustomUnavailable": {
+    "en": "No API protocol is available to declare.",
+    "it": "Nessun protocollo API disponibile da dichiarare."
+  },
+  "provider": {
+    "en": "Provider",
+    "it": "Provider"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "apply": {
+    "en": "Apply",
+    "it": "Applica"
+  },
+  "applying": {
+    "en": "Applying…",
+    "it": "Applicazione…"
+  },
+  "savedProvider": {
+    "en": "Saved {provider}.",
+    "it": "{provider} salvato."
+  },
+  "credentialConfigured": {
+    "en": "API key configured",
+    "it": "Chiave API configurata"
+  },
+  "credentialMissing": {
+    "en": "API key missing",
+    "it": "Chiave API mancante"
+  },
+  "accountSignedIn": {
+    "en": "Signed in",
+    "it": "Accesso effettuato"
+  },
+  "readOnly": {
+    "en": "The settings document is read-only in this deployment.",
+    "it": "In questa installazione il documento delle impostazioni è in sola lettura."
+  },
+  "loadFailed": {
+    "en": "Loading the provider directory failed",
+    "it": "Caricamento dell'elenco dei provider non riuscito"
+  },
+  "conflict": {
+    "en": "Someone else changed these settings while this card was open. Close it and reopen to edit the current values.",
+    "it": "Qualcun altro ha modificato queste impostazioni mentre la scheda era aperta. Chiudila e riaprila per modificare i valori attuali."
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "keyInput": {
+    "en": "API key",
+    "it": "Chiave API"
+  },
+  "keyReveal": {
+    "en": "Show secret",
+    "it": "Mostra segreto"
+  },
+  "keyHide": {
+    "en": "Hide secret",
+    "it": "Nascondi segreto"
+  },
+  "keyPlaceholder": {
+    "en": "Enter your API key",
+    "it": "Inserisci la tua chiave API"
+  },
+  "keyPlaceholderFallback": {
+    "en": "Leave blank to use env as auth ({hint})",
+    "it": "Lascia vuoto per autenticarti con le variabili d'ambiente ({hint})"
+  },
+  "keyPlaceholderSaved": {
+    "en": "Leave blank to use saved credentials",
+    "it": "Lascia vuoto per usare le credenziali salvate"
+  },
+  "keyFallbackMissing": {
+    "en": "Env var not detected. Enter an API key, or configure {hint} in your env.",
+    "it": "Variabile d'ambiente non rilevata. Inserisci una chiave API o configura {hint} nell'ambiente."
+  },
+  "keyFallbackDetected": {
+    "en": "Env var detected. ({hint})",
+    "it": "Variabile d'ambiente rilevata. ({hint})"
+  },
+  "keyFallbackDetectedHidden": {
+    "en": "Env var detected.",
+    "it": "Variabile d'ambiente rilevata."
+  },
+  "keyFallbackUnchecked": {
+    "en": "Environment credential status has not been confirmed.",
+    "it": "Lo stato delle credenziali d'ambiente non è stato verificato."
+  },
+  "keyHelp": {
+    "en": "Saved credentials are used first. Environment fallbacks shown here, in order: {env}. Sources are launch environment, $cwd/.env, then $DSH_HOME/.env.",
+    "it": "Le credenziali salvate hanno la precedenza. Ripieghi d'ambiente mostrati qui, in ordine: {env}. Le fonti sono l'ambiente di avvio, $cwd/.env, poi $DSH_HOME/.env."
+  },
+  "authHelp": {
+    "en": "Authentication details",
+    "it": "Dettagli sull'autenticazione"
+  },
+  "customized": {
+    "en": "Customized settings",
+    "it": "Impostazioni personalizzate"
+  },
+  "baseUrl": {
+    "en": "Base URL",
+    "it": "URL di base"
+  },
+  "baseUrlDefault": {
+    "en": "No default endpoint",
+    "it": "Nessun endpoint predefinito"
+  },
+  "baseUrlEnvironment": {
+    "en": "Provider endpoint configuration: {env}",
+    "it": "Configurazione dell'endpoint del provider: {env}"
+  },
+  "baseUrlConfigured": {
+    "en": "Provider-configured endpoint",
+    "it": "Endpoint configurato dal provider"
+  },
+  "baseUrlPlaceholder": {
+    "en": "{url}",
+    "it": "{url}"
+  },
+  "deepSeekBaseUrl": {
+    "en": "https://api.deepseek.com/anthropic (Default to use DEEPSEEK_BASE_URL)",
+    "it": "https://api.deepseek.com/anthropic (predefinito: usa DEEPSEEK_BASE_URL)"
+  },
+  "deepSeekEndpointHint": {
+    "en": "Use an API endpoint compatible with Anthropic Messages.",
+    "it": "Usa un endpoint API compatibile con Anthropic Messages."
+  },
+  "models": {
+    "en": "Models",
+    "it": "Modelli"
+  },
+  "modelsInherited": {
+    "en": "Using the adapter defaults",
+    "it": "Usa i valori predefiniti dell'adattatore"
+  },
+  "modelsCustomized": {
+    "en": "Customized model catalog",
+    "it": "Catalogo di modelli personalizzato"
+  },
+  "resetModels": {
+    "en": "Restore defaults",
+    "it": "Ripristina i predefiniti"
+  },
+  "model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "modelId": {
+    "en": "Model ID",
+    "it": "ID del modello"
+  },
+  "modelName": {
+    "en": "Display name",
+    "it": "Nome visualizzato"
+  },
+  "modelNamePlaceholder": {
+    "en": "Uses the model ID when empty",
+    "it": "Se vuoto usa l'ID del modello"
+  },
+  "contextWindow": {
+    "en": "Context window",
+    "it": "Finestra di contesto"
+  },
+  "contextWindowPlaceholder": {
+    "en": "Uses the provider default",
+    "it": "Usa il valore predefinito del provider"
+  },
+  "maxTokens": {
+    "en": "Max output tokens",
+    "it": "Token massimi in output"
+  },
+  "maxTokensPlaceholder": {
+    "en": "Uses the provider default",
+    "it": "Usa il valore predefinito del provider"
+  },
+  "modelAdvanced": {
+    "en": "Model options",
+    "it": "Opzioni del modello"
+  },
+  "modelInputTypes": {
+    "en": "Input types",
+    "it": "Tipi di input"
+  },
+  "modelInputText": {
+    "en": "Text",
+    "it": "Testo"
+  },
+  "modelInputImage": {
+    "en": "Image",
+    "it": "Immagine"
+  },
+  "modelReasoning": {
+    "en": "Reasoning levels",
+    "it": "Livelli di ragionamento"
+  },
+  "modelReasoningLevel": {
+    "en": "Level",
+    "it": "Livello"
+  },
+  "modelReasoningValue": {
+    "en": "API value",
+    "it": "Valore API"
+  },
+  "modelReasoningHelp": {
+    "en": "About reasoning levels",
+    "it": "Informazioni sui livelli di ragionamento"
+  },
+  "modelReasoningHelpText": {
+    "en": "The API value is sent in the request's reasoning-effort field, such as OpenAI's reasoning_effort. It defaults to the level name; where the model provider's API documentation specifies a different value, follow it. Off turns reasoning off and needs no value; a value already written in the configuration is kept and sent.",
+    "it": "Il valore API viene inviato nel campo della richiesta che regola il ragionamento, come reasoning_effort di OpenAI. Per impostazione predefinita è il nome del livello; se la documentazione API del provider indica un valore diverso, segui quella. Off disattiva il ragionamento e non richiede un valore; un valore già scritto nella configurazione viene mantenuto e inviato."
+  },
+  "modelReasoningNeedsLevel": {
+    "en": "Add at least one level besides Off, or turn reasoning levels off.",
+    "it": "Aggiungi almeno un livello oltre a Off, oppure disattiva i livelli di ragionamento."
+  },
+  "modelReasoningValueRequired": {
+    "en": "Every level besides Off needs an API value, and no value can be empty.",
+    "it": "Ogni livello oltre a Off richiede un valore API, e nessun valore può essere vuoto."
+  },
+  "modelReasoningAdd": {
+    "en": "Add level",
+    "it": "Aggiungi livello"
+  },
+  "modelReasoningRemove": {
+    "en": "Delete level",
+    "it": "Elimina livello"
+  },
+  "modelReasoningOffValuePlaceholder": {
+    "en": "Turns reasoning off",
+    "it": "Disattiva il ragionamento"
+  },
+  "addModel": {
+    "en": "Add model",
+    "it": "Aggiungi modello"
+  },
+  "removeModel": {
+    "en": "Delete model",
+    "it": "Elimina modello"
+  },
+  "modelsEmpty": {
+    "en": "No models will be shown in the selector. Unlisted IDs can still be sent directly.",
+    "it": "Nessun modello comparirà nel selettore. Gli ID non elencati si possono comunque inviare direttamente."
+  },
+  "keyBlank": {
+    "en": "Enter the API key, or leave the field empty to keep the stored one.",
+    "it": "Inserisci la chiave API, oppure lascia vuoto per mantenere quella salvata."
+  },
+  "keyBlankNew": {
+    "en": "Enter the API key, or leave the field empty if this provider authenticates another way.",
+    "it": "Inserisci la chiave API, oppure lascia vuoto se questo provider si autentica in altro modo."
+  },
+  "keyIllegalCharacters": {
+    "en": "This API key is not in a valid format. Please check it.",
+    "it": "Il formato di questa chiave API non è valido. Controllala."
+  },
+  "modelIdRequired": {
+    "en": "Model ID is required.",
+    "it": "L'ID del modello è obbligatorio."
+  },
+  "modelIdDuplicate": {
+    "en": "Model ID must be unique.",
+    "it": "L'ID del modello deve essere univoco."
+  },
+  "modelNameInvalid": {
+    "en": "Display name cannot be empty.",
+    "it": "Il nome visualizzato non può essere vuoto."
+  },
+  "modelContextInvalid": {
+    "en": "Context window must be a positive count, like 131072, 256K, or 1M.",
+    "it": "La finestra di contesto deve essere un numero positivo, come 131072, 256K o 1M."
+  },
+  "modelMaxTokensInvalid": {
+    "en": "Max output tokens must be a positive count, like 8192, 64K, or 1M.",
+    "it": "I token massimi in output devono essere un numero positivo, come 8192, 64K o 1M."
+  },
+  "advancedHint": {
+    "en": "Other fields live in cordis.patch.yml; edit that section directly.",
+    "it": "Gli altri campi sono in cordis.patch.yml: modifica direttamente quella sezione."
+  },
+  "modelCapacityInvalid": {
+    "en": "A capacity must be a number, optionally suffixed K or M.",
+    "it": "Una capacità deve essere un numero, eventualmente seguito da K o M."
+  },
+  "modelDuplicate": {
+    "en": "Each model ID may appear once.",
+    "it": "Ogni ID di modello può comparire una sola volta."
+  },
+  "fetchModels": {
+    "en": "Fetch available models",
+    "it": "Recupera i modelli disponibili"
+  },
+  "fetching": {
+    "en": "Asking the provider…",
+    "it": "Richiesta al provider…"
+  },
+  "fetchNeedsBaseUrl": {
+    "en": "Enter the base URL first, then fetch.",
+    "it": "Inserisci prima l'URL di base, poi recupera i modelli."
+  },
+  "fetchEmpty": {
+    "en": "The provider listed no models. Add them by hand.",
+    "it": "Il provider non ha elencato modelli. Aggiungili a mano."
+  },
+  "fetchTitle": {
+    "en": "Choose models to add",
+    "it": "Scegli i modelli da aggiungere"
+  },
+  "fetchDescription": {
+    "en": "These are the models this provider has available. Choose the ones to add.",
+    "it": "Questi sono i modelli disponibili presso il provider. Scegli quelli da aggiungere."
+  },
+  "fetchSearch": {
+    "en": "Search models",
+    "it": "Cerca modelli"
+  },
+  "fetchNoMatches": {
+    "en": "No matching models.",
+    "it": "Nessun modello corrispondente."
+  },
+  "fetchSelectAll": {
+    "en": "Select all",
+    "it": "Seleziona tutto"
+  },
+  "fetchDeselectAll": {
+    "en": "Deselect all",
+    "it": "Deseleziona tutto"
+  },
+  "fetchAdopt": {
+    "en": "Add selected",
+    "it": "Aggiungi i selezionati"
+  },
+  "customTag": {
+    "en": "Custom",
+    "it": "Personalizzato"
+  },
+  "customRoute": {
+    "en": "Provider ID",
+    "it": "ID del provider"
+  },
+  "customRouteHint": {
+    "en": "Lowercase identifier, starting with a letter, that uniquely names this provider in requests and as its credential name.",
+    "it": "Identificatore in minuscolo, che inizia con una lettera e identifica in modo univoco il provider nelle richieste e come nome delle sue credenziali."
+  },
+  "customRouteInvalid": {
+    "en": "Start with a lowercase letter; then lowercase letters, digits, and dashes.",
+    "it": "Inizia con una lettera minuscola, poi lettere minuscole, cifre e trattini."
+  },
+  "customRouteTaken": {
+    "en": "A provider already uses this ID.",
+    "it": "Questo ID è già usato da un altro provider."
+  },
+  "customDisplayName": {
+    "en": "Display name",
+    "it": "Nome visualizzato"
+  },
+  "customApi": {
+    "en": "API protocol",
+    "it": "Protocollo API"
+  },
+  "customApiUnset": {
+    "en": "Not selected",
+    "it": "Non selezionato"
+  },
+  "protocolOpenAiCompletions": {
+    "en": "OpenAI Chat Completions",
+    "it": "OpenAI Chat Completions"
+  },
+  "protocolOpenAiResponses": {
+    "en": "OpenAI Responses",
+    "it": "OpenAI Responses"
+  },
+  "protocolAnthropicMessages": {
+    "en": "Anthropic Messages",
+    "it": "Anthropic Messages"
+  },
+  "customNeedsBaseUrl": {
+    "en": "A custom provider needs a base URL.",
+    "it": "Un provider personalizzato richiede un URL di base."
+  },
+  "customBaseUrlInvalid": {
+    "en": "Enter a valid HTTP or HTTPS URL.",
+    "it": "Inserisci un URL HTTP o HTTPS valido."
+  },
+  "customNeedsModels": {
+    "en": "A custom provider needs at least one model.",
+    "it": "Un provider personalizzato richiede almeno un modello."
+  },
+  "customBaseUrlPlaceholder": {
+    "en": "https://gateway.example/v1",
+    "it": "https://gateway.example/v1"
+  },
+  "customAnthropicBaseUrlPlaceholder": {
+    "en": "https://gateway.example",
+    "it": "https://gateway.example"
+  },
+  "settingsPathUnresolvable": {
+    "en": "unresolvable settings path",
+    "it": "percorso delle impostazioni non risolvibile"
+  },
+  "create": {
+    "en": "Create provider",
+    "it": "Crea provider"
+  },
+  "creating": {
+    "en": "Creating…",
+    "it": "Creazione…"
+  },
+  "welcomeTitle": {
+    "en": "Preview Notice",
+    "it": "Avviso di anteprima"
+  },
+  "welcomeBody": {
+    "en": "DeepSeek Harness 0.2 is still in preview, and many areas need continued improvement and refinement. We welcome feedback and suggestions from all developers and users. The new desktop app now targets a broad range of users, while developer-related advanced features can be enabled in the settings. DeepSeek Harness’s product features and plugin APIs are expected to continue rapid iteration and evolution, and will gradually stabilize over time.\n\nWe look forward to exploring the limits of intelligence together with users and developers around the world, building on open-source, reusable, and composable infrastructure. We welcome everyone to bring their ideas to life with DeepSeek Harness and participate in the community to enrich the plugin ecosystem.",
+    "it": "Workspace Harness è basato su DeepSeek Harness, un progetto open source (licenza MIT). DeepSeek Harness 0.2 è ancora in anteprima e molte parti richiedono miglioramenti e rifiniture continue: suggerimenti e segnalazioni di sviluppatori e utenti sono benvenuti. La nuova app desktop si rivolge a un pubblico ampio, mentre le funzioni avanzate per sviluppatori si attivano nelle impostazioni. Funzioni del prodotto e API dei plugin di DeepSeek Harness continueranno a evolvere rapidamente e si stabilizzeranno col tempo.\n\nIl progetto punta a esplorare i limiti dell'intelligenza insieme a utenti e sviluppatori di tutto il mondo, su un'infrastruttura open source, riutilizzabile e componibile. Chiunque può dare forma alle proprie idee con DeepSeek Harness e partecipare alla comunità per arricchire l'ecosistema dei plugin."
+  },
+  "welcomeContinue": {
+    "en": "Continue",
+    "it": "Continua"
+  },
+  "welcomeError": {
+    "en": "The acknowledgement could not be saved. Please try again.",
+    "it": "Impossibile salvare la conferma. Riprova."
+  },
+  "onboardingTitle": {
+    "en": "Add an API key to get started",
+    "it": "Aggiungi una chiave API per iniziare"
+  },
+  "onboardingDescription": {
+    "en": "Configure the official DeepSeek provider to start building.",
+    "it": "Configura il provider ufficiale DeepSeek per iniziare, oppure usa i modelli locali già configurati (Ollama, LM Studio)."
+  },
+  "onboardingLater": {
+    "en": "Configure later",
+    "it": "Configura più tardi"
+  },
+  "onboardingSave": {
+    "en": "Save and continue",
+    "it": "Salva e continua"
+  },
+  "onboardingSaving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "keyRequired": {
+    "en": "Enter an API key to continue.",
+    "it": "Inserisci una chiave API per continuare."
+  }
+}

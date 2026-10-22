@@ -1,0 +1,438 @@
+{
+  "dictate": {
+    "en": "Dictate",
+    "it": "Detta"
+  },
+  "setupPrompt.title": {
+    "en": "Set up voice input before recording",
+    "it": "Configura l'input vocale prima di registrare"
+  },
+  "setupPrompt.body": {
+    "en": "Voice input is enabled. First use requires downloading and preparing local recognition models. Open the plugin details to review disk space, memory and time estimates before starting setup.",
+    "it": "L'input vocale è attivo. Al primo uso bisogna scaricare e preparare i modelli di riconoscimento locali. Apri i dettagli del plugin per vedere spazio su disco, memoria e tempi stimati prima di avviare la configurazione."
+  },
+  "setupPrompt.later": {
+    "en": "Later",
+    "it": "Più tardi"
+  },
+  "setupPrompt.open": {
+    "en": "Go to setup",
+    "it": "Vai alla configurazione"
+  },
+  "setupPrompt.trigger": {
+    "en": "Open voice input setup",
+    "it": "Apri la configurazione dell'input vocale"
+  },
+  "setupPrompt.details": {
+    "en": "Open voice plugin settings",
+    "it": "Apri le impostazioni del plugin vocale"
+  },
+  "setupPrompt.unavailableTitle": {
+    "en": "Speech recognition is not ready",
+    "it": "Il riconoscimento vocale non è pronto"
+  },
+  "setupPrompt.unavailableBody": {
+    "en": "Open the voice plugin details to check recognition status, preparation progress, or errors.",
+    "it": "Apri i dettagli del plugin vocale per vedere stato del riconoscimento, avanzamento della preparazione o errori."
+  },
+  "setup.local": {
+    "en": "Local models will be downloaded to the machine running DSH. No Python or compiler is required.",
+    "it": "I modelli locali verranno scaricati sul computer che esegue DSH. Non servono Python né compilatori."
+  },
+  "setup.disk": {
+    "en": "Disk space",
+    "it": "Spazio su disco"
+  },
+  "setup.diskValue": {
+    "en": "Allow about {gb} GB for models, runtime, and download caches",
+    "it": "Prevedi circa {gb} GB per modelli, runtime e cache dei download"
+  },
+  "setup.memory": {
+    "en": "Memory",
+    "it": "Memoria"
+  },
+  "setup.memoryValue": {
+    "en": "About {gb} GB with the model loaded; recognition may use more",
+    "it": "Circa {gb} GB con il modello caricato; il riconoscimento può usarne di più"
+  },
+  "setup.time": {
+    "en": "First setup",
+    "it": "Prima configurazione"
+  },
+  "setup.timeValue": {
+    "en": "Allow roughly {min}–{max} minutes, depending on the network and machine",
+    "it": "Prevedi circa {min}–{max} minuti, a seconda della rete e del computer"
+  },
+  "setup.estimateNote": {
+    "en": "These are estimates; slow networks may take longer. Downloads are reused; idle models release memory by default.",
+    "it": "Sono stime: con reti lente può volerci di più. I download vengono riutilizzati e i modelli inattivi liberano la memoria per impostazione predefinita."
+  },
+  "step.check": {
+    "en": "Check local resources",
+    "it": "Controllo delle risorse locali"
+  },
+  "step.model": {
+    "en": "Prepare recognition model",
+    "it": "Preparazione del modello di riconoscimento"
+  },
+  "step.vad": {
+    "en": "Prepare voice detection model",
+    "it": "Preparazione del modello di rilevamento della voce"
+  },
+  "step.verify": {
+    "en": "Verify model files",
+    "it": "Verifica dei file dei modelli"
+  },
+  "step.load": {
+    "en": "Load {name}",
+    "it": "Caricamento di {name}"
+  },
+  "stepStatus.pending": {
+    "en": "Not started",
+    "it": "Non iniziato"
+  },
+  "stepStatus.running": {
+    "en": "In progress",
+    "it": "In corso"
+  },
+  "stepStatus.complete": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "stepStatus.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "stepStatus.cancelled": {
+    "en": "Cancelled",
+    "it": "Annullato"
+  },
+  "short.downloading": {
+    "en": "Downloading",
+    "it": "Download"
+  },
+  "short.failed": {
+    "en": "Setup failed",
+    "it": "Configurazione non riuscita"
+  },
+  "retryRecording": {
+    "en": "Record again",
+    "it": "Registra di nuovo"
+  },
+  "preparationSteps": {
+    "en": "Preparation steps",
+    "it": "Passi di preparazione"
+  },
+  "prepare": {
+    "en": "Download and prepare",
+    "it": "Scarica e prepara"
+  },
+  "retryPrepare": {
+    "en": "Retry preparation",
+    "it": "Riprova la preparazione"
+  },
+  "cancelPrepare": {
+    "en": "Cancel preparation",
+    "it": "Annulla la preparazione"
+  },
+  "downloadProgress": {
+    "en": "Download progress",
+    "it": "Avanzamento del download"
+  },
+  "downloadBytes": {
+    "en": "Download: {completed} / {total} MB, {percent}%",
+    "it": "Download: {completed} / {total} MB, {percent}%"
+  },
+  "downloadUnknown": {
+    "en": "Downloaded {completed} MB",
+    "it": "Scaricati {completed} MB"
+  },
+  "elapsed": {
+    "en": "Waiting {seconds} seconds",
+    "it": "In attesa da {seconds} secondi"
+  },
+  "preparationFailed": {
+    "en": "Preparation failed: {message}",
+    "it": "Preparazione non riuscita: {message}"
+  },
+  "download.network": {
+    "en": "Cannot download {resource}: connection to the download service failed.",
+    "it": "Impossibile scaricare {resource}: connessione al servizio di download non riuscita."
+  },
+  "download.dns": {
+    "en": "Cannot download {resource}: the download address could not be resolved.",
+    "it": "Impossibile scaricare {resource}: l'indirizzo di download non è stato risolto."
+  },
+  "download.timeout": {
+    "en": "The download of {resource} timed out.",
+    "it": "Il download di {resource} ha superato il tempo massimo."
+  },
+  "download.certificate": {
+    "en": "Cannot download {resource}: certificate verification failed.",
+    "it": "Impossibile scaricare {resource}: verifica del certificato non riuscita."
+  },
+  "download.http": {
+    "en": "Cannot download {resource}: the download service returned HTTP {status}.",
+    "it": "Impossibile scaricare {resource}: il servizio di download ha risposto HTTP {status}."
+  },
+  "download.integrity": {
+    "en": "The download of {resource} is incomplete or failed verification.",
+    "it": "Il download di {resource} è incompleto o non ha superato la verifica."
+  },
+  "download.storage": {
+    "en": "Cannot save {resource}: insufficient disk space or write permission.",
+    "it": "Impossibile salvare {resource}: spazio su disco o permessi di scrittura insufficienti."
+  },
+  "download.unknown": {
+    "en": "Could not prepare {resource}.",
+    "it": "Impossibile preparare {resource}."
+  },
+  "downloadAdvice.network": {
+    "en": "Check that the machine running DSH can reach the download source and its model download services. Configure a proxy on that machine if needed, then retry.",
+    "it": "Verifica che il computer che esegue DSH raggiunga la fonte di download e i suoi servizi per i modelli. Se serve, configura un proxy su quel computer, poi riprova."
+  },
+  "downloadAdvice.dns": {
+    "en": "Check DNS and proxy settings on the machine running DSH. Confirm that it can resolve the download source domain, then retry.",
+    "it": "Controlla DNS e proxy sul computer che esegue DSH e verifica che risolva il dominio della fonte di download, poi riprova."
+  },
+  "downloadAdvice.timeout": {
+    "en": "Check the network or proxy connection on the machine running DSH, then retry later. Verified downloaded files are retained.",
+    "it": "Controlla la rete o il proxy sul computer che esegue DSH, poi riprova più tardi. I file già scaricati e verificati restano."
+  },
+  "downloadAdvice.certificate": {
+    "en": "Check the system clock, trusted certificates and proxy settings on the machine running DSH, then retry.",
+    "it": "Controlla orologio di sistema, certificati attendibili e proxy sul computer che esegue DSH, poi riprova."
+  },
+  "downloadAdvice.http": {
+    "en": "Confirm that the download address is available and the proxy can reach the download service, or retry later.",
+    "it": "Verifica che l'indirizzo di download sia disponibile e che il proxy raggiunga il servizio, oppure riprova più tardi."
+  },
+  "downloadAdvice.integrity": {
+    "en": "Retry the download. Other completed and verified files are retained.",
+    "it": "Riprova il download. Gli altri file completati e verificati restano."
+  },
+  "downloadAdvice.storage": {
+    "en": "Check available disk space and write permission for the model directory on the machine running DSH, then retry.",
+    "it": "Controlla lo spazio libero e i permessi di scrittura della cartella dei modelli sul computer che esegue DSH, poi riprova."
+  },
+  "downloadAdvice.unknown": {
+    "en": "Check the network, disk space and model directory permissions on the machine running DSH, then retry.",
+    "it": "Controlla rete, spazio su disco e permessi della cartella dei modelli sul computer che esegue DSH, poi riprova."
+  },
+  "downloadSource": {
+    "en": "Download source: {source}",
+    "it": "Fonte di download: {source}"
+  },
+  "sourceChoice": {
+    "en": "Model download source",
+    "it": "Fonte di download dei modelli"
+  },
+  "sourceAuto": {
+    "en": "Automatic (recommended)",
+    "it": "Automatica (consigliata)"
+  },
+  "sourceHuggingFace": {
+    "en": "Hugging Face",
+    "it": "Hugging Face"
+  },
+  "sourceMirror": {
+    "en": "HF-Mirror (China mirror)",
+    "it": "HF-Mirror (mirror cinese)"
+  },
+  "sourceAutoHelp": {
+    "en": "Prefer the first responding source and try another if a download fails.",
+    "it": "Usa la prima fonte che risponde e ne prova un'altra se un download non riesce."
+  },
+  "sourceManualHelp": {
+    "en": "Download only from the selected source. Verified downloaded files are reused.",
+    "it": "Scarica solo dalla fonte scelta. I file già scaricati e verificati vengono riutilizzati."
+  },
+  "downloadCode": {
+    "en": "Error code: {code}",
+    "it": "Codice di errore: {code}"
+  },
+  "reconnecting": {
+    "en": "Connecting to speech recognition…",
+    "it": "Connessione al riconoscimento vocale…"
+  },
+  "preparation.unprepared": {
+    "en": "First use downloads the local recognition models.",
+    "it": "Al primo uso vengono scaricati i modelli di riconoscimento locali."
+  },
+  "preparation.checking": {
+    "en": "Checking local resources…",
+    "it": "Controllo delle risorse locali…"
+  },
+  "preparation.loading": {
+    "en": "Loading {name}…",
+    "it": "Caricamento di {name}…"
+  },
+  "preparation.waking": {
+    "en": "Waking local speech recognition…",
+    "it": "Attivazione del riconoscimento vocale locale…"
+  },
+  "preparation.ready": {
+    "en": "Local speech recognition is ready.",
+    "it": "Il riconoscimento vocale locale è pronto."
+  },
+  "preparation.standby": {
+    "en": "Local resources are prepared. Recording wakes the recognizer.",
+    "it": "Le risorse locali sono pronte. La registrazione attiva il riconoscimento."
+  },
+  "preparation.cancelled": {
+    "en": "Preparation cancelled. Completed downloads are retained.",
+    "it": "Preparazione annullata. I download completati restano."
+  },
+  "preparation.cancelling": {
+    "en": "Cancelling preparation…",
+    "it": "Annullamento della preparazione…"
+  },
+  "cloudReady": {
+    "en": "Cloud speech recognition is ready.",
+    "it": "Il riconoscimento vocale cloud è pronto."
+  },
+  "discard": {
+    "en": "Discard transcript",
+    "it": "Scarta la trascrizione"
+  },
+  "transcribingShort": {
+    "en": "Transcribing…",
+    "it": "Trascrizione…"
+  },
+  "wakingShort": {
+    "en": "Waking…",
+    "it": "Attivazione…"
+  },
+  "provider": {
+    "en": "Recognition service",
+    "it": "Servizio di riconoscimento"
+  },
+  "language": {
+    "en": "Recognition language",
+    "it": "Lingua di riconoscimento"
+  },
+  "inputDevice": {
+    "en": "Input device",
+    "it": "Dispositivo di input"
+  },
+  "systemMicrophone": {
+    "en": "System default",
+    "it": "Predefinito di sistema"
+  },
+  "systemMicrophoneNamed": {
+    "en": "System default ({name})",
+    "it": "Predefinito di sistema ({name})"
+  },
+  "unnamedSelectedMicrophone": {
+    "en": "Microphone",
+    "it": "Microfono"
+  },
+  "unnamedMicrophone": {
+    "en": "Microphone {number}",
+    "it": "Microfono {number}"
+  },
+  "inputLevel": {
+    "en": "Microphone input level",
+    "it": "Livello di ingresso del microfono"
+  },
+  "deviceUnavailable": {
+    "en": "Unavailable",
+    "it": "Non disponibile"
+  },
+  "deviceMissing": {
+    "en": "Microphone unavailable. Choose another input device.",
+    "it": "Microfono non disponibile. Scegli un altro dispositivo di input."
+  },
+  "auto": {
+    "en": "Detect automatically",
+    "it": "Rileva automaticamente"
+  },
+  "zh": {
+    "en": "Chinese",
+    "it": "Cinese"
+  },
+  "en": {
+    "en": "English",
+    "it": "Inglese"
+  },
+  "yue": {
+    "en": "Cantonese",
+    "it": "Cantonese"
+  },
+  "ja": {
+    "en": "Japanese",
+    "it": "Giapponese"
+  },
+  "ko": {
+    "en": "Korean",
+    "it": "Coreano"
+  },
+  "start": {
+    "en": "Start recording",
+    "it": "Avvia la registrazione"
+  },
+  "stop": {
+    "en": "Stop and transcribe",
+    "it": "Ferma e trascrivi"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "insert": {
+    "en": "Insert text",
+    "it": "Inserisci il testo"
+  },
+  "loading": {
+    "en": "Loading recognition services…",
+    "it": "Caricamento dei servizi di riconoscimento…"
+  },
+  "requesting": {
+    "en": "Allow microphone access to continue…",
+    "it": "Consenti l'accesso al microfono per continuare…"
+  },
+  "recording": {
+    "en": "Recording…",
+    "it": "Registrazione…"
+  },
+  "interrupted": {
+    "en": "Recording was interrupted. Please try again.",
+    "it": "La registrazione si è interrotta. Riprova."
+  },
+  "local": {
+    "en": "Audio is recognized on the machine running DSH. If models need downloading, that machine must be able to reach the selected source and its file services. Configure a proxy on that machine if needed.",
+    "it": "L'audio viene riconosciuto sul computer che esegue DSH. Se servono download di modelli, quel computer deve raggiungere la fonte scelta e i suoi servizi di file. Se serve, configura un proxy su quel computer."
+  },
+  "cloud": {
+    "en": "Audio will be sent to the selected cloud service.",
+    "it": "L'audio verrà inviato al servizio cloud scelto."
+  },
+  "empty": {
+    "en": "No speech recognized",
+    "it": "Nessun parlato riconosciuto"
+  },
+  "cancelled": {
+    "en": "Voice input cancelled.",
+    "it": "Input vocale annullato."
+  },
+  "conflict": {
+    "en": "Your draft changed. The transcript is preserved and can be inserted at the current cursor.",
+    "it": "La bozza è cambiata. La trascrizione è conservata e si può inserire nella posizione attuale del cursore."
+  },
+  "failed": {
+    "en": "Speech recognition failed: {message}",
+    "it": "Riconoscimento vocale non riuscito: {message}"
+  },
+  "unavailable": {
+    "en": "This browser cannot record audio. Use a browser with microphone support.",
+    "it": "Questo browser non può registrare audio. Usa un browser con supporto per il microfono."
+  },
+  "permission": {
+    "en": "Microphone access is disabled. Allow it in browser and system settings.",
+    "it": "L'accesso al microfono è disattivato. Consentilo nelle impostazioni del browser e del sistema."
+  },
+  "tooLarge": {
+    "en": "The recording exceeds the service limit. Try a shorter recording.",
+    "it": "La registrazione supera il limite del servizio. Prova con una registrazione più breve."
+  }
+}

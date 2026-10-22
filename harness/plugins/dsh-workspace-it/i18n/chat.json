@@ -1,0 +1,766 @@
+{
+  "message.stepProcess.thinking": {
+    "en": "Analyzing the request",
+    "it": "Analisi della richiesta"
+  },
+  "message.stepProcess.read": {
+    "en": "Reading files",
+    "it": "Lettura dei file"
+  },
+  "message.stepProcess.readImage": {
+    "en": "Reading images",
+    "it": "Lettura delle immagini"
+  },
+  "message.stepProcess.write": {
+    "en": "Writing files",
+    "it": "Scrittura dei file"
+  },
+  "message.stepProcess.search": {
+    "en": "Searching code",
+    "it": "Ricerca nel codice"
+  },
+  "message.stepProcess.edit": {
+    "en": "Editing files",
+    "it": "Modifica dei file"
+  },
+  "message.stepProcess.commands": {
+    "en": "Running commands",
+    "it": "Esecuzione di comandi"
+  },
+  "message.stepProcess.code": {
+    "en": "Running code",
+    "it": "Esecuzione di codice"
+  },
+  "message.stepProcess.webSearch": {
+    "en": "Searching the web",
+    "it": "Ricerca sul web"
+  },
+  "message.stepProcess.webFetch": {
+    "en": "Visiting web pages",
+    "it": "Visita di pagine web"
+  },
+  "message.stepProcess.subagents": {
+    "en": "Coordinating subagents",
+    "it": "Coordinamento dei subagenti"
+  },
+  "message.stepProcess.plan": {
+    "en": "Updating the plan",
+    "it": "Aggiornamento del piano"
+  },
+  "message.stepProcess.questions": {
+    "en": "Waiting for your action",
+    "it": "In attesa di una tua azione"
+  },
+  "message.stepProcess.tools": {
+    "en": "Calling tools",
+    "it": "Chiamata a strumenti"
+  },
+  "message.stepProcess.prepare.read": {
+    "en": "Preparing to read files",
+    "it": "Preparazione alla lettura dei file"
+  },
+  "message.stepProcess.prepare.readImage": {
+    "en": "Preparing to read images",
+    "it": "Preparazione alla lettura delle immagini"
+  },
+  "message.stepProcess.prepare.write": {
+    "en": "Preparing to write files",
+    "it": "Preparazione alla scrittura dei file"
+  },
+  "message.stepProcess.prepare.search": {
+    "en": "Preparing to search code",
+    "it": "Preparazione alla ricerca nel codice"
+  },
+  "message.stepProcess.prepare.edit": {
+    "en": "Preparing to edit files",
+    "it": "Preparazione alla modifica dei file"
+  },
+  "message.stepProcess.prepare.commands": {
+    "en": "Preparing to run commands",
+    "it": "Preparazione all'esecuzione di comandi"
+  },
+  "message.stepProcess.prepare.code": {
+    "en": "Preparing to run code",
+    "it": "Preparazione all'esecuzione di codice"
+  },
+  "message.stepProcess.prepare.webSearch": {
+    "en": "Preparing to search the web",
+    "it": "Preparazione alla ricerca sul web"
+  },
+  "message.stepProcess.prepare.webFetch": {
+    "en": "Preparing to visit web pages",
+    "it": "Preparazione alla visita di pagine web"
+  },
+  "message.stepProcess.prepare.subagents": {
+    "en": "Preparing to coordinate subagents",
+    "it": "Preparazione al coordinamento dei subagenti"
+  },
+  "message.stepProcess.prepare.plan": {
+    "en": "Preparing to update the plan",
+    "it": "Preparazione all'aggiornamento del piano"
+  },
+  "message.stepProcess.prepare.questions": {
+    "en": "Preparing questions",
+    "it": "Preparazione delle domande"
+  },
+  "message.stepProcess.prepare.tools": {
+    "en": "Preparing tool calls",
+    "it": "Preparazione delle chiamate a strumenti"
+  },
+  "message.stepProcess.done.thinking": {
+    "en": "Analysis completed",
+    "it": "Analisi completata"
+  },
+  "message.stepProcess.done.read": {
+    "en": "Read files",
+    "it": "File letti"
+  },
+  "message.stepProcess.done.readImage": {
+    "en": "Read images",
+    "it": "Immagini lette"
+  },
+  "message.stepProcess.done.write": {
+    "en": "Wrote files",
+    "it": "File scritti"
+  },
+  "message.stepProcess.done.search": {
+    "en": "Searched code",
+    "it": "Codice cercato"
+  },
+  "message.stepProcess.done.edit": {
+    "en": "Edited files",
+    "it": "File modificati"
+  },
+  "message.stepProcess.done.commands": {
+    "en": "Ran commands",
+    "it": "Comandi eseguiti"
+  },
+  "message.stepProcess.done.code": {
+    "en": "Ran code",
+    "it": "Codice eseguito"
+  },
+  "message.stepProcess.done.webSearch": {
+    "en": "Searched the web",
+    "it": "Ricerca web fatta"
+  },
+  "message.stepProcess.done.webFetch": {
+    "en": "Visited web pages",
+    "it": "Pagine web visitate"
+  },
+  "message.stepProcess.done.subagents": {
+    "en": "Coordinated subagents",
+    "it": "Subagenti coordinati"
+  },
+  "message.stepProcess.done.plan": {
+    "en": "Updated the plan",
+    "it": "Piano aggiornato"
+  },
+  "message.stepProcess.done.questions": {
+    "en": "Asked questions",
+    "it": "Domande poste"
+  },
+  "message.stepProcess.done.tools": {
+    "en": "Called tools",
+    "it": "Strumenti chiamati"
+  },
+  "message.stepProcess.joinTwo": {
+    "en": "{first} and {second}",
+    "it": "{first} e {second}"
+  },
+  "message.stepProcess.comma": {
+    "en": ", ",
+    "it": ", "
+  },
+  "message.stepProcess.sharedPrefix": {
+    "en": "",
+    "it": " "
+  },
+  "message.stepProcess.more": {
+    "en": "{title}, etc.",
+    "it": "{title}, ecc."
+  },
+  "message.trigger.request": {
+    "en": "Execution requested",
+    "it": "Esecuzione richiesta"
+  },
+  "message.trigger.goal": {
+    "en": "Continuing goal",
+    "it": "Obiettivo in prosecuzione"
+  },
+  "message.trigger.agent": {
+    "en": "Task message received",
+    "it": "Messaggio di attività ricevuto"
+  },
+  "message.trigger.team": {
+    "en": "Team message received",
+    "it": "Messaggio del team ricevuto"
+  },
+  "message.trigger.subagent": {
+    "en": "Subtask status updated",
+    "it": "Stato della sotto-attività aggiornato"
+  },
+  "message.trigger.github": {
+    "en": "GitHub event received",
+    "it": "Evento GitHub ricevuto"
+  },
+  "message.trigger.webhook": {
+    "en": "External event received",
+    "it": "Evento esterno ricevuto"
+  },
+  "message.trigger.schedule": {
+    "en": "Automation task",
+    "it": "Attività automatica"
+  },
+  "message.trigger.job": {
+    "en": "Background task updated",
+    "it": "Attività in background aggiornata"
+  },
+  "message.trigger.plugin": {
+    "en": "Plugin status updated",
+    "it": "Stato del plugin aggiornato"
+  },
+  "message.trigger.explanation": {
+    "en": "This notification triggered this response.",
+    "it": "Questa risposta è stata avviata da questa notifica."
+  },
+  "message.turnProcess.worked": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "message.turnProcess.took": {
+    "en": "Completed in ",
+    "it": "Completato in "
+  },
+  "message.turnProcess.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "view.chat": {
+    "en": "Chat",
+    "it": "Chat"
+  },
+  "image.open": {
+    "en": "View full image",
+    "it": "Vedi l'immagine intera"
+  },
+  "image.loading": {
+    "en": "Loading image…",
+    "it": "Caricamento dell'immagine…"
+  },
+  "image.failed": {
+    "en": "Image preview unavailable",
+    "it": "Anteprima dell'immagine non disponibile"
+  },
+  "image.dialog": {
+    "en": "Image preview",
+    "it": "Anteprima dell'immagine"
+  },
+  "image.close": {
+    "en": "Close image preview",
+    "it": "Chiudi l'anteprima dell'immagine"
+  },
+  "number.groupSeparator": {
+    "en": ",",
+    "it": "."
+  },
+  "duration.compactSeconds": {
+    "en": "{seconds}s",
+    "it": "{seconds} s"
+  },
+  "duration.compactMinutes": {
+    "en": "{minutes}m{seconds}s",
+    "it": "{minutes} min {seconds} s"
+  },
+  "duration.milliseconds": {
+    "en": "{milliseconds}ms",
+    "it": "{milliseconds} ms"
+  },
+  "stats.counts": {
+    "en": "{turns} turns {steps} steps",
+    "it": "{turns} turni {steps} passi"
+  },
+  "stats.cacheHit": {
+    "en": "Cache hit {percent}%",
+    "it": "Cache hit {percent}%"
+  },
+  "stats.dialog.title": {
+    "en": "Session statistics",
+    "it": "Statistiche della sessione"
+  },
+  "stats.dialog.usageTitle": {
+    "en": "Token usage",
+    "it": "Consumo di token"
+  },
+  "stats.dialog.llmTime": {
+    "en": "LLM time",
+    "it": "Tempo LLM"
+  },
+  "stats.dialog.toolTime": {
+    "en": "Tool time",
+    "it": "Tempo strumenti"
+  },
+  "stats.dialog.ttft": {
+    "en": "Avg time to first token (TTFT)",
+    "it": "Tempo medio al primo token (TTFT)"
+  },
+  "stats.dialog.speed": {
+    "en": "Tokens per second (TPS)",
+    "it": "Token al secondo (TPS)"
+  },
+  "chat.loadingHistory": {
+    "en": "Loading history…",
+    "it": "Caricamento della cronologia…"
+  },
+  "chat.loadError": {
+    "en": "Failed to load history: {message} ({code})",
+    "it": "Caricamento della cronologia non riuscito: {message} ({code})"
+  },
+  "chat.loadOlder": {
+    "en": "Load earlier",
+    "it": "Carica precedenti"
+  },
+  "chat.toBottom": {
+    "en": "Back to bottom",
+    "it": "Torna in fondo"
+  },
+  "chat.deepDiving": {
+    "en": "Deep diving",
+    "it": "Analisi approfondita"
+  },
+  "chat.deepDivingFor": {
+    "en": "Deep diving for {duration} ···",
+    "it": "Analisi approfondita da {duration} ···"
+  },
+  "chat.turnNavigation.label": {
+    "en": "Turn navigation",
+    "it": "Navigazione tra i turni"
+  },
+  "chat.turnNavigation.jump": {
+    "en": "Jump to turn {turn}",
+    "it": "Vai al turno {turn}"
+  },
+  "chat.turnNavigation.jumpLoad": {
+    "en": "Load and jump to turn {turn}",
+    "it": "Carica e vai al turno {turn}"
+  },
+  "chat.turnNavigation.turn": {
+    "en": "Turn {turn}",
+    "it": "Turno {turn}"
+  },
+  "settings.performance.title": {
+    "en": "Performance & usage",
+    "it": "Prestazioni e consumi"
+  },
+  "settings.performance.description": {
+    "en": "Choose how much performance and usage information to show",
+    "it": "Scegli quante informazioni su prestazioni e consumi mostrare"
+  },
+  "settings.performance.compact": {
+    "en": "Compact",
+    "it": "Compatto"
+  },
+  "settings.performance.detailed": {
+    "en": "Detailed",
+    "it": "Dettagliato"
+  },
+  "settings.links.title": {
+    "en": "Open chat links in",
+    "it": "Apri i link della chat in"
+  },
+  "settings.links.description": {
+    "en": "Choose where to open web links",
+    "it": "Scegli dove aprire i link web"
+  },
+  "settings.links.sidebar": {
+    "en": "In-App Sidebar",
+    "it": "Barra laterale dell'app"
+  },
+  "settings.links.newTab": {
+    "en": "Default Browser",
+    "it": "Browser predefinito"
+  },
+  "settings.transcript.title": {
+    "en": "Work details",
+    "it": "Dettagli del lavoro"
+  },
+  "settings.transcript.description": {
+    "en": "Choose how much detail to show for tool calls",
+    "it": "Scegli quanti dettagli mostrare per le chiamate agli strumenti"
+  },
+  "settings.collapse.title": {
+    "en": "When to Collapse Work Details",
+    "it": "Quando comprimere i dettagli del lavoro"
+  },
+  "settings.collapse.description": {
+    "en": "Choose when to automatically collapse work details",
+    "it": "Scegli quando comprimere automaticamente i dettagli del lavoro"
+  },
+  "settings.collapse.completion": {
+    "en": "On completion",
+    "it": "Al completamento"
+  },
+  "settings.collapse.nextInput": {
+    "en": "On next message",
+    "it": "Al messaggio successivo"
+  },
+  "settings.transcript.compact": {
+    "en": "Compact",
+    "it": "Compatto"
+  },
+  "settings.transcript.standard": {
+    "en": "Standard",
+    "it": "Standard"
+  },
+  "settings.transcript.detailed": {
+    "en": "Detailed",
+    "it": "Dettagliato"
+  },
+  "settings.transcript.verbose": {
+    "en": "Verbose",
+    "it": "Completo"
+  },
+  "fileOpen.title": {
+    "en": "Couldn’t open file",
+    "it": "Impossibile aprire il file"
+  },
+  "fileOpen.unknown": {
+    "en": "Couldn’t open this file",
+    "it": "Impossibile aprire questo file"
+  },
+  "message.extraBlock": {
+    "en": "Extra content block",
+    "it": "Blocco di contenuto aggiuntivo"
+  },
+  "message.systemPrompt": {
+    "en": "System prompt",
+    "it": "Prompt di sistema"
+  },
+  "message.systemPromptUpdate": {
+    "en": "System prompt update",
+    "it": "Aggiornamento del prompt di sistema"
+  },
+  "message.toolAdded": {
+    "en": "Tool added: {name}",
+    "it": "Strumento aggiunto: {name}"
+  },
+  "message.toolRemoved": {
+    "en": "Tool removed: {name}",
+    "it": "Strumento rimosso: {name}"
+  },
+  "message.toolsAdded": {
+    "en": "Added: {names}",
+    "it": "Aggiunti: {names}"
+  },
+  "message.toolsAddedCount": {
+    "en": "{count} added",
+    "it": "{count} aggiunti"
+  },
+  "message.toolsChanged": {
+    "en": "{added} added, {removed} removed",
+    "it": "{added} aggiunti, {removed} rimossi"
+  },
+  "message.toolsRemoved": {
+    "en": "Removed: {names}",
+    "it": "Rimossi: {names}"
+  },
+  "message.toolsRemovedCount": {
+    "en": "{count} removed",
+    "it": "{count} rimossi"
+  },
+  "message.toolsUpdated": {
+    "en": "Tools updated",
+    "it": "Strumenti aggiornati"
+  },
+  "message.contextInjection": {
+    "en": "Context injection",
+    "it": "Inserimento di contesto"
+  },
+  "message.contextRecall": {
+    "en": "Session recall",
+    "it": "Richiamo della sessione"
+  },
+  "message.referenceSummary": {
+    "en": "Referenced session · {labels}",
+    "it": "Sessione citata · {labels}"
+  },
+  "message.referenceSeparator": {
+    "en": ", ",
+    "it": ", "
+  },
+  "message.context.instructions.loaded": {
+    "en": "loaded",
+    "it": "caricate"
+  },
+  "message.context.instructions.added": {
+    "en": "added",
+    "it": "aggiunte"
+  },
+  "message.context.instructions.updated": {
+    "en": "updated",
+    "it": "aggiornate"
+  },
+  "message.context.instructions.removed": {
+    "en": "removed",
+    "it": "rimosse"
+  },
+  "message.context.catalog.replaced": {
+    "en": "Replacement catalog",
+    "it": "Catalogo sostitutivo"
+  },
+  "message.context.catalog.more": {
+    "en": "… {count} more",
+    "it": "… altri {count}"
+  },
+  "message.context.snapshot.supersedes": {
+    "en": "Supersedes earlier snapshots",
+    "it": "Sostituisce le istantanee precedenti"
+  },
+  "message.context.relay.from": {
+    "en": "From session {session}",
+    "it": "Dalla sessione {session}"
+  },
+  "message.context.recall.counts": {
+    "en": "{retained} kept · {omitted} omitted",
+    "it": "{retained} mantenuti · {omitted} omessi"
+  },
+  "message.context.recall.truncated": {
+    "en": "truncated",
+    "it": "troncato"
+  },
+  "message.compaction": {
+    "en": "Context compacted",
+    "it": "Contesto compattato"
+  },
+  "message.compaction.running": {
+    "en": "Compacting context…",
+    "it": "Compattazione del contesto…"
+  },
+  "message.compaction.completed": {
+    "en": "Compacted {items} history items (~{tokens} tokens)",
+    "it": "Compattati {items} elementi della cronologia (~{tokens} token)"
+  },
+  "message.compaction.expand": {
+    "en": "View compaction summary",
+    "it": "Vedi il riepilogo della compattazione"
+  },
+  "message.compaction.unavailable": {
+    "en": "Compaction summary unavailable",
+    "it": "Riepilogo della compattazione non disponibile"
+  },
+  "message.compaction.commandTitle": {
+    "en": "compact",
+    "it": "compact"
+  },
+  "message.think": {
+    "en": "Think",
+    "it": "Ragionamento"
+  },
+  "message.unknownSurface": {
+    "en": "Unknown surface event: {type}",
+    "it": "Evento di superficie sconosciuto: {type}"
+  },
+  "message.unknownBlock": {
+    "en": "Unknown content block",
+    "it": "Blocco di contenuto sconosciuto"
+  },
+  "message.turnProcess.toolCalls.one": {
+    "en": "{count} tool call",
+    "it": "{count} chiamata a strumento"
+  },
+  "message.turnProcess.toolCalls.other": {
+    "en": "{count} tool calls",
+    "it": "{count} chiamate a strumenti"
+  },
+  "message.turnProcess.messages.one": {
+    "en": "{count} message",
+    "it": "{count} messaggio"
+  },
+  "message.turnProcess.messages.other": {
+    "en": "{count} messages",
+    "it": "{count} messaggi"
+  },
+  "message.turnProcess.subagents.one": {
+    "en": "{count} subagent",
+    "it": "{count} subagente"
+  },
+  "message.turnProcess.subagents.other": {
+    "en": "{count} subagents",
+    "it": "{count} subagenti"
+  },
+  "message.turnProcess.thoughtForAWhile": {
+    "en": "Thought for a while",
+    "it": "Ha ragionato per un po'"
+  },
+  "message.turnProcess.separator": {
+    "en": " · ",
+    "it": " · "
+  },
+  "message.stopped": {
+    "en": "Stopped",
+    "it": "Interrotto"
+  },
+  "message.branch": {
+    "en": "Branch into a new conversation",
+    "it": "Dirama in una nuova conversazione"
+  },
+  "message.branchUnavailable": {
+    "en": "Available only on the last message of a completed turn",
+    "it": "Disponibile solo sull'ultimo messaggio di un turno completato"
+  },
+  "message.retry.active": {
+    "en": "Retrying model request",
+    "it": "Nuovo tentativo della richiesta al modello"
+  },
+  "message.retry.cancelled": {
+    "en": "Model request retry cancelled",
+    "it": "Nuovo tentativo della richiesta al modello annullato"
+  },
+  "message.retry.started": {
+    "en": "Retried model request",
+    "it": "Richiesta al modello ritentata"
+  },
+  "message.retry.scheduled": {
+    "en": "Waiting to retry model request",
+    "it": "In attesa di ritentare la richiesta al modello"
+  },
+  "message.retry.status": {
+    "en": "{label} ({retry}/{maximum}) · {seconds}s",
+    "it": "{label} ({retry}/{maximum}) · {seconds} s"
+  },
+  "message.retry.delay": {
+    "en": "Retry delay: ",
+    "it": "Attesa prima del nuovo tentativo: "
+  },
+  "message.retry.failure": {
+    "en": "Failure reason: ",
+    "it": "Motivo dell'errore: "
+  },
+  "message.failure.auth": {
+    "en": "API key is invalid",
+    "it": "La chiave API non è valida"
+  },
+  "message.taskStopped": {
+    "en": "Task stopped",
+    "it": "Attività interrotta"
+  },
+  "message.failure.accountSignedOut": {
+    "en": "Stopped because you signed out of DeepSeek.",
+    "it": "Interrotta perché sei uscito dall'account DeepSeek."
+  },
+  "message.failure.interrupted": {
+    "en": "The DSH process exited before this turn finished (for example, it was killed, crashed, or timed out while shutting down), so the turn was closed when DSH restarted. Unfinished tool calls have unknown outcomes.",
+    "it": "Il processo DSH è terminato prima della fine di questo turno (ad esempio è stato chiuso, si è bloccato o ha superato il tempo di arresto), quindi il turno è stato chiuso al riavvio di DSH. L'esito delle chiamate a strumenti non concluse è sconosciuto."
+  },
+  "message.failure.accountSignInRequired": {
+    "en": "Sign in to DeepSeek and ensure the request destination supports account authentication.",
+    "it": "Accedi a DeepSeek e verifica che la destinazione della richiesta supporti l'autenticazione con account."
+  },
+  "message.failure.quota": {
+    "en": "Request quota exhausted.",
+    "it": "Quota di richieste esaurita."
+  },
+  "message.turnError": {
+    "en": "This turn failed",
+    "it": "Questo turno non è riuscito"
+  },
+  "message.maxTokens": {
+    "en": "Output token limit reached",
+    "it": "Raggiunto il limite di token in output"
+  },
+  "message.maxTokens.hint": {
+    "en": "The reply was cut off; earlier output is preserved in the conversation. Send \"continue\" to let the model resume.",
+    "it": "La risposta è stata troncata; l'output precedente resta nella conversazione. Scrivi \"continua\" per far riprendere il modello."
+  },
+  "message.tokensPerSecond": {
+    "en": "{tps} tok/s",
+    "it": "{tps} token/s"
+  },
+  "message.turnUsage.title": {
+    "en": "Turn usage",
+    "it": "Consumo del turno"
+  },
+  "message.turnUsage.consumed": {
+    "en": "Usage {total}",
+    "it": "Consumo {total}"
+  },
+  "message.turnUsage.model": {
+    "en": "Provider / model",
+    "it": "Provider / modello"
+  },
+  "message.turnUsage.cacheHit": {
+    "en": "Cache hit",
+    "it": "Cache hit"
+  },
+  "message.turnUsage.input": {
+    "en": "Uncached input",
+    "it": "Input non in cache"
+  },
+  "message.turnUsage.cacheRead": {
+    "en": "Cached input",
+    "it": "Input in cache"
+  },
+  "message.turnUsage.cacheWrite": {
+    "en": "Cache write",
+    "it": "Scrittura in cache"
+  },
+  "message.turnUsage.output": {
+    "en": "Output",
+    "it": "Output"
+  },
+  "message.turnUsage.reasoning": {
+    "en": " ({tokens} reasoning)",
+    "it": " ({tokens} di ragionamento)"
+  },
+  "message.turnUsage.count": {
+    "en": "{count} tok",
+    "it": "{count} token"
+  },
+  "duration.secondUnit": {
+    "en": "s",
+    "it": " s"
+  },
+  "duration.minuteUnit": {
+    "en": "m ",
+    "it": " min "
+  },
+  "duration.hourUnit": {
+    "en": "h ",
+    "it": " h "
+  },
+  "command.running": {
+    "en": "Running…",
+    "it": "In esecuzione…"
+  },
+  "command.failed": {
+    "en": "Command failed",
+    "it": "Comando non riuscito"
+  },
+  "command.done": {
+    "en": "Completed",
+    "it": "Completato"
+  },
+  "command.title": {
+    "en": "Command",
+    "it": "Comando"
+  },
+  "row.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "row.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "json.truncated": {
+    "en": "… truncated, {total} characters total",
+    "it": "… troncato, {total} caratteri in tutto"
+  },
+  "clock.md": {
+    "en": "{m}/{d}",
+    "it": "{d}/{m}"
+  },
+  "clock.ymd": {
+    "en": "{y}-{m}-{d}",
+    "it": "{d}/{m}/{y}"
+  }
+}

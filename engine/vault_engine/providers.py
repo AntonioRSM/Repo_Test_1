@@ -5,8 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import re
+import sys
 import uuid
-from typing import Literal
+from typing import Any, Literal
 
 import httpx
 from pydantic import BaseModel
@@ -102,6 +105,31 @@ async def _lmstudio_status(client: httpx.AsyncClient, base: str) -> ProviderStat
         return ProviderStatus(provider="lmstudio", base_url=base, online=True, models=models)
 
 
+def _ollama_server_ctx() -> int | None:
+    """Miglioramento #23: OLLAMA_CONTEXT_LENGTH letta dall'ambiente del processo e, su
+    Windows, anche dalle variabili utente/macchina nel registro (come fa la Harness,
+    Bug #27): il server la legge solo al proprio avvio, quindi il processo motore può
+    non averla. None se non impostata."""
+    value: str | None = os.environ.get("OLLAMA_CONTEXT_LENGTH")
+    if value is None and sys.platform == "win32":
+        import winreg
+
+        for root, sub in (
+            (winreg.HKEY_CURRENT_USER, r"Environment"),
+            (winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+        ):
+            try:
+                with winreg.OpenKey(root, sub) as handle:
+                    raw, _ = winreg.QueryValueEx(handle, "OLLAMA_CONTEXT_LENGTH")
+                value = str(raw)
+                break
+            except OSError:
+                continue
+    if value and value.strip().isdigit():
+        return int(value.strip())
+    return None
+
+
 async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus:
     resp = await client.get(f"{base}/api/tags")
     resp.raise_for_status()
@@ -110,15 +138,17 @@ async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus
         version = (await client.get(f"{base}/api/version")).json().get("version")
     except (httpx.HTTPError, ValueError):
         pass
-    loaded = set()
+    loaded: dict[str, int | None] = {}
     try:
-        loaded = {m["name"] for m in (await client.get(f"{base}/api/ps")).json().get("models", [])}
+        loaded = {m["name"]: m.get("context_length") for m in (await client.get(f"{base}/api/ps")).json().get("models", [])}
     except (httpx.HTTPError, ValueError, KeyError):
         pass
+    server_ctx = _ollama_server_ctx()
 
     async def describe(m: dict) -> ModelInfo:
         name = m["name"]
         kinds = _guess_kinds(name)
+        num_ctx = None
         try:
             show = (await client.post(f"{base}/api/show", json={"model": name})).json()
             caps = show.get("capabilities") or []
@@ -130,9 +160,16 @@ async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus
                     kinds.append("llm")
                 if "vision" in caps:
                     kinds.append("vision")
+            # Miglioramento #23: contesto effettivo con cui il modello verrebbe caricato:
+            match = re.search(r"num_ctx\s+(\d+)", show.get("parameters") or "")
+            if match:
+                num_ctx = int(match.group(1))
         except (httpx.HTTPError, ValueError):
             pass
-        return ModelInfo(id=name, kinds=kinds or ["llm"], loaded=name in loaded, size_bytes=m.get("size"))
+        # Precedenza come la Harness (Bug #27): contesto reale se già caricato, poi
+        # num_ctx del Modelfile, poi il predefinito del server, infine 4.096.
+        ctx = loaded.get(name) or num_ctx or server_ctx or 4096
+        return ModelInfo(id=name, kinds=kinds or ["llm"], loaded=name in loaded, size_bytes=m.get("size"), context_length=ctx)
 
     models = await asyncio.gather(*(describe(m) for m in resp.json().get("models", [])))
     return ProviderStatus(provider="ollama", base_url=base, online=True, version=version, models=list(models))
@@ -184,24 +221,70 @@ class ProviderClient:
         temperature: float = 0.1,
         max_tokens: int = 1024,
         reasoning: bool = False,
+        num_ctx: int | None = None,
     ) -> str:
+        # Bug #32: l'API OpenAI-compatibile /v1/chat/completions NON permette di passare
+        # num_ctx, quindi un riassunto lungo sfora il contesto predefinito di Ollama
+        # (4.096). Con num_ctx richiesto e provider Ollama si usa l'API nativa /api/chat,
+        # che accetta options.num_ctx (come ensure_loaded fa per keep_alive).
+        if ref.provider == "ollama" and num_ctx:
+            payload: dict = {
+                "model": ref.model,
+                "messages": messages,
+                "stream": False,
+                "options": {"num_ctx": num_ctx, "temperature": temperature, "num_predict": max_tokens},
+            }
+            if not reasoning:
+                payload["think"] = False
+            async with httpx.AsyncClient(timeout=CHAT_TIMEOUT) as client:
+                body = await post_json(client, f"{self._base(ref)}/api/chat", payload, f"chat {ref.model}")
+            content = strip_reasoning((body.get("message") or {}).get("content") or "")
+            if not content and body.get("done_reason") == "length":
+                raise ProviderError(
+                    f"{ref.model} used its whole token budget before answering (reasoning model?); "
+                    "raise max_tokens or choose a non-reasoning model"
+                )
+            return content
         payload = chat_payload(ref, messages, temperature, max_tokens, reasoning)
         async with httpx.AsyncClient(timeout=CHAT_TIMEOUT) as client:
             body = await post_json(client, f"{self._base(ref)}/v1/chat/completions", payload, f"chat {ref.model}")
         return chat_content(ref, body)
 
 
-async def ensure_loaded(endpoints: dict[str, str], refs: list[tuple[ModelRef, ModelKind]]) -> None:
+async def ensure_loaded(
+    endpoints: dict[str, str],
+    refs: list[tuple[ModelRef, ModelKind]],
+    *,
+    events: Any = None,
+    auto_pull: bool = True,
+    keep_alive_minutes: int = 30,
+    allow_download: bool = True,
+) -> None:
     """Loads the given models explicitly so they stay resident together.
 
     LM Studio's just-in-time loading keeps a single model: alternating the chat model and
     the embedding model (every agent step, every ingestion wave) would reload one of them
     each time. Explicitly loaded models are not evicted. Ollama gets a long keep_alive.
-    Best effort: older servers without these APIs fall back to on-demand loading."""
+    For Ollama, a missing model is downloaded automatically (auto_pull) with progress
+    events, so vault jobs and the agent can ask for any model by name.
+
+    With allow_download=False (interactive requests such as search/ask) a missing model
+    starts a background download and raises ProviderError instead of blocking the HTTP
+    request for the whole download.
+
+    Best effort: a server that does not answer is logged and skipped, so on-demand
+    loading (or a clean 502 from the actual embed/chat call) takes over."""
     targets = dict(DEFAULT_ENDPOINTS) | endpoints
     unique = {(r.provider, r.model): (r, kind) for r, kind in refs}
+
+    async def report(model: str, **data: Any) -> None:
+        if events is not None:
+            events.publish({"type": "ollama", "kind": "pull", "model": model, **data})
+
     async with httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=3.0)) as client:
         lms_loaded: set[str] | None = None
+        ollama_online: bool | None = None
+        ollama_installed: set[str] = set()
         for (provider, model), (ref, kind) in unique.items():
             base = targets[provider].rstrip("/")
             try:
@@ -214,8 +297,55 @@ async def ensure_loaded(endpoints: dict[str, str], refs: list[tuple[ModelRef, Mo
                         resp.raise_for_status()
                         lms_loaded.add(model)
                 else:
+                    from . import ollama_hub
+
+                    # Miglioramento #10: ONE /api/tags fetch per ensure_loaded call,
+                    # reused for the online check and the installed-model lookup —
+                    # status()+is_installed() used to cost 4 HTTP requests per model.
+                    if ollama_online is None:
+                        fetched = await ollama_hub.installed_names(targets)
+                        ollama_online = fetched is not None
+                        ollama_installed = fetched or set()
+                    # Bug #1: with the server offline, installed_names() is None:
+                    # skip the pull (it would raise HubError) and the explicit load;
+                    # the embed/chat call below then fails with a clean ProviderError.
+                    if not ollama_online:
+                        log.warning("Ollama non raggiungibile: salto il preload di %s", model)
+                        continue
+                    if auto_pull and ollama_hub.normalize_name(model) not in ollama_installed:
+                        if allow_download:
+                            await report(model, status="download_avviato", completed=None, total=None)
+                            try:
+                                await ollama_hub.pull_dedup(
+                                    targets,
+                                    model,
+                                    on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                                )
+                                ollama_installed.add(ollama_hub.normalize_name(model))
+                                await report(model, status="download_completato", completed=None, total=None)
+                            except ollama_hub.HubError as exc:
+                                # Bug #2: without this event the Models page spins forever.
+                                log.warning("download di %s fallito: %s", model, exc)
+                                await report(model, status="errore", error=str(exc))
+                                continue  # the explicit load below would fail with "model not found"
+                        else:
+                            # Bug #9: a download started from search/ask must publish its
+                            # outcome too, or the Models page stays stuck on the last %.
+                            ollama_hub.start_pull(
+                                targets,
+                                model,
+                                on_progress=lambda p, m=model: report(m, status=p.get("status") or "download", completed=p.get("completed"), total=p.get("total")),
+                                on_finished=lambda m=model: report(m, status="download_completato", completed=None, total=None),
+                                on_error=lambda exc, m=model: report(m, status="errore", error=str(exc)),
+                            )
+                            raise ProviderError(
+                                f"modello '{model}' in download in background: attendi il completamento (pagina Modelli) e riprova"
+                            )
                     route, body = ("/api/embed", {"input": ""}) if kind == "embedding" else ("/api/generate", {})
-                    await client.post(f"{base}{route}", json={"model": model, "keep_alive": "30m"} | body)
+                    await client.post(
+                        f"{base}{route}",
+                        json={"model": model, "keep_alive": f"{keep_alive_minutes}m"} | body,
+                    )
             except (httpx.HTTPError, KeyError, ValueError) as exc:
                 log.info("could not preload %s/%s: %s", provider, model, exc)
 

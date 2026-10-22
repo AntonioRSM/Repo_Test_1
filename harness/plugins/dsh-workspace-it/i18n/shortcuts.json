@@ -1,0 +1,226 @@
+{
+  "edit-label": {
+    "en": "Edit shortcut for {command}",
+    "it": "Modifica la scorciatoia di {command}"
+  },
+  "record": {
+    "en": "Press a shortcut",
+    "it": "Premi una scorciatoia"
+  },
+  "record-help": {
+    "en": "Release the keys to save. Tab moves between actions; Esc cancels.",
+    "it": "Rilascia i tasti per salvare. Tab passa da un'azione all'altra; Esc annulla."
+  },
+  "web-help": {
+    "en": "Browser combinations: Mod+/, Mod+Shift+,, Mod+Shift+.. Mod is Command on Mac and Ctrl elsewhere.",
+    "it": "Combinazioni nel browser: Mod+/, Mod+Maiusc+,, Mod+Maiusc+.. Mod è Command su Mac e Ctrl altrove."
+  },
+  "unsupported-key": {
+    "en": "This key is not supported.",
+    "it": "Questo tasto non è supportato."
+  },
+  "reserved": {
+    "en": "This combination is reserved for system or text editing actions.",
+    "it": "Questa combinazione è riservata ad azioni di sistema o di modifica del testo."
+  },
+  "modifier-required": {
+    "en": "Include Command, Ctrl, or Alt in the combination.",
+    "it": "Includi Command, Ctrl o Alt nella combinazione."
+  },
+  "too-many-keys": {
+    "en": "Hold at most two non-modifier keys. Release the keys to try again.",
+    "it": "Tieni premuti al massimo due tasti non modificatori. Rilascia i tasti per riprovare."
+  },
+  "macos-web-help": {
+    "en": "Use Command+/, Command+,, Command+Backslash, Control+Backquote, Command+Option+key, or Command+Shift+key. Combinations with three or four distinct modifiers are also supported. Browser or system shortcuts may not reach the page.",
+    "it": "Usa Command+/, Command+,, Command+Backslash, Control+Backquote, Command+Option+tasto o Command+Maiusc+tasto. Sono supportate anche combinazioni con tre o quattro modificatori diversi. Le scorciatoie del browser o del sistema potrebbero non arrivare alla pagina."
+  },
+  "windows-web-help": {
+    "en": "Use Ctrl+/, Ctrl+,, Ctrl+Alt+key, or Ctrl+Shift+key. Combinations with three or four distinct modifiers are also supported. Browser or system shortcuts may not reach the page.",
+    "it": "Usa Ctrl+/, Ctrl+,, Ctrl+Alt+tasto o Ctrl+Maiusc+tasto. Sono supportate anche combinazioni con tre o quattro modificatori diversi. Le scorciatoie del browser o del sistema potrebbero non arrivare alla pagina."
+  },
+  "unsupported-browser": {
+    "en": "This browser does not support this combination yet.",
+    "it": "Questo browser non supporta ancora questa combinazione."
+  },
+  "conflict": {
+    "en": "Already used by “{commands}”",
+    "it": "Già usata da “{commands}”"
+  },
+  "saved": {
+    "en": "Modified",
+    "it": "Modificata"
+  },
+  "clear": {
+    "en": "Remove",
+    "it": "Rimuovi"
+  },
+  "retry-save": {
+    "en": "Retry save",
+    "it": "Riprova a salvare"
+  },
+  "reset": {
+    "en": "Restore default",
+    "it": "Ripristina il predefinito"
+  },
+  "reset-all": {
+    "en": "Restore all defaults",
+    "it": "Ripristina tutti i predefiniti"
+  },
+  "modified-count": {
+    "en": "{count} customized",
+    "it": "{count} personalizzate"
+  },
+  "reset-title": {
+    "en": "Restore all default shortcuts?",
+    "it": "Ripristinare tutte le scorciatoie predefinite?"
+  },
+  "reset-description": {
+    "en": "Restore the default shortcuts for this platform. All modified or removed shortcuts will be restored. Other platforms are unaffected.",
+    "it": "Ripristina le scorciatoie predefinite per questa piattaforma. Tutte le scorciatoie modificate o rimosse torneranno come in origine. Le altre piattaforme non cambiano."
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "reset-saved": {
+    "en": "Default shortcuts restored",
+    "it": "Scorciatoie predefinite ripristinate"
+  },
+  "close-confirmation": {
+    "en": "Close confirmation",
+    "it": "Chiudi la conferma"
+  },
+  "reset-failed": {
+    "en": "Could not restore defaults. Your shortcuts are unchanged. Please retry.",
+    "it": "Impossibile ripristinare i predefiniti: le tue scorciatoie non sono cambiate. Riprova."
+  },
+  "review": {
+    "en": "I have reviewed the latest configuration",
+    "it": "Ho controllato la configurazione più recente"
+  },
+  "stale": {
+    "en": "Shortcut configuration or available commands changed. Review the latest bindings before saving.",
+    "it": "La configurazione delle scorciatoie o i comandi disponibili sono cambiati. Controlla le associazioni più recenti prima di salvare."
+  },
+  "write-failed": {
+    "en": "Could not save. Your previous shortcuts and current draft are preserved. Please retry.",
+    "it": "Impossibile salvare. Le scorciatoie precedenti e la bozza attuale sono conservate. Riprova."
+  },
+  "not-ready": {
+    "en": "Shortcuts are not ready. Please try again.",
+    "it": "Le scorciatoie non sono pronte. Riprova."
+  },
+  "read": {
+    "en": "Could not read {location}. Check access permissions, then {reload}.",
+    "it": "Impossibile leggere {location}. Controlla i permessi di accesso, poi {reload}."
+  },
+  "invalid": {
+    "en": "Shortcut configuration in {location} is damaged. Back up and repair this configuration, then {reload}.",
+    "it": "La configurazione delle scorciatoie in {location} è danneggiata. Fanne una copia e riparala, poi {reload}."
+  },
+  "future": {
+    "en": "Shortcut configuration in {location} was created by a newer version. Upgrade Harness and try again.",
+    "it": "La configurazione delle scorciatoie in {location} è stata creata da una versione più recente. Aggiorna Harness e riprova."
+  },
+  "web-document": {
+    "en": "this site’s localStorage entry dsh.keybindings.v1",
+    "it": "la voce localStorage dsh.keybindings.v1 di questo sito"
+  },
+  "desktop-document": {
+    "en": "userData/keybindings.json",
+    "it": "userData/keybindings.json"
+  },
+  "web-reload": {
+    "en": "reload the page",
+    "it": "ricarica la pagina"
+  },
+  "desktop-reload": {
+    "en": "restart Harness",
+    "it": "riavvia Harness"
+  },
+  "using-defaults": {
+    "en": "Default bindings are active.",
+    "it": "Sono attive le associazioni predefinite."
+  },
+  "using-accepted": {
+    "en": "The last successfully read bindings remain active.",
+    "it": "Restano attive le ultime associazioni lette correttamente."
+  },
+  "native-failed": {
+    "en": "Could not protect desktop key recording. Exit recording and try again.",
+    "it": "Impossibile proteggere la registrazione dei tasti sul desktop. Esci dalla registrazione e riprova."
+  },
+  "global-hint": {
+    "en": "Open from anywhere",
+    "it": "Apri da qualsiasi punto"
+  },
+  "clear-search": {
+    "en": "Clear search",
+    "it": "Cancella la ricerca"
+  },
+  "title": {
+    "en": "Keyboard shortcuts",
+    "it": "Scorciatoie da tastiera"
+  },
+  "open": {
+    "en": "Open keyboard shortcuts",
+    "it": "Apri le scorciatoie da tastiera"
+  },
+  "settings": {
+    "en": "Keyboard shortcuts",
+    "it": "Scorciatoie da tastiera"
+  },
+  "view": {
+    "en": "Edit shortcuts",
+    "it": "Modifica le scorciatoie"
+  },
+  "description": {
+    "en": "View and edit available shortcuts and input actions",
+    "it": "Visualizza e modifica le scorciatoie e le azioni di input disponibili"
+  },
+  "search": {
+    "en": "Search shortcuts",
+    "it": "Cerca scorciatoie"
+  },
+  "close": {
+    "en": "Close keyboard shortcuts",
+    "it": "Chiudi le scorciatoie da tastiera"
+  },
+  "application": {
+    "en": "Application",
+    "it": "Applicazione"
+  },
+  "input": {
+    "en": "Message input",
+    "it": "Inserimento messaggi"
+  },
+  "menus": {
+    "en": "Menus and dialogs",
+    "it": "Menu e finestre di dialogo"
+  },
+  "approval": {
+    "en": "Approval area",
+    "it": "Area di approvazione"
+  },
+  "unbound": {
+    "en": "No shortcut",
+    "it": "Nessuna scorciatoia"
+  },
+  "empty": {
+    "en": "No matching shortcuts",
+    "it": "Nessuna scorciatoia corrispondente"
+  },
+  "move": {
+    "en": "Move menu selection",
+    "it": "Sposta la selezione nel menu"
+  },
+  "select": {
+    "en": "Select menu item",
+    "it": "Seleziona la voce del menu"
+  },
+  "dismiss": {
+    "en": "Close menu or top dialog",
+    "it": "Chiudi il menu o la finestra in primo piano"
+  }
+}

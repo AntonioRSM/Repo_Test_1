@@ -1,0 +1,106 @@
+{
+  "type.label": {
+    "en": "Browser",
+    "it": "Browser"
+  },
+  "guide.title": {
+    "en": "Browser",
+    "it": "Browser"
+  },
+  "guide.description": {
+    "en": "Browse web pages",
+    "it": "Naviga tra le pagine web"
+  },
+  "shortcut.noSession": {
+    "en": "Open a session first",
+    "it": "Apri prima una sessione"
+  },
+  "address.placeholder": {
+    "en": "Enter an HTTP(S) address",
+    "it": "Inserisci un indirizzo HTTP(S)"
+  },
+  "address.changed": {
+    "en": "URL changed",
+    "it": "URL cambiato"
+  },
+  "back": {
+    "en": "Back",
+    "it": "Indietro"
+  },
+  "forward": {
+    "en": "Forward",
+    "it": "Avanti"
+  },
+  "reload": {
+    "en": "Reload",
+    "it": "Ricarica"
+  },
+  "go": {
+    "en": "Go",
+    "it": "Vai"
+  },
+  "external": {
+    "en": "Open in system browser",
+    "it": "Apri nel browser di sistema"
+  },
+  "sandbox.disable": {
+    "en": "Disable sandbox restrictions",
+    "it": "Disattiva le restrizioni della sandbox"
+  },
+  "sandbox.enable": {
+    "en": "Restore sandbox restrictions",
+    "it": "Ripristina le restrizioni della sandbox"
+  },
+  "sandbox.warning": {
+    "en": "Sandbox restrictions are disabled; the page can navigate the top-level app and use downloads, modal dialogs, and input locks.",
+    "it": "Le restrizioni della sandbox sono disattivate: la pagina può navigare l'app principale e usare download, finestre modali e blocchi dell'input."
+  },
+  "start": {
+    "en": "Enter an HTTP(S) address to start browsing",
+    "it": "Inserisci un indirizzo HTTP(S) per iniziare a navigare"
+  },
+  "loading": {
+    "en": "Opening…",
+    "it": "Apertura…"
+  },
+  "restore.previous": {
+    "en": "Previously opened",
+    "it": "Aperta in precedenza"
+  },
+  "restore.action": {
+    "en": "Restore page",
+    "it": "Ripristina la pagina"
+  },
+  "error.empty": {
+    "en": "Enter an address.",
+    "it": "Inserisci un indirizzo."
+  },
+  "error.invalid": {
+    "en": "That address is invalid or too long.",
+    "it": "L'indirizzo non è valido o è troppo lungo."
+  },
+  "error.protocol": {
+    "en": "Only HTTP and HTTPS addresses are supported; use Document Preview for local files.",
+    "it": "Sono supportati solo indirizzi HTTP e HTTPS: per i file locali usa l'anteprima documenti."
+  },
+  "error.credentials": {
+    "en": "Addresses cannot contain a username or password.",
+    "it": "Gli indirizzi non possono contenere nome utente o password."
+  },
+  "error.application-origin": {
+    "en": "The embedded browser cannot open the DSH application itself.",
+    "it": "Il browser integrato non può aprire l'applicazione DSH stessa."
+  },
+  "load.failed": {
+    "en": "The page could not load; reload or open it in the system browser.",
+    "it": "Impossibile caricare la pagina: ricaricala o aprila nel browser di sistema."
+  },
+  "load.failed.detail": {
+    "en": "Page load failed ({code}): {description}",
+    "it": "Caricamento della pagina non riuscito ({code}): {description}"
+  },
+  "address.unknown": {
+    "en": "The page navigated; this carrier cannot read its new URL.",
+    "it": "La pagina ha cambiato indirizzo: questo contenitore non può leggere il nuovo URL."
+  }
+}

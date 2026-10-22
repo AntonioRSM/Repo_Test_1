@@ -1,0 +1,102 @@
+{
+  "trigger": {
+    "en": "Agent Team",
+    "it": "Team di agenti"
+  },
+  "loading": {
+    "en": "Loading Team…",
+    "it": "Caricamento del team…"
+  },
+  "unavailable": {
+    "en": "Team is unavailable",
+    "it": "Il team non è disponibile"
+  },
+  "failure": {
+    "en": "Invalid persisted Team record: {message}",
+    "it": "Record del team salvato non valido: {message}"
+  },
+  "empty": {
+    "en": "No shared tasks yet. Create them through the conversation.",
+    "it": "Ancora nessuna attività condivisa. Creale dalla conversazione."
+  },
+  "roster": {
+    "en": "Members",
+    "it": "Membri"
+  },
+  "tasks": {
+    "en": "Shared tasks",
+    "it": "Attività condivise"
+  },
+  "model": {
+    "en": "Model",
+    "it": "Modello"
+  },
+  "open": {
+    "en": "Open member conversation",
+    "it": "Apri la conversazione del membro"
+  },
+  "current": {
+    "en": "Current chat",
+    "it": "Chat corrente"
+  },
+  "owner": {
+    "en": "Owner",
+    "it": "Responsabile"
+  },
+  "unowned": {
+    "en": "Unowned",
+    "it": "Senza responsabile"
+  },
+  "blockedBy": {
+    "en": "Blocked by",
+    "it": "Bloccata da"
+  },
+  "writeScopes": {
+    "en": "Write scopes",
+    "it": "Ambiti di scrittura"
+  },
+  "ready": {
+    "en": "Ready",
+    "it": "Pronta"
+  },
+  "blocked": {
+    "en": "Blocked by dependencies",
+    "it": "Bloccata da dipendenze"
+  },
+  "task.expand": {
+    "en": "Show more",
+    "it": "Mostra di più"
+  },
+  "task.collapse": {
+    "en": "Show less",
+    "it": "Mostra meno"
+  },
+  "memberStatus.running": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "memberStatus.inactive": {
+    "en": "Inactive",
+    "it": "Inattivo"
+  },
+  "memberStatus.provisioning": {
+    "en": "Provisioning",
+    "it": "In preparazione"
+  },
+  "memberStatus.failed": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "status.pending": {
+    "en": "Pending",
+    "it": "In attesa"
+  },
+  "status.in_progress": {
+    "en": "In progress",
+    "it": "In corso"
+  },
+  "status.completed": {
+    "en": "Completed",
+    "it": "Completata"
+  }
+}

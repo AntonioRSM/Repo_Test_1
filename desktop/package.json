@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "app": "electron .",
     "app:dev": "cross-env WSOS_DEV_URL=http://localhost:5173 electron .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:main": "node --test electron/openable.test.cjs"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.56.0",

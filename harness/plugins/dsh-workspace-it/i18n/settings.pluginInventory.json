@@ -1,0 +1,150 @@
+{
+  "tab": {
+    "en": "Plugin list",
+    "it": "Elenco plugin"
+  },
+  "loading": {
+    "en": "Reading plugins…",
+    "it": "Lettura dei plugin…"
+  },
+  "clientSyncing": {
+    "en": "Syncing plugins on this page…",
+    "it": "Sincronizzazione dei plugin in questa pagina…"
+  },
+  "clientSyncFailed": {
+    "en": "Some plugins could not sync on this page. Host enablement is unchanged.",
+    "it": "Alcuni plugin non si sono sincronizzati in questa pagina. L'attivazione sull'host non è cambiata."
+  },
+  "clientSyncRetry": {
+    "en": "Retry this page",
+    "it": "Riprova questa pagina"
+  },
+  "error": {
+    "en": "Plugins are temporarily unavailable.",
+    "it": "I plugin non sono temporaneamente disponibili."
+  },
+  "metadataError": {
+    "en": "Package metadata error: {error}",
+    "it": "Errore nei metadati del pacchetto: {error}"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "search": {
+    "en": "Search plugins",
+    "it": "Cerca plugin"
+  },
+  "empty": {
+    "en": "No plugins are available.",
+    "it": "Nessun plugin disponibile."
+  },
+  "emptySearch": {
+    "en": "No matching plugins.",
+    "it": "Nessun plugin corrispondente."
+  },
+  "presetTitle": {
+    "en": "Session plugins",
+    "it": "Plugin della sessione"
+  },
+  "presetSubtitle": {
+    "en": "Composed per session by agent presets",
+    "it": "Composti per ogni sessione dai preset dell'agente"
+  },
+  "switcherLabel": {
+    "en": "Choose the agent preset to inspect",
+    "it": "Scegli il preset dell'agente da ispezionare"
+  },
+  "presetOptionDefault": {
+    "en": "{name} (default)",
+    "it": "{name} (predefinito)"
+  },
+  "presetOptionBroken": {
+    "en": "{name} (failed to load)",
+    "it": "{name} (caricamento non riuscito)"
+  },
+  "globalTitle": {
+    "en": "Global plugins",
+    "it": "Plugin globali"
+  },
+  "globalSubtitle": {
+    "en": "Shared by the system and every session",
+    "it": "Condivisi dal sistema e da ogni sessione"
+  },
+  "presetProvidedDetail": {
+    "en": "Disabled globally; agent presets provide it per session",
+    "it": "Disattivato a livello globale; lo forniscono i preset dell'agente per ogni sessione"
+  },
+  "enabledIn": {
+    "en": "Enabled in",
+    "it": "Attivo in"
+  },
+  "matchesInOtherPresets": {
+    "en": "{count} more matches in other presets: ",
+    "it": "Altri {count} risultati in altri preset: "
+  },
+  "enabledTag": {
+    "en": "Enabled",
+    "it": "Attivo"
+  },
+  "disabledTag": {
+    "en": "Disabled",
+    "it": "Disattivato"
+  },
+  "conditionalTag": {
+    "en": "Conditional",
+    "it": "Condizionale"
+  },
+  "presetEnabledTag": {
+    "en": "Via presets",
+    "it": "Tramite preset"
+  },
+  "failedTag": {
+    "en": "Failed",
+    "it": "Non riuscito"
+  },
+  "moduleLabel": {
+    "en": "Module",
+    "it": "Modulo"
+  },
+  "fromPreset": {
+    "en": "From",
+    "it": "Da"
+  },
+  "condition": {
+    "en": "Disabled when",
+    "it": "Disattivato quando"
+  },
+  "configuration": {
+    "en": "Configuration",
+    "it": "Configurazione"
+  },
+  "runtime": {
+    "en": "Status",
+    "it": "Stato"
+  },
+  "unobserved": {
+    "en": "Not running",
+    "it": "Non in esecuzione"
+  },
+  "pending": {
+    "en": "Waiting for dependencies",
+    "it": "In attesa delle dipendenze"
+  },
+  "loadingPhase": {
+    "en": "Loading",
+    "it": "Caricamento"
+  },
+  "active": {
+    "en": "Running",
+    "it": "In esecuzione"
+  },
+  "failed": {
+    "en": "Failed to start",
+    "it": "Avvio non riuscito"
+  },
+  "unloading": {
+    "en": "Unloading",
+    "it": "Scaricamento"
+  }
+}

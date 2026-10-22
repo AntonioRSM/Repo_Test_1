@@ -1,0 +1,378 @@
+{
+  "modelSignInRequired": {
+    "en": "Model unavailable. Please sign in and try again.",
+    "it": "Modello non disponibile. Accedi e riprova."
+  },
+  "sessionExpired": {
+    "en": "You have signed out of your account, please log in again.",
+    "it": "Sei uscito dal tuo account: accedi di nuovo."
+  },
+  "onboardingArtworkLocale": {
+    "en": "en",
+    "it": "en"
+  },
+  "onboardingWelcome": {
+    "en": "Welcome to",
+    "it": "Benvenuto in"
+  },
+  "onboardingBrand": {
+    "en": "DeepSeek Harness",
+    "it": "Workspace Harness"
+  },
+  "onboardingIntroduction": {
+    "en": "DeepSeek Harness works in a local folder and uses tools to read and write files on your computer. It can help you research and organize information, create documents and spreadsheets, write code, troubleshoot issues, and more.",
+    "it": "Workspace Harness lavora in una cartella locale e usa strumenti per leggere e scrivere file sul tuo computer. Può aiutarti a cercare e organizzare informazioni, creare documenti e fogli di calcolo, scrivere codice, risolvere problemi e altro ancora."
+  },
+  "onboardingStart": {
+    "en": "Get started",
+    "it": "Inizia"
+  },
+  "onboardingCredit": {
+    "en": "Add credits",
+    "it": "Aggiungi credito"
+  },
+  "onboardingCreditDescription": {
+    "en": "DeepSeek Harness charges credits based on the tokens used by models and tools. Add credits in advance to keep your tasks running without interruption. Your balance is only used while the agent is working on a task.",
+    "it": "Con i modelli DeepSeek il credito viene addebitato in base ai token usati da modelli e strumenti. Aggiungi credito in anticipo perché le attività non si interrompano. Il saldo si usa solo mentre l'agente lavora a un'attività."
+  },
+  "onboardingTopUp": {
+    "en": "Add credits",
+    "it": "Aggiungi credito"
+  },
+  "onboardingLater": {
+    "en": "Next",
+    "it": "Avanti"
+  },
+  "onboardingFundedTopUp": {
+    "en": "Add credits",
+    "it": "Aggiungi credito"
+  },
+  "onboardingPurposePrefix": {
+    "en": "What would you like",
+    "it": "In che cosa vuoi"
+  },
+  "onboardingPurposeSuffix": {
+    "en": "to help with?",
+    "it": "farti aiutare?"
+  },
+  "onboardingPurposeDescription": {
+    "en": "We’ll tailor the interface and tools to fit the way you work.",
+    "it": "Adatteremo interfaccia e strumenti al tuo modo di lavorare."
+  },
+  "onboardingOffice": {
+    "en": "Office & creative work",
+    "it": "Ufficio e lavoro creativo"
+  },
+  "onboardingOfficeDescription": {
+    "en": "Edit documents, organize data, create presentations, and more",
+    "it": "Modifica documenti, organizza dati, crea presentazioni e altro"
+  },
+  "onboardingDevelopment": {
+    "en": "Coding & development",
+    "it": "Programmazione e sviluppo"
+  },
+  "onboardingDevelopmentDescription": {
+    "en": "Edit code, debug issues, run commands, manage project files, and more",
+    "it": "Modifica codice, risolvi errori, esegui comandi, gestisci i file di progetto e altro"
+  },
+  "onboardingContinue": {
+    "en": "Continue",
+    "it": "Continua"
+  },
+  "onboardingProcess": {
+    "en": "How much detail would you like to see?",
+    "it": "Quanti dettagli vuoi vedere?"
+  },
+  "onboardingProcessDescription": {
+    "en": "This only changes how progress is shown, not what DeepSeek Harness can do.",
+    "it": "Cambia solo come viene mostrato l'avanzamento, non quello che Workspace Harness può fare."
+  },
+  "onboardingCompact": {
+    "en": "Results only",
+    "it": "Solo risultati"
+  },
+  "onboardingCompactDescription": {
+    "en": "See just the results in a clean, simple interface",
+    "it": "Vedi solo i risultati in un'interfaccia pulita e semplice"
+  },
+  "onboardingStandard": {
+    "en": "Key details",
+    "it": "Dettagli principali"
+  },
+  "onboardingStandardDescription": {
+    "en": "Focus on results, with only the most important steps and actions shown",
+    "it": "Concentrati sui risultati, con solo i passi e le azioni più importanti"
+  },
+  "onboardingDetailed": {
+    "en": "Full details",
+    "it": "Tutti i dettagli"
+  },
+  "onboardingDetailedDescription": {
+    "en": "See the full process for easier debugging and troubleshooting",
+    "it": "Vedi l'intero processo per facilitare debug e risoluzione dei problemi"
+  },
+  "onboardingEnter": {
+    "en": "Open app",
+    "it": "Apri l'app"
+  },
+  "onboardingBack": {
+    "en": "Back",
+    "it": "Indietro"
+  },
+  "onboardingSkip": {
+    "en": "Skip",
+    "it": "Salta"
+  },
+  "onboardingSkipTitle": {
+    "en": "Skip setup?",
+    "it": "Saltare la configurazione?"
+  },
+  "onboardingSkipDescription": {
+    "en": "You can change how progress, performance, and usage are displayed, or enable Coding Tools, anytime in Settings → General.",
+    "it": "Puoi cambiare in qualsiasi momento come vengono mostrati avanzamento, prestazioni e consumi, o attivare gli strumenti di sviluppo, da Impostazioni → Generali."
+  },
+  "onboardingKeepSetting": {
+    "en": "Continue setup",
+    "it": "Continua la configurazione"
+  },
+  "onboardingNoCreditTitle": {
+    "en": "Skip adding credits?",
+    "it": "Non aggiungere credito?"
+  },
+  "onboardingNoCreditDescription": {
+    "en": "DeepSeek Harness can’t start new tasks without credits. You can add them later in Settings → Account.",
+    "it": "Senza credito i modelli DeepSeek non possono avviare nuove attività. Puoi aggiungerlo più tardi da Impostazioni → Account. I modelli locali (Ollama, LM Studio) non richiedono credito."
+  },
+  "onboardingUnderstood": {
+    "en": "Got it",
+    "it": "Ho capito"
+  },
+  "onboardingGoTopUp": {
+    "en": "Add credits",
+    "it": "Aggiungi credito"
+  },
+  "onboardingSaveFailed": {
+    "en": "Could not save settings. Try again.",
+    "it": "Impossibile salvare le impostazioni. Riprova."
+  },
+  "onboardingRetry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "onboardingLoading": {
+    "en": "Loading settings…",
+    "it": "Caricamento delle impostazioni…"
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "addApiKey": {
+    "en": "Add API Key",
+    "it": "Aggiungi chiave API"
+  },
+  "retry": {
+    "en": "Sign in again",
+    "it": "Accedi di nuovo"
+  },
+  "loginTitle": {
+    "en": "Get started",
+    "it": "Inizia"
+  },
+  "loginDescription": {
+    "en": "Sign in to your DeepSeek account or add an API Key to get started. Your projects and files are stored locally.",
+    "it": "Accedi al tuo account DeepSeek o aggiungi una chiave API per iniziare. Progetti e file restano sul tuo computer."
+  },
+  "browserTitle": {
+    "en": "Waiting for sign in",
+    "it": "In attesa dell'accesso"
+  },
+  "browserPrompt": {
+    "en": "Page did not open automatically? ",
+    "it": "La pagina non si è aperta da sola? "
+  },
+  "copyLink": {
+    "en": "Copy sign-in link",
+    "it": "Copia il link di accesso"
+  },
+  "copiedLink": {
+    "en": "Link copied",
+    "it": "Link copiato"
+  },
+  "copyFailed": {
+    "en": "Copy failed",
+    "it": "Copia non riuscita"
+  },
+  "browserDescription": {
+    "en": ", then open it in your browser to finish signing in.",
+    "it": ", poi aprilo nel browser per completare l'accesso."
+  },
+  "timeoutTitle": {
+    "en": "Sign in timed out",
+    "it": "Tempo per l'accesso scaduto"
+  },
+  "timeoutDescription": {
+    "en": "Sign in again to continue.",
+    "it": "Accedi di nuovo per continuare."
+  },
+  "failureTitle": {
+    "en": "Could not sign in",
+    "it": "Impossibile accedere"
+  },
+  "platformFailed": {
+    "en": "Could not complete the operation. Try again.",
+    "it": "Impossibile completare l'operazione. Riprova."
+  },
+  "platformRetry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "loading": {
+    "en": "Loading…",
+    "it": "Caricamento…"
+  },
+  "backToHarness": {
+    "en": "Back to DeepSeek Harness",
+    "it": "Torna a Workspace Harness"
+  },
+  "settings": {
+    "en": "Settings",
+    "it": "Impostazioni"
+  },
+  "contactUs": {
+    "en": "Feedback",
+    "it": "Feedback"
+  },
+  "menu": {
+    "en": "Account menu",
+    "it": "Menu dell'account"
+  },
+  "nav": {
+    "en": "Account",
+    "it": "Account"
+  },
+  "signedIn": {
+    "en": "Signed in to DeepSeek",
+    "it": "Accesso a DeepSeek effettuato"
+  },
+  "signedOut": {
+    "en": "Not signed in",
+    "it": "Accesso non effettuato"
+  },
+  "signIn": {
+    "en": "Sign in",
+    "it": "Accedi"
+  },
+  "signOut": {
+    "en": "Sign out",
+    "it": "Esci"
+  },
+  "signOutUnknownDescription": {
+    "en": "Could not check running tasks. Signing out may interrupt tasks using this account. Sign out now?",
+    "it": "Impossibile verificare le attività in corso. Uscire potrebbe interrompere le attività che usano questo account. Uscire ora?"
+  },
+  "signOutDescription": {
+    "en": "Signing out will not delete any data. You can sign in to this account again.",
+    "it": "Uscire non elimina alcun dato. Potrai accedere di nuovo a questo account."
+  },
+  "signOutRunningDescription": {
+    "en": "Tasks are currently running. Signing out will interrupt them. Sign out now?",
+    "it": "Ci sono attività in corso: uscendo verranno interrotte. Uscire ora?"
+  },
+  "cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "open": {
+    "en": "Open browser",
+    "it": "Apri il browser"
+  },
+  "initializing": {
+    "en": "Starting sign in…",
+    "it": "Avvio dell'accesso…"
+  },
+  "waiting": {
+    "en": "Continue in your browser",
+    "it": "Continua nel browser"
+  },
+  "completing": {
+    "en": "Completing sign in…",
+    "it": "Completamento dell'accesso…"
+  },
+  "expired": {
+    "en": "Sign in expired. Try again.",
+    "it": "Accesso scaduto. Riprova."
+  },
+  "failed": {
+    "en": "Could not complete the operation. Try again.",
+    "it": "Impossibile completare l'operazione. Riprova."
+  },
+  "noResponse": {
+    "en": "Something went wrong. Please check your network connection and try again.",
+    "it": "Qualcosa è andato storto. Controlla la connessione di rete e riprova."
+  },
+  "settingsSignedOutTitle": {
+    "en": "You are not signed in to DeepSeek Harness",
+    "it": "Non hai effettuato l'accesso all'account DeepSeek"
+  },
+  "settingsSignedOutDescription": {
+    "en": "Sign in to DeepSeek Harness to get your dedicated API Key",
+    "it": "Accedi con l'account DeepSeek per ottenere la tua chiave API dedicata"
+  },
+  "signInDescription": {
+    "en": "Use your DeepSeek account to get started.",
+    "it": "Usa il tuo account DeepSeek per iniziare."
+  },
+  "profileUnavailable": {
+    "en": "Account details are not available yet.",
+    "it": "I dettagli dell'account non sono ancora disponibili."
+  },
+  "balance": {
+    "en": "Topped-up balance",
+    "it": "Saldo ricaricato"
+  },
+  "bonusBalance": {
+    "en": "Granted balance",
+    "it": "Saldo omaggio"
+  },
+  "balanceUnavailable": {
+    "en": "View on Platform",
+    "it": "Vedi sulla piattaforma"
+  },
+  "balanceSignedOut": {
+    "en": "Sign in to view",
+    "it": "Accedi per vederlo"
+  },
+  "accountInfo": {
+    "en": "More account information",
+    "it": "Altre informazioni sull'account"
+  },
+  "more": {
+    "en": "More",
+    "it": "Altro"
+  },
+  "usage": {
+    "en": "View usage",
+    "it": "Vedi i consumi"
+  },
+  "topUp": {
+    "en": "Top up",
+    "it": "Ricarica"
+  },
+  "quotaTitle": {
+    "en": "No balance available",
+    "it": "Nessun saldo disponibile"
+  },
+  "quotaDescription": {
+    "en": "DeepSeek Harness cannot start a new task with this account when no balance is available. Would you like to top up? You can also top up later in Settings → Account.",
+    "it": "Senza saldo non si possono avviare nuove attività con i modelli di questo account DeepSeek. Vuoi ricaricare? Puoi farlo anche più tardi da Impostazioni → Account."
+  },
+  "quotaTopUp": {
+    "en": "Top up",
+    "it": "Ricarica"
+  },
+  "bonusNoticeTitle": {
+    "en": "Bonus credited",
+    "it": "Bonus accreditato"
+  }
+}

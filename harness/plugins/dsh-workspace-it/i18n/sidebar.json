@@ -1,0 +1,22 @@
+{
+  "session.new": {
+    "en": "New Session",
+    "it": "Nuova sessione"
+  },
+  "session.new.label": {
+    "en": "New session",
+    "it": "Nuova sessione"
+  },
+  "toggle.open": {
+    "en": "Open sidebar",
+    "it": "Apri la barra laterale"
+  },
+  "toggle.collapse": {
+    "en": "Collapse sidebar",
+    "it": "Comprimi la barra laterale"
+  },
+  "panels.label": {
+    "en": "Global panels",
+    "it": "Pannelli globali"
+  }
+}

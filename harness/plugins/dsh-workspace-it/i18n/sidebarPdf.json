@@ -1,0 +1,62 @@
+{
+  "zoomControls": {
+    "en": "Zoom controls",
+    "it": "Controlli zoom"
+  },
+  "zoomMenu": {
+    "en": "Choose zoom",
+    "it": "Scegli lo zoom"
+  },
+  "zoomOut": {
+    "en": "Zoom out",
+    "it": "Riduci"
+  },
+  "zoomIn": {
+    "en": "Zoom in",
+    "it": "Ingrandisci"
+  },
+  "zoomFitWidth": {
+    "en": "Fit width",
+    "it": "Adatta alla larghezza"
+  },
+  "zoomValue": {
+    "en": "{percent}%",
+    "it": "{percent}%"
+  },
+  "title": {
+    "en": "PDF",
+    "it": "PDF"
+  },
+  "pageImage": {
+    "en": "PDF page {page}",
+    "it": "Pagina PDF {page}"
+  },
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "rendering": {
+    "en": "Rendering page…",
+    "it": "Rendering della pagina…"
+  },
+  "failed": {
+    "en": "Cannot display PDF: {message}",
+    "it": "Impossibile mostrare il PDF: {message}"
+  },
+  "password": {
+    "en": "This PDF requires a password; password-protected previews are not supported.",
+    "it": "Questo PDF richiede una password: l'anteprima dei file protetti non è supportata."
+  },
+  "workerFailed": {
+    "en": "The PDF rendering process could not continue. Please retry.",
+    "it": "Il processo di rendering del PDF non può continuare. Riprova."
+  },
+  "unsupported": {
+    "en": "PDF preview requires the complete file contents.",
+    "it": "L'anteprima del PDF richiede il contenuto completo del file."
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  }
+}

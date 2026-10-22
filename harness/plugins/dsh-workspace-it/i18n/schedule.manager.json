@@ -1,0 +1,754 @@
+{
+  "panel": {
+    "en": "Automation tasks",
+    "it": "Attività automatiche"
+  },
+  "title": {
+    "en": "Automation tasks",
+    "it": "Attività automatiche"
+  },
+  "new.action": {
+    "en": "New",
+    "it": "Nuova"
+  },
+  "list.label": {
+    "en": "Task catalog",
+    "it": "Catalogo delle attività"
+  },
+  "list.nextPrefix": {
+    "en": "Next scheduled time: ",
+    "it": "Prossima esecuzione pianificata: "
+  },
+  "list.loading": {
+    "en": "Loading tasks…",
+    "it": "Caricamento delle attività…"
+  },
+  "list.error": {
+    "en": "Could not load tasks.",
+    "it": "Impossibile caricare le attività."
+  },
+  "list.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "list.empty": {
+    "en": "No tasks yet. Tasks created in your sessions appear here.",
+    "it": "Ancora nessuna attività. Qui compaiono le attività create nelle sessioni."
+  },
+  "list.emptyInactive": {
+    "en": "No inactive automation tasks",
+    "it": "Nessuna attività automatica inattiva"
+  },
+  "list.noMatches": {
+    "en": "No matching tasks",
+    "it": "Nessuna attività corrispondente"
+  },
+  "search.label": {
+    "en": "Search tasks",
+    "it": "Cerca attività"
+  },
+  "search.placeholder": {
+    "en": "Search automation tasks",
+    "it": "Cerca attività automatiche"
+  },
+  "search.clear": {
+    "en": "Clear search",
+    "it": "Cancella la ricerca"
+  },
+  "empty.action": {
+    "en": "New automation task",
+    "it": "Nuova attività automatica"
+  },
+  "statusFilter.label": {
+    "en": "Task status",
+    "it": "Stato dell'attività"
+  },
+  "statusFilter.all": {
+    "en": "All",
+    "it": "Tutte"
+  },
+  "status.active": {
+    "en": "Enabled",
+    "it": "Attiva"
+  },
+  "status.inactive": {
+    "en": "Inactive",
+    "it": "Inattiva"
+  },
+  "detail.label": {
+    "en": "Task details",
+    "it": "Dettagli dell'attività"
+  },
+  "detail.close": {
+    "en": "Close details",
+    "it": "Chiudi i dettagli"
+  },
+  "detail.more": {
+    "en": "Automation task actions",
+    "it": "Azioni sull'attività automatica"
+  },
+  "detail.nextRun": {
+    "en": "Next run",
+    "it": "Prossima esecuzione"
+  },
+  "detail.tabs": {
+    "en": "Task detail views",
+    "it": "Viste dei dettagli dell'attività"
+  },
+  "detail.rule": {
+    "en": "Rules",
+    "it": "Regole"
+  },
+  "detail.records": {
+    "en": "Records",
+    "it": "Registro"
+  },
+  "delivery.empty": {
+    "en": "No delivery record available",
+    "it": "Nessun record di consegna disponibile"
+  },
+  "delivery.loading": {
+    "en": "Loading delivery records…",
+    "it": "Caricamento dei record di consegna…"
+  },
+  "delivery.error": {
+    "en": "Could not load delivery records.",
+    "it": "Impossibile caricare i record di consegna."
+  },
+  "delivery.notFound": {
+    "en": "This task is no longer available.",
+    "it": "Questa attività non è più disponibile."
+  },
+  "delivery.cursorError": {
+    "en": "Records were updated.",
+    "it": "I record sono stati aggiornati."
+  },
+  "delivery.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "delivery.refresh": {
+    "en": "Refresh",
+    "it": "Aggiorna"
+  },
+  "delivery.loadMore": {
+    "en": "Load more",
+    "it": "Carica altro"
+  },
+  "delivery.expand": {
+    "en": "Expand",
+    "it": "Espandi"
+  },
+  "delivery.collapse": {
+    "en": "Collapse",
+    "it": "Comprimi"
+  },
+  "delivery.pruned": {
+    "en": "Earlier delivery records have been cleared",
+    "it": "I record di consegna precedenti sono stati cancellati"
+  },
+  "delivery.retention": {
+    "en": "Retention rules",
+    "it": "Regole di conservazione"
+  },
+  "delivery.retentionBounds": {
+    "en": "Each task keeps up to {records} delivery records from the last {days} days.",
+    "it": "Ogni attività conserva fino a {records} record di consegna degli ultimi {days} giorni."
+  },
+  "delivery.retentionExplanation": {
+    "en": "When a new record is saved, older records outside these limits are cleared automatically. Clearing records does not stop the task.",
+    "it": "Quando si salva un nuovo record, quelli più vecchi oltre questi limiti vengono cancellati automaticamente. Cancellare i record non ferma l'attività."
+  },
+  "detail.name": {
+    "en": "Automation task name",
+    "it": "Nome dell'attività automatica"
+  },
+  "detail.instruction": {
+    "en": "Automation task instruction",
+    "it": "Istruzione dell'attività automatica"
+  },
+  "detail.status": {
+    "en": "Status",
+    "it": "Stato"
+  },
+  "detail.next": {
+    "en": "Next scheduled time",
+    "it": "Prossima esecuzione pianificata"
+  },
+  "detail.frequency": {
+    "en": "Frequency",
+    "it": "Frequenza"
+  },
+  "detail.id": {
+    "en": "Task ID",
+    "it": "ID dell'attività"
+  },
+  "detail.session": {
+    "en": "Linked session",
+    "it": "Sessione collegata"
+  },
+  "detail.openSession": {
+    "en": "Linked session: open original session",
+    "it": "Sessione collegata: apri la sessione originale"
+  },
+  "detail.openSessionTitle": {
+    "en": "Linked session {title}: open original session",
+    "it": "Sessione collegata {title}: apri la sessione originale"
+  },
+  "detail.sessionLoading": {
+    "en": "Loading original session information.",
+    "it": "Caricamento delle informazioni sulla sessione originale."
+  },
+  "detail.sessionArchived": {
+    "en": "The original session is archived.",
+    "it": "La sessione originale è archiviata."
+  },
+  "detail.sessionUnavailable": {
+    "en": "The original session is unavailable.",
+    "it": "La sessione originale non è disponibile."
+  },
+  "detail.missing": {
+    "en": "Task unavailable. It may have been deleted.",
+    "it": "Attività non disponibile: potrebbe essere stata eliminata."
+  },
+  "delivery.label": {
+    "en": "Saved delivery record",
+    "it": "Record di consegna salvato"
+  },
+  "frequency.once": {
+    "en": "Once",
+    "it": "Una volta"
+  },
+  "frequency.every": {
+    "en": "Every {value} {unit}",
+    "it": "Ogni {value} {unit}"
+  },
+  "time.locale": {
+    "en": "en",
+    "it": "it"
+  },
+  "time.utcPrefix": {
+    "en": "UTC",
+    "it": "UTC"
+  },
+  "frequency.daily": {
+    "en": "Daily at {time} ({timeZone})",
+    "it": "Ogni giorno alle {time} ({timeZone})"
+  },
+  "frequency.dailyLocal": {
+    "en": "Daily at {time}",
+    "it": "Ogni giorno alle {time}"
+  },
+  "frequency.weekly": {
+    "en": "Weekly on {weekdays} at {time} ({timeZone})",
+    "it": "Ogni settimana il {weekdays} alle {time} ({timeZone})"
+  },
+  "frequency.weeklyLocal": {
+    "en": "Weekly on {weekdays} at {time}",
+    "it": "Ogni settimana il {weekdays} alle {time}"
+  },
+  "frequency.cron": {
+    "en": "Cron {expression} ({timeZone})",
+    "it": "Cron {expression} ({timeZone})"
+  },
+  "frequency.cronLocal": {
+    "en": "Cron {expression}",
+    "it": "Cron {expression}"
+  },
+  "frequency.cronRule": {
+    "en": "{rule} ({timeZone})",
+    "it": "{rule} ({timeZone})"
+  },
+  "cron.list.join": {
+    "en": ", ",
+    "it": ", "
+  },
+  "cron.part.join": {
+    "en": " ",
+    "it": " "
+  },
+  "cron.weekday.name": {
+    "en": "{weekday}",
+    "it": "{weekday}"
+  },
+  "cron.weekday.range": {
+    "en": "{from}–{to}",
+    "it": "{from}–{to}"
+  },
+  "cron.months": {
+    "en": " in {months}",
+    "it": " nei mesi di {months}"
+  },
+  "cron.day.every": {
+    "en": "Every day{months}",
+    "it": "Ogni giorno{months}"
+  },
+  "cron.day.weekdays": {
+    "en": "{weekdays}{months}",
+    "it": "{weekdays}{months}"
+  },
+  "cron.day.monthDays": {
+    "en": "Day {days} of every month{months}",
+    "it": "Giorno {days} di ogni mese{months}"
+  },
+  "cron.day.both": {
+    "en": "Day {days} of every month or {weekdays}{months}",
+    "it": "Giorno {days} di ogni mese oppure {weekdays}{months}"
+  },
+  "cron.day.bothStarred": {
+    "en": "Day {days} of every month and {weekdays}{months}",
+    "it": "Giorno {days} di ogni mese e {weekdays}{months}"
+  },
+  "cron.hours.range": {
+    "en": "{from}–{to}",
+    "it": "{from}–{to}"
+  },
+  "cron.hours.list": {
+    "en": "{hours}",
+    "it": "{hours}"
+  },
+  "cron.time.everyMinute": {
+    "en": "Every minute",
+    "it": "Ogni minuto"
+  },
+  "cron.time.everyMinutes": {
+    "en": "Every {step} minutes",
+    "it": "Ogni {step} minuti"
+  },
+  "cron.time.joinedEveryMinute": {
+    "en": "every minute",
+    "it": "ogni minuto"
+  },
+  "cron.time.joinedEveryMinutes": {
+    "en": "every {step} minutes",
+    "it": "ogni {step} minuti"
+  },
+  "cron.time.everyHour": {
+    "en": "Every hour",
+    "it": "Ogni ora"
+  },
+  "cron.time.joinedEveryHour": {
+    "en": "every hour",
+    "it": "ogni ora"
+  },
+  "cron.time.everyNHours": {
+    "en": "Every {count} hours",
+    "it": "Ogni {count} ore"
+  },
+  "cron.time.joinedEveryNHours": {
+    "en": "every {count} hours",
+    "it": "ogni {count} ore"
+  },
+  "cron.time.hourlyAt": {
+    "en": "Every hour at minute {minutes}",
+    "it": "Ogni ora al minuto {minutes}"
+  },
+  "cron.time.joinedHourlyAt": {
+    "en": "every hour at minute {minutes}",
+    "it": "ogni ora al minuto {minutes}"
+  },
+  "cron.time.hoursEveryMinute": {
+    "en": "every minute during hours {hours}",
+    "it": "ogni minuto nelle ore {hours}"
+  },
+  "cron.time.hoursEveryMinutes": {
+    "en": "every {step} minutes during hours {hours}",
+    "it": "ogni {step} minuti nelle ore {hours}"
+  },
+  "cron.time.at": {
+    "en": "at {times}",
+    "it": "alle {times}"
+  },
+  "cron.time.hoursAt": {
+    "en": "at minute {minutes} of hours {hours}",
+    "it": "al minuto {minutes} delle ore {hours}"
+  },
+  "frequency.weekday.join": {
+    "en": ", ",
+    "it": ", "
+  },
+  "frequency.weekday.1": {
+    "en": "Mon",
+    "it": "lun"
+  },
+  "frequency.weekday.2": {
+    "en": "Tue",
+    "it": "mar"
+  },
+  "frequency.weekday.3": {
+    "en": "Wed",
+    "it": "mer"
+  },
+  "frequency.weekday.4": {
+    "en": "Thu",
+    "it": "gio"
+  },
+  "frequency.weekday.5": {
+    "en": "Fri",
+    "it": "ven"
+  },
+  "frequency.weekday.6": {
+    "en": "Sat",
+    "it": "sab"
+  },
+  "frequency.weekday.7": {
+    "en": "Sun",
+    "it": "dom"
+  },
+  "unit.day.one": {
+    "en": "day",
+    "it": "giorno"
+  },
+  "unit.day.other": {
+    "en": "days",
+    "it": "giorni"
+  },
+  "unit.hour.one": {
+    "en": "hour",
+    "it": "ora"
+  },
+  "unit.hour.other": {
+    "en": "hours",
+    "it": "ore"
+  },
+  "unit.minute.one": {
+    "en": "minute",
+    "it": "minuto"
+  },
+  "unit.minute.other": {
+    "en": "minutes",
+    "it": "minuti"
+  },
+  "unit.second.one": {
+    "en": "second",
+    "it": "secondo"
+  },
+  "unit.second.other": {
+    "en": "seconds",
+    "it": "secondi"
+  },
+  "relative.now": {
+    "en": "Due now",
+    "it": "In scadenza ora"
+  },
+  "relative.future": {
+    "en": "in {value} {unit}",
+    "it": "tra {value} {unit}"
+  },
+  "relative.overdue": {
+    "en": "{value} {unit} overdue",
+    "it": "in ritardo di {value} {unit}"
+  },
+  "timing.date": {
+    "en": "Date",
+    "it": "Data"
+  },
+  "timing.time": {
+    "en": "Time",
+    "it": "Ora"
+  },
+  "timing.hour": {
+    "en": "Hour",
+    "it": "Ora"
+  },
+  "timing.minute": {
+    "en": "Minute",
+    "it": "Minuto"
+  },
+  "timing.second": {
+    "en": "Second",
+    "it": "Secondo"
+  },
+  "timing.prevMonth": {
+    "en": "Previous month",
+    "it": "Mese precedente"
+  },
+  "timing.nextMonth": {
+    "en": "Next month",
+    "it": "Mese successivo"
+  },
+  "timing.zone": {
+    "en": "Time zone",
+    "it": "Fuso orario"
+  },
+  "timing.zoneSearch": {
+    "en": "Search by UTC offset, IANA ID, or city",
+    "it": "Cerca per scostamento UTC, ID IANA o città"
+  },
+  "timing.zoneNoResults": {
+    "en": "No matching time zones",
+    "it": "Nessun fuso orario corrispondente"
+  },
+  "timing.interval": {
+    "en": "Repeat every",
+    "it": "Ripeti ogni"
+  },
+  "timing.intervalIncrease": {
+    "en": "Increase interval",
+    "it": "Aumenta l'intervallo"
+  },
+  "timing.intervalDecrease": {
+    "en": "Decrease interval",
+    "it": "Riduci l'intervallo"
+  },
+  "timing.unit.hour": {
+    "en": "hours",
+    "it": "ore"
+  },
+  "timing.unit.minute": {
+    "en": "minutes",
+    "it": "minuti"
+  },
+  "timing.unit.second": {
+    "en": "seconds",
+    "it": "secondi"
+  },
+  "timing.intervalHint.hour": {
+    "en": "At least 1 hour. The interval counts from task creation or the last rule change and is independent of time zones.",
+    "it": "Almeno 1 ora. L'intervallo parte dalla creazione dell'attività o dall'ultima modifica della regola e non dipende dal fuso orario."
+  },
+  "timing.intervalHint.minute": {
+    "en": "At least 1 minute. The interval counts from task creation or the last rule change and is independent of time zones.",
+    "it": "Almeno 1 minuto. L'intervallo parte dalla creazione dell'attività o dall'ultima modifica della regola e non dipende dal fuso orario."
+  },
+  "timing.intervalHint.second": {
+    "en": "At least 60 seconds. The interval counts from task creation or the last rule change and is independent of time zones.",
+    "it": "Almeno 60 secondi. L'intervallo parte dalla creazione dell'attività o dall'ultima modifica della regola e non dipende dal fuso orario."
+  },
+  "timing.zoneNoStored": {
+    "en": "A one-time task stores only its target moment, not a time zone. The date and time are interpreted in the selected time zone.",
+    "it": "Un'attività singola salva solo il momento di esecuzione, non un fuso orario. Data e ora vengono interpretate nel fuso orario scelto."
+  },
+  "timing.inactive": {
+    "en": "Inactive tasks are read-only. Their timing cannot be edited.",
+    "it": "Le attività inattive sono in sola lettura: i loro orari non si possono modificare."
+  },
+  "timing.conflict": {
+    "en": "This task changed while you were editing. Your draft is retained. Cancel and reopen after refresh to edit the latest rule.",
+    "it": "L'attività è cambiata mentre la modificavi. La bozza è conservata: annulla e riapri dopo l'aggiornamento per modificare la regola più recente."
+  },
+  "timing.notFound": {
+    "en": "This task is no longer available. Your draft is retained; cancel to close the editor.",
+    "it": "Questa attività non è più disponibile. La bozza è conservata: annulla per chiudere l'editor."
+  },
+  "timing.subagentSession": {
+    "en": "This session belongs to a sub-agent, which never receives delivered reminders.",
+    "it": "Questa sessione appartiene a un subagente, che non riceve mai i promemoria consegnati."
+  },
+  "timing.invalid": {
+    "en": "Enter a valid date and time, or check the timing fields.",
+    "it": "Inserisci data e ora valide, oppure controlla i campi degli orari."
+  },
+  "timing.invalidZone": {
+    "en": "Enter a valid IANA time zone, for example Asia/Shanghai.",
+    "it": "Inserisci un fuso orario IANA valido, ad esempio Europe/Rome."
+  },
+  "timing.notFuture": {
+    "en": "Choose a date and time in the future.",
+    "it": "Scegli una data e un'ora nel futuro."
+  },
+  "timing.invalidInterval": {
+    "en": "Enter an interval of at least 1 minute.",
+    "it": "Inserisci un intervallo di almeno 1 minuto."
+  },
+  "timing.invalidInterval.hour": {
+    "en": "Enter an interval of at least 1 hour.",
+    "it": "Inserisci un intervallo di almeno 1 ora."
+  },
+  "timing.invalidInterval.minute": {
+    "en": "Enter an interval of at least 1 minute.",
+    "it": "Inserisci un intervallo di almeno 1 minuto."
+  },
+  "timing.invalidInterval.second": {
+    "en": "Enter an interval of at least 60 seconds.",
+    "it": "Inserisci un intervallo di almeno 60 secondi."
+  },
+  "timing.error": {
+    "en": "Could not confirm the timing update. Your draft is retained. Check the task before retrying.",
+    "it": "Impossibile confermare la modifica degli orari. La bozza è conservata: controlla l'attività prima di riprovare."
+  },
+  "rule.title": {
+    "en": "Run time",
+    "it": "Orario di esecuzione"
+  },
+  "rule.repeat": {
+    "en": "Repeat",
+    "it": "Ripetizione"
+  },
+  "rule.weekday": {
+    "en": "Weekday",
+    "it": "Giorno della settimana"
+  },
+  "rule.weekdayOption": {
+    "en": "Weekday {weekday}",
+    "it": "Giorno {weekday}"
+  },
+  "rule.unsaved": {
+    "en": "Unsaved changes",
+    "it": "Modifiche non salvate"
+  },
+  "rule.save": {
+    "en": "Save changes",
+    "it": "Salva le modifiche"
+  },
+  "rule.saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "rule.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "rule.invalidTitle": {
+    "en": "Enter a task name of at most 120 characters.",
+    "it": "Inserisci un nome di attività di massimo 120 caratteri."
+  },
+  "rule.invalidPrompt": {
+    "en": "Enter a task instruction.",
+    "it": "Inserisci un'istruzione per l'attività."
+  },
+  "rule.once": {
+    "en": "Once",
+    "it": "Una volta"
+  },
+  "rule.everyMinutes": {
+    "en": "Every N minutes",
+    "it": "Ogni N minuti"
+  },
+  "rule.everyHours": {
+    "en": "Every N hours",
+    "it": "Ogni N ore"
+  },
+  "rule.everySeconds": {
+    "en": "Every N seconds",
+    "it": "Ogni N secondi"
+  },
+  "rule.daily": {
+    "en": "Every day",
+    "it": "Ogni giorno"
+  },
+  "rule.weekdays": {
+    "en": "Monday to Friday",
+    "it": "Dal lunedì al venerdì"
+  },
+  "rule.weekly": {
+    "en": "Weekly",
+    "it": "Ogni settimana"
+  },
+  "rule.cron": {
+    "en": "Custom",
+    "it": "Personalizzata"
+  },
+  "rule.cronLabel": {
+    "en": "Cron expression",
+    "it": "Espressione cron"
+  },
+  "rule.cronInvalid": {
+    "en": "Enter a five-field cron expression, for example 0 9 * * 1-5.",
+    "it": "Inserisci un'espressione cron a cinque campi, ad esempio 0 9 * * 1-5."
+  },
+  "cronForm.frequency": {
+    "en": "Frequency",
+    "it": "Frequenza"
+  },
+  "cronForm.monthly": {
+    "en": "Monthly",
+    "it": "Ogni mese"
+  },
+  "cronForm.weekly": {
+    "en": "Weekly",
+    "it": "Ogni settimana"
+  },
+  "cronForm.daily": {
+    "en": "Every day",
+    "it": "Ogni giorno"
+  },
+  "cronForm.dates": {
+    "en": "On dates",
+    "it": "Nei giorni"
+  },
+  "cronForm.dateOption": {
+    "en": "Day {day}",
+    "it": "Giorno {day}"
+  },
+  "cronForm.atMinute": {
+    "en": "At minute",
+    "it": "Al minuto"
+  },
+  "cronForm.minuteIncrease": {
+    "en": "Increase minute",
+    "it": "Aumenta il minuto"
+  },
+  "cronForm.minuteDecrease": {
+    "en": "Decrease minute",
+    "it": "Riduci il minuto"
+  },
+  "rule.zone.system": {
+    "en": " (system)",
+    "it": " (sistema)"
+  },
+  "rule.error.conflict": {
+    "en": "This task changed before the update was saved. The row shows the saved rule; try again.",
+    "it": "L'attività è cambiata prima che la modifica fosse salvata. La riga mostra la regola salvata: riprova."
+  },
+  "rule.error.notFound": {
+    "en": "This task is no longer available.",
+    "it": "Questa attività non è più disponibile."
+  },
+  "rule.error.unknown": {
+    "en": "Could not confirm the rule update. The row shows the saved rule.",
+    "it": "Impossibile confermare la modifica della regola. La riga mostra la regola salvata."
+  },
+  "delete.action": {
+    "en": "Delete task",
+    "it": "Elimina attività"
+  },
+  "delete.title": {
+    "en": "Delete this task?",
+    "it": "Eliminare questa attività?"
+  },
+  "delete.description": {
+    "en": "This stops the task from triggering and deletes it together with its saved delivery records. The original session and its messages remain; queued messages are not withdrawn.",
+    "it": "L'attività smette di attivarsi e viene eliminata insieme ai record di consegna salvati. La sessione originale e i suoi messaggi restano; i messaggi in coda non vengono ritirati."
+  },
+  "delete.confirm": {
+    "en": "Confirm deletion",
+    "it": "Conferma l'eliminazione"
+  },
+  "delete.cancel": {
+    "en": "Cancel",
+    "it": "Annulla"
+  },
+  "delete.close": {
+    "en": "Close deletion confirmation",
+    "it": "Chiudi la conferma di eliminazione"
+  },
+  "delete.pending": {
+    "en": "Deleting…",
+    "it": "Eliminazione…"
+  },
+  "toast.deleted": {
+    "en": "Task deleted.",
+    "it": "Attività eliminata."
+  },
+  "toast.deleteFailed": {
+    "en": "Could not delete the task.",
+    "it": "Impossibile eliminare l'attività."
+  },
+  "card.open": {
+    "en": "Open",
+    "it": "Apri"
+  },
+  "card.openLabel": {
+    "en": "Open task details: {title}",
+    "it": "Apri i dettagli dell'attività: {title}"
+  },
+  "card.deleted": {
+    "en": "Deleted",
+    "it": "Eliminata"
+  },
+  "tool.invoked": {
+    "en": "Invoked {name}",
+    "it": "Richiamato {name}"
+  }
+}

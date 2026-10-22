@@ -1,0 +1,38 @@
+{
+  "command": {
+    "en": "Commands",
+    "it": "Comandi"
+  },
+  "skill": {
+    "en": "Skills",
+    "it": "Skill"
+  },
+  "subagent": {
+    "en": "Subagents",
+    "it": "Subagenti"
+  },
+  "loading": {
+    "en": "Loading…",
+    "it": "Caricamento…"
+  },
+  "drill.aria": {
+    "en": "Browse folder",
+    "it": "Sfoglia cartella"
+  },
+  "drill.hint": {
+    "en": "Browse folder",
+    "it": "Sfoglia cartella"
+  },
+  "drill.key": {
+    "en": "Tab",
+    "it": "Tab"
+  },
+  "crumbs.aria": {
+    "en": "Folder navigation",
+    "it": "Navigazione cartelle"
+  },
+  "suggestions.aria": {
+    "en": "Trigger suggestions",
+    "it": "Suggerimenti"
+  }
+}

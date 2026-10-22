@@ -1,0 +1,62 @@
+{
+  "title": {
+    "en": "Office document",
+    "it": "Documento Office"
+  },
+  "loading": {
+    "en": "Rendering document...",
+    "it": "Rendering del documento..."
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "viewMissingFonts": {
+    "en": "Missing fonts: {count}. Click to view.",
+    "it": "Caratteri mancanti: {count}. Fai clic per vederli."
+  },
+  "missingFontsTitle": {
+    "en": "Missing fonts",
+    "it": "Caratteri mancanti"
+  },
+  "missingFontsDescription": {
+    "en": "These fonts are unavailable for this preview. Text and layout may differ from the original document.",
+    "it": "Questi caratteri non sono disponibili per l'anteprima: testo e impaginazione possono differire dal documento originale."
+  },
+  "missingFontsCount": {
+    "en": "Fonts: {count}",
+    "it": "Caratteri: {count}"
+  },
+  "closeDetails": {
+    "en": "Close font details",
+    "it": "Chiudi i dettagli dei caratteri"
+  },
+  "unavailable": {
+    "en": "Office previews are unavailable. Enable the document preview service on the computer running DeepSeek Harness.",
+    "it": "Le anteprime Office non sono disponibili. Attiva il servizio di anteprima dei documenti sul computer che esegue DeepSeek Harness."
+  },
+  "invalid": {
+    "en": "This Office file cannot be previewed. It may be damaged, password protected, or have the wrong extension.",
+    "it": "Impossibile mostrare l'anteprima di questo file Office: potrebbe essere danneggiato, protetto da password o avere l'estensione sbagliata."
+  },
+  "tooLarge": {
+    "en": "The Office file or converted PDF exceeds the preview size limit. Reduce the file size or adjust the preview configuration.",
+    "it": "Il file Office o il PDF convertito supera il limite di dimensione dell'anteprima. Riduci il file o modifica la configurazione dell'anteprima."
+  },
+  "failed": {
+    "en": "Office conversion did not produce a usable PDF. Check the file and try again.",
+    "it": "La conversione Office non ha prodotto un PDF utilizzabile. Controlla il file e riprova."
+  },
+  "timeout": {
+    "en": "Office conversion timed out. Try again.",
+    "it": "La conversione Office ha superato il tempo massimo. Riprova."
+  },
+  "busy": {
+    "en": "Office preview is busy. Try again shortly.",
+    "it": "L'anteprima Office è occupata. Riprova tra poco."
+  },
+  "changed": {
+    "en": "The file changed while being read. Reopen the preview.",
+    "it": "Il file è cambiato durante la lettura. Riapri l'anteprima."
+  }
+}

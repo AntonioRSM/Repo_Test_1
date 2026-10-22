@@ -1,0 +1,190 @@
+{
+  "modeExplanation": {
+    "en": "Mode details",
+    "it": "Dettagli della modalità"
+  },
+  "howToUse": {
+    "en": "How to use",
+    "it": "Come si usa"
+  },
+  "guideSections": {
+    "en": "Guide sections",
+    "it": "Sezioni della guida"
+  },
+  "guideExampleTask": {
+    "en": "Example task",
+    "it": "Attività di esempio"
+  },
+  "guideCopy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "guideCopied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "guideFootnotes": {
+    "en": "Footnotes",
+    "it": "Note"
+  },
+  "guideStandardIntro": {
+    "en": "Choose Standard mode when starting a new task. Describe what you want to accomplish, point to the relevant files, and explain how to check the result.",
+    "it": "Scegli la modalità Standard quando avvii una nuova attività. Descrivi cosa vuoi ottenere, indica i file interessati e spiega come verificare il risultato."
+  },
+  "guideStandardExplanation": {
+    "en": "### How it works\n\nThe agent calls tools directly to read and edit files, search, and run terminal commands. It includes Skills, planning, goals, subagents, workflows, and context compaction.\n\n### When to choose it\n\nStart here for everyday coding, file work, and research. Standard mode can also write scripts and process files in batches. PTC changes how tool calls are organized; it is not required for batch tasks.",
+    "it": "### Come funziona\n\nL'agente chiama direttamente gli strumenti per leggere e modificare file, cercare ed eseguire comandi nel terminale. Include Skill, pianificazione, obiettivi, subagenti, workflow e compattazione del contesto.\n\n### Quando sceglierla\n\nÈ il punto di partenza per programmazione, lavoro sui file e ricerche di ogni giorno. La modalità Standard può anche scrivere script ed elaborare file in blocco. PTC cambia il modo in cui sono organizzate le chiamate agli strumenti; non serve per le attività in blocco."
+  },
+  "guideStandardUsage": {
+    "en": "### Fix a bug\n\n> Find out why submitting the search form twice makes the results disappear. Fix it and run the relevant tests. Explain the cause and what changed.\n\nExpected output: a code change, the relevant test results, and an explanation of the cause.\n\n### Organize project notes\n\n> Read the Markdown notes in this project. Summarize the agreed decisions and open questions, with links to the source files.\n\nExpected output: a summary with references that you can check against the original notes.",
+    "it": "### Correggere un bug\n\n> Scopri perché inviando due volte il modulo di ricerca i risultati spariscono. Correggi il problema ed esegui i test interessati. Spiega la causa e cosa hai cambiato.\n\nRisultato atteso: una modifica al codice, l'esito dei test interessati e la spiegazione della causa.\n\n### Riordinare gli appunti di progetto\n\n> Leggi gli appunti Markdown di questo progetto. Riassumi le decisioni prese e le questioni aperte, con i link ai file di origine.\n\nRisultato atteso: un riepilogo con riferimenti da confrontare con gli appunti originali."
+  },
+  "guidePtcIntro": {
+    "en": "Choose PTC mode when starting a new task. Specify the input files, processing rules, and output format. The agent writes the code.",
+    "it": "Scegli la modalità PTC quando avvii una nuova attività. Indica i file di input, le regole di elaborazione e il formato di output: il codice lo scrive l'agente."
+  },
+  "guidePtcExplanation": {
+    "en": "### How tools are called\n\nPTC means Programmatic Tool Calling. In this built-in preset, the agent uses run_code to write a TypeScript program that calls tools through a generated SDK. The program can use loops, conditions, error handling, and concurrent calls where appropriate.\n\n### What reaches the model\n\nTool results first reach the program, which can filter and combine them. The model receives what the program prints or returns; image results are attached separately. Nested tool calls are still recorded and remain subject to tool permissions.\n\n### Compared with Standard mode\n\nBoth modes can handle coding and batch tasks. Standard mode exposes individual tools directly; PTC organizes tool calls in code. The current PTC preset leaves the workflow tool disabled. Speed and token use depend on the task and how the program handles its results.",
+    "it": "### Come vengono chiamati gli strumenti\n\nPTC significa Programmatic Tool Calling. In questo preset integrato l'agente usa run_code per scrivere un programma TypeScript che chiama gli strumenti tramite un SDK generato. Il programma può usare cicli, condizioni, gestione degli errori e chiamate concorrenti dove serve.\n\n### Cosa arriva al modello\n\nI risultati degli strumenti arrivano prima al programma, che può filtrarli e combinarli. Il modello riceve quello che il programma stampa o restituisce; i risultati in forma di immagine sono allegati a parte. Le chiamate annidate restano registrate e soggette ai permessi degli strumenti.\n\n### Rispetto alla modalità Standard\n\nEntrambe le modalità gestiscono programmazione e attività in blocco. La modalità Standard espone direttamente i singoli strumenti; PTC organizza le chiamate nel codice. Il preset PTC attuale lascia disattivato lo strumento dei workflow. Velocità e consumo di token dipendono dall'attività e da come il programma gestisce i risultati."
+  },
+  "guidePtcUsage": {
+    "en": "### Check a set of configuration files\n\n> Check all JSON files in configs/. List missing required fields and invalid values against schema.json. Save a CSV with one row per issue. Include unreadable files in the report and keep checking the rest. Leave the original files unchanged.\n\nExpected output: an issue summary and a CSV report. The program can repeat the same checks, handle individual failures, and collect the results.\n\n### Summarize error logs\n\n> Analyze the log files in logs/. Group errors by service and error type. Show the ten most frequent groups and one example from each. Save the full counts to a CSV.\n\nExpected output: the top error groups and a complete count table. Intermediate data can be aggregated in the program before the summary reaches the model.",
+    "it": "### Controllare un insieme di file di configurazione\n\n> Controlla tutti i file JSON in configs/. Elenca i campi obbligatori mancanti e i valori non validi rispetto a schema.json. Salva un CSV con una riga per problema. Includi nel rapporto i file illeggibili e continua a controllare gli altri. Non modificare i file originali.\n\nRisultato atteso: un riepilogo dei problemi e un rapporto CSV. Il programma può ripetere gli stessi controlli, gestire i singoli errori e raccogliere i risultati.\n\n### Riassumere i log degli errori\n\n> Analizza i file di log in logs/. Raggruppa gli errori per servizio e tipo di errore. Mostra i dieci gruppi più frequenti con un esempio per ciascuno. Salva i conteggi completi in un CSV.\n\nRisultato atteso: i gruppi di errori principali e una tabella completa dei conteggi. I dati intermedi si possono aggregare nel programma prima che il riepilogo arrivi al modello."
+  },
+  "guideMinimalIntro": {
+    "en": "Choose Minimal mode for a new task. For a comparison, hold the model, permissions, input, and starting workspace state constant across runs.",
+    "it": "Scegli la modalità Minima per una nuova attività. Per un confronto, mantieni uguali tra le esecuzioni modello, permessi, input e stato iniziale del workspace."
+  },
+  "guideMinimalExplanation": {
+    "en": "### What is included\n\nOne persistent shell tool, read_image, and a fixed system prompt. Image reading requires an image-capable model. Older history is compacted automatically under context pressure; use /compact while the agent is idle to compact it manually. The built-in preset does not load Skills, planning, or the standard runtime context.\n\n### When to choose it\n\nUse it as a baseline for experiments and comparisons. It can still read files and execute scripts through shell commands, but offers fewer built-in ways to manage a long task. Fewer tools does not necessarily make it easier for a beginner.",
+    "it": "### Cosa include\n\nUn solo strumento shell persistente, read_image e un prompt di sistema fisso. Per leggere le immagini serve un modello che le supporti. La cronologia meno recente viene compattata automaticamente quando il contesto si riempie; usa /compact mentre l'agente è inattivo per compattarla a mano. Il preset integrato non carica Skill, pianificazione né il contesto di runtime standard.\n\n### Quando sceglierla\n\nUsala come riferimento per esperimenti e confronti. Può comunque leggere file ed eseguire script con comandi shell, ma offre meno strumenti integrati per gestire un'attività lunga. Meno strumenti non significa necessariamente più semplicità per chi inizia."
+  },
+  "guideMinimalUsage": {
+    "en": "### Compare performance on a small bug fix\n\n> Run the tests for this project, find the cause of the failure, and make the smallest fix. Run the relevant tests again and report the result.\n\nRun the same task separately in Standard and Minimal modes from the same starting state. Compare task completion, tool calls, and the resulting changes. Minimal mode performs the work through terminal commands.",
+    "it": "### Confrontare le prestazioni su una piccola correzione\n\n> Esegui i test di questo progetto, trova la causa dell'errore e applica la correzione più piccola possibile. Esegui di nuovo i test interessati e riporta il risultato.\n\nEsegui la stessa attività separatamente in modalità Standard e Minima partendo dallo stesso stato. Confronta completamento dell'attività, chiamate agli strumenti e modifiche risultanti. La modalità Minima svolge il lavoro tramite comandi nel terminale."
+  },
+  "guideCordisIntro": {
+    "en": "Choose Creator mode for a new task. Describe the capability you want, where it should appear, and how you will verify it.",
+    "it": "Scegli la modalità Creatore per una nuova attività. Descrivi la funzione che vuoi, dove deve comparire e come la verificherai."
+  },
+  "guideCordisExplanation": {
+    "en": "### What you can create\n\nCreator mode includes the standard task tools plus runtime inspection, persistent plugin management, and guidance for authoring Cordis plugins and agent presets. It can create a plugin that adds a capability or UI, or a preset that combines tools and prompts for a particular job.\n\n### Plugins and modes\n\nA plugin adds capabilities to DSH, such as a tool, a service connection, or a UI entry. A mode is an agent preset that selects tools and defines how the agent works in a task. A plugin can be included in a custom preset.\n\n### How the result takes effect\n\nAsk the agent to install and verify the result, not just generate source code. A plugin may load immediately or require a restart, depending on what it changes. A newly created preset is selected when starting a new task.",
+    "it": "### Cosa puoi creare\n\nLa modalità Creatore include gli strumenti standard più l'ispezione del runtime, la gestione persistente dei plugin e le indicazioni per scrivere plugin Cordis e preset dell'agente. Può creare un plugin che aggiunge una funzione o un'interfaccia, oppure un preset che combina strumenti e prompt per un compito preciso.\n\n### Plugin e modalità\n\nUn plugin aggiunge funzioni a DSH, come uno strumento, una connessione a un servizio o una voce dell'interfaccia. Una modalità è un preset dell'agente che sceglie gli strumenti e definisce come l'agente lavora in un'attività. Un plugin può far parte di un preset personalizzato.\n\n### Come entra in funzione il risultato\n\nChiedi all'agente di installare e verificare il risultato, non solo di generare il codice sorgente. Un plugin può caricarsi subito o richiedere un riavvio, a seconda di cosa cambia. Un preset appena creato si sceglie all'avvio di una nuova attività."
+  },
+  "guideCordisUsage": {
+    "en": "### Add a UI\n\n> Create a DSH plugin that adds a project notes entry to the sidebar. Let me browse the Markdown files in this workspace and preview a selected note. Install it and verify that the page opens.\n\nExpected output: an installed plugin with a working entry and preview page, plus any remaining activation steps.\n\n### Add a tool\n\n> Create a plugin with a tool that reads this project’s test report and summarizes the failed tests. Register it and verify it with a sample report.\n\nExpected output: a plugin with a callable tool and a verified sample call.\n\n### Create my own mode\n\n> Create a “Code review” mode based on Standard mode. Have it prioritize potential bugs and test gaps, cite file paths and lines, and ask before modifying files. Save it as a selectable preset.\n\nExpected output: a custom preset for new tasks. These review instructions guide the agent; permission settings determine which actions it can execute.",
+    "it": "### Aggiungere un'interfaccia\n\n> Crea un plugin DSH che aggiunge una voce \"appunti di progetto\" alla barra laterale. Fammi sfogliare i file Markdown di questo workspace e vedere l'anteprima dell'appunto scelto. Installalo e verifica che la pagina si apra.\n\nRisultato atteso: un plugin installato con una voce e una pagina di anteprima funzionanti, più gli eventuali passi di attivazione rimasti.\n\n### Aggiungere uno strumento\n\n> Crea un plugin con uno strumento che legge il rapporto dei test di questo progetto e riassume i test non riusciti. Registralo e verificalo con un rapporto di esempio.\n\nRisultato atteso: un plugin con uno strumento richiamabile e una chiamata di esempio verificata.\n\n### Creare una modalità tutta mia\n\n> Crea una modalità \"Revisione del codice\" basata sulla modalità Standard. Falle dare priorità a possibili bug e test mancanti, citare percorsi e righe dei file e chiedere prima di modificare i file. Salvala come preset selezionabile.\n\nRisultato atteso: un preset personalizzato per le nuove attività. Queste istruzioni guidano l'agente; quali azioni può eseguire lo decidono le impostazioni dei permessi."
+  },
+  "builtInGroup": {
+    "en": "Built-in",
+    "it": "Integrati"
+  },
+  "customGroup": {
+    "en": "Custom",
+    "it": "Personalizzati"
+  },
+  "sectionIntro": {
+    "en": "Choose the agent’s tools and how it works. Use Standard mode for everyday tasks, or Creator mode to add capabilities to DSH.",
+    "it": "Scegli gli strumenti dell'agente e come lavora. Usa la modalità Standard per le attività di tutti i giorni, o la modalità Creatore per aggiungere funzioni a DSH."
+  },
+  "seatHint": {
+    "en": "Choose the agent preset for your new task",
+    "it": "Scegli il preset dell'agente per la nuova attività"
+  },
+  "headerHint": {
+    "en": "The agent preset chosen when this task started",
+    "it": "Il preset dell'agente scelto all'avvio di questa attività"
+  },
+  "nav": {
+    "en": "Agent presets",
+    "it": "Preset dell'agente"
+  },
+  "setDefault": {
+    "en": "Set as new task default",
+    "it": "Imposta come predefinito per le nuove attività"
+  },
+  "view": {
+    "en": "View configuration",
+    "it": "Vedi la configurazione"
+  },
+  "presetStandardName": {
+    "en": "Standard mode",
+    "it": "Modalità Standard"
+  },
+  "presetStandardDescription": {
+    "en": "Work with code, files, and information. Suitable for most tasks, with search, editing, terminal commands, and other tools available as needed.",
+    "it": "Lavora con codice, file e informazioni. Adatta alla maggior parte delle attività, con ricerca, modifica, comandi nel terminale e altri strumenti quando servono."
+  },
+  "presetPtcName": {
+    "en": "PTC mode",
+    "it": "Modalità PTC"
+  },
+  "presetPtcDescription": {
+    "en": "Includes all Standard mode capabilities. Better suited to tasks that call tools in batches and then filter, organize, deduplicate, count, or summarize the results.",
+    "it": "Include tutte le funzioni della modalità Standard. Più adatta alle attività che chiamano strumenti in blocco e poi filtrano, organizzano, deduplicano, contano o riassumono i risultati."
+  },
+  "presetMinimalName": {
+    "en": "Minimal mode",
+    "it": "Modalità Minima"
+  },
+  "presetMinimalDescription": {
+    "en": "The agent uses a terminal and image reading, with context compaction. Useful for testing and comparing its basic performance.",
+    "it": "L'agente usa un terminale e la lettura di immagini, con compattazione del contesto. Utile per provare e confrontare le prestazioni di base."
+  },
+  "presetCordisName": {
+    "en": "Creator mode",
+    "it": "Modalità Creatore"
+  },
+  "presetCordisDescription": {
+    "en": "Customize DSH through conversation. Let the agent write plugins that add features or UI, or combine tools and prompts to create your own mode.",
+    "it": "Personalizza DSH conversando. Fai scrivere all'agente plugin che aggiungono funzioni o interfacce, oppure combina strumenti e prompt per creare la tua modalità."
+  },
+  "inUse": {
+    "en": "New task default",
+    "it": "Predefinito per le nuove attività"
+  },
+  "noDescription": {
+    "en": "No description.",
+    "it": "Nessuna descrizione."
+  },
+  "brokenBadge": {
+    "en": "Failed to load",
+    "it": "Caricamento non riuscito"
+  },
+  "switchRefused": {
+    "en": "Could not switch to {name}: {reason}",
+    "it": "Impossibile passare a {name}: {reason}"
+  },
+  "standardUnavailable": {
+    "en": "Standard mode is unavailable. Restore it or choose another available mode.",
+    "it": "La modalità Standard non è disponibile. Ripristinala o scegli un'altra modalità disponibile."
+  },
+  "close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "creatorDraft": {
+    "en": "Let the agent help me create a preset",
+    "it": "Fatti aiutare dall'agente a creare un preset"
+  },
+  "createPlugin": {
+    "en": "Let the agent create a plugin",
+    "it": "Fai creare un plugin all'agente"
+  },
+  "createPluginDescription": {
+    "en": "Enter Creator mode and make your own DSH plugin",
+    "it": "Entra nella modalità Creatore e crea il tuo plugin DSH"
+  },
+  "createPluginChecking": {
+    "en": "Checking whether Creator mode is available",
+    "it": "Verifica della disponibilità della modalità Creatore"
+  },
+  "createPluginUnavailable": {
+    "en": "Temporarily unavailable. Reopen this menu to retry",
+    "it": "Temporaneamente non disponibile. Riapri questo menu per riprovare"
+  },
+  "createPluginMissing": {
+    "en": "Creator mode is not included in this configuration",
+    "it": "La modalità Creatore non è inclusa in questa configurazione"
+  }
+}

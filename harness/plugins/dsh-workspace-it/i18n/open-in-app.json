@@ -1,0 +1,182 @@
+{
+  "open.title": {
+    "en": "Open in {app}",
+    "it": "Apri in {app}"
+  },
+  "path.appDefault": {
+    "en": "{app} (default)",
+    "it": "{app} (predefinita)"
+  },
+  "path.appsError": {
+    "en": "Could not load applications",
+    "it": "Impossibile caricare le applicazioni"
+  },
+  "shortcut.busy": {
+    "en": "Opening workspace",
+    "it": "Apertura del workspace"
+  },
+  "shortcut.unavailable": {
+    "en": "Current workspace or local application unavailable",
+    "it": "Workspace corrente o applicazione locale non disponibile"
+  },
+  "open.tooltip": {
+    "en": "Open locally",
+    "it": "Apri in locale"
+  },
+  "path.open": {
+    "en": "Open",
+    "it": "Apri"
+  },
+  "path.more": {
+    "en": "More ways to open",
+    "it": "Altri modi per aprire"
+  },
+  "path.reveal": {
+    "en": "Show file location",
+    "it": "Mostra il percorso del file"
+  },
+  "path.openError": {
+    "en": "Could not open. Try again.",
+    "it": "Impossibile aprire. Riprova."
+  },
+  "path.revealError": {
+    "en": "Could not show the file location. Try again.",
+    "it": "Impossibile mostrare il percorso del file. Riprova."
+  },
+  "app.cursor": {
+    "en": "Cursor",
+    "it": "Cursor"
+  },
+  "app.vscode": {
+    "en": "VS Code",
+    "it": "VS Code"
+  },
+  "app.vscodeinsiders": {
+    "en": "VS Code Insiders",
+    "it": "VS Code Insiders"
+  },
+  "app.windsurf": {
+    "en": "Windsurf",
+    "it": "Windsurf"
+  },
+  "app.zed": {
+    "en": "Zed",
+    "it": "Zed"
+  },
+  "app.sublimetext": {
+    "en": "Sublime Text",
+    "it": "Sublime Text"
+  },
+  "app.xcode": {
+    "en": "Xcode",
+    "it": "Xcode"
+  },
+  "app.androidstudio": {
+    "en": "Android Studio",
+    "it": "Android Studio"
+  },
+  "app.intellij": {
+    "en": "IntelliJ IDEA",
+    "it": "IntelliJ IDEA"
+  },
+  "app.pycharm": {
+    "en": "PyCharm",
+    "it": "PyCharm"
+  },
+  "app.webstorm": {
+    "en": "WebStorm",
+    "it": "WebStorm"
+  },
+  "app.phpstorm": {
+    "en": "PhpStorm",
+    "it": "PhpStorm"
+  },
+  "app.goland": {
+    "en": "GoLand",
+    "it": "GoLand"
+  },
+  "app.rider": {
+    "en": "Rider",
+    "it": "Rider"
+  },
+  "app.rustrover": {
+    "en": "RustRover",
+    "it": "RustRover"
+  },
+  "app.fork": {
+    "en": "Fork",
+    "it": "Fork"
+  },
+  "app.sourcetree": {
+    "en": "Sourcetree",
+    "it": "Sourcetree"
+  },
+  "app.github": {
+    "en": "GitHub Desktop",
+    "it": "GitHub Desktop"
+  },
+  "app.tower": {
+    "en": "Tower",
+    "it": "Tower"
+  },
+  "app.gitkraken": {
+    "en": "GitKraken",
+    "it": "GitKraken"
+  },
+  "app.smartgit": {
+    "en": "SmartGit",
+    "it": "SmartGit"
+  },
+  "app.sublimemerge": {
+    "en": "Sublime Merge",
+    "it": "Sublime Merge"
+  },
+  "app.ghostty": {
+    "en": "Ghostty",
+    "it": "Ghostty"
+  },
+  "app.warp": {
+    "en": "Warp",
+    "it": "Warp"
+  },
+  "app.iterm": {
+    "en": "iTerm2",
+    "it": "iTerm2"
+  },
+  "app.kitty": {
+    "en": "kitty",
+    "it": "kitty"
+  },
+  "app.windowsterminal": {
+    "en": "Windows Terminal",
+    "it": "Windows Terminal"
+  },
+  "app.gitbash": {
+    "en": "Git Bash",
+    "it": "Git Bash"
+  },
+  "app.gnometerminal": {
+    "en": "GNOME Terminal",
+    "it": "GNOME Terminal"
+  },
+  "app.konsole": {
+    "en": "Konsole",
+    "it": "Konsole"
+  },
+  "app.finder": {
+    "en": "Finder",
+    "it": "Finder"
+  },
+  "app.explorer": {
+    "en": "File Explorer",
+    "it": "Esplora file"
+  },
+  "app.filemanager": {
+    "en": "Files",
+    "it": "File"
+  },
+  "app.terminal": {
+    "en": "Terminal",
+    "it": "Terminale"
+  }
+}

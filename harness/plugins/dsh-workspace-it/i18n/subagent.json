@@ -1,0 +1,166 @@
+{
+  "duration.seconds": {
+    "en": "{seconds}s",
+    "it": "{seconds} s"
+  },
+  "duration.minutes": {
+    "en": "{minutes}m {seconds}s",
+    "it": "{minutes} min {seconds} s"
+  },
+  "duration.hours": {
+    "en": "{hours}h {minutes}m {seconds}s",
+    "it": "{hours} h {minutes} min {seconds} s"
+  },
+  "duration.days": {
+    "en": "{days}d",
+    "it": "{days} g"
+  },
+  "duration.daysHours": {
+    "en": "{days}d {hours}h",
+    "it": "{days} g {hours} h"
+  },
+  "duration.months": {
+    "en": "~{months}mo",
+    "it": "~{months} mesi"
+  },
+  "duration.monthsDays": {
+    "en": "~{months}mo {days}d",
+    "it": "~{months} mesi {days} g"
+  },
+  "duration.years": {
+    "en": "~{years}y",
+    "it": "~{years} anni"
+  },
+  "duration.yearsMonths": {
+    "en": "~{years}y {months}mo",
+    "it": "~{years} anni {months} mesi"
+  },
+  "duration.exactDays": {
+    "en": "{days}d {hours}h {minutes}m {seconds}s",
+    "it": "{days} g {hours} h {minutes} min {seconds} s"
+  },
+  "duration.exactTitle": {
+    "en": "Total active duration: {duration}",
+    "it": "Durata attiva totale: {duration}"
+  },
+  "tokens.thousand": {
+    "en": "{value}K",
+    "it": "{value}K"
+  },
+  "tokens.million": {
+    "en": "{value}M",
+    "it": "{value}M"
+  },
+  "tokens.total": {
+    "en": "{value} tok",
+    "it": "{value} token"
+  },
+  "loading.label": {
+    "en": "Loading subagents…",
+    "it": "Caricamento dei subagenti…"
+  },
+  "load.error": {
+    "en": "Unable to load subagents",
+    "it": "Impossibile caricare i subagenti"
+  },
+  "catalog.migrationRequired": {
+    "en": "Migration required",
+    "it": "Migrazione necessaria"
+  },
+  "retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "mode.external": {
+    "en": "External task",
+    "it": "Attività esterna"
+  },
+  "mode.oneShot": {
+    "en": "one-shot",
+    "it": "singola"
+  },
+  "mode.continuable": {
+    "en": "continuable",
+    "it": "continuabile"
+  },
+  "mode.unknown": {
+    "en": "unknown mode",
+    "it": "modalità sconosciuta"
+  },
+  "readonly.unknown.body": {
+    "en": "Read the child session to determine whether it can be continued.",
+    "it": "Leggi la sessione figlia per capire se si può continuare."
+  },
+  "activity.running": {
+    "en": "running",
+    "it": "in esecuzione"
+  },
+  "activity.completed": {
+    "en": "completed",
+    "it": "completato"
+  },
+  "activity.inactive": {
+    "en": "not running",
+    "it": "non in esecuzione"
+  },
+  "branch.collapse": {
+    "en": "Collapse {label} descendants",
+    "it": "Comprimi i discendenti di {label}"
+  },
+  "branch.expand": {
+    "en": "Expand {label} descendants",
+    "it": "Espandi i discendenti di {label}"
+  },
+  "count.total.one": {
+    "en": "{count} subagent",
+    "it": "{count} subagente"
+  },
+  "count.total.other": {
+    "en": "{count} subagents",
+    "it": "{count} subagenti"
+  },
+  "count.running.one": {
+    "en": "{count} subagent running",
+    "it": "{count} subagente in esecuzione"
+  },
+  "count.running.other": {
+    "en": "{count} subagents running",
+    "it": "{count} subagenti in esecuzione"
+  },
+  "switcher.aria": {
+    "en": "Switch subagent: {title}",
+    "it": "Cambia subagente: {title}"
+  },
+  "tree.aria": {
+    "en": "Subagent sessions",
+    "it": "Sessioni dei subagenti"
+  },
+  "open.sidebar": {
+    "en": "Open in sidebar",
+    "it": "Apri nella barra laterale"
+  },
+  "open.sidebar.aria": {
+    "en": "Open {label} in sidebar",
+    "it": "Apri {label} nella barra laterale"
+  },
+  "sidebar.chat": {
+    "en": "Chat",
+    "it": "Chat"
+  },
+  "readonly.oneShot.title": {
+    "en": "One-shot subagent record",
+    "it": "Registro del subagente singolo"
+  },
+  "readonly.title": {
+    "en": "This subagent is read-only for now",
+    "it": "Per ora questo subagente è in sola lettura"
+  },
+  "readonly.oneShot.body": {
+    "en": "One-shot tasks do not accept follow-ups; review the full execution record here.",
+    "it": "Le attività singole non accettano seguiti: qui trovi il registro completo dell'esecuzione."
+  },
+  "readonly.body": {
+    "en": "The parent session is offline; reopen it to continue sending messages.",
+    "it": "La sessione principale è offline: riaprila per continuare a inviare messaggi."
+  }
+}

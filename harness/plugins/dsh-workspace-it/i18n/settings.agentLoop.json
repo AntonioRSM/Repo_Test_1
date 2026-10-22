@@ -1,0 +1,50 @@
+{
+  "title": {
+    "en": "Agent loop",
+    "it": "Ciclo dell'agente"
+  },
+  "description": {
+    "en": "Control how the Agent dispatches tool calls.",
+    "it": "Controlla come l'agente esegue le chiamate agli strumenti."
+  },
+  "maxParallel": {
+    "en": "Parallel tool calls",
+    "it": "Chiamate parallele agli strumenti"
+  },
+  "maxParallelHint": {
+    "en": "Upper bound on parallel-safe calls running at once within one step.",
+    "it": "Numero massimo di chiamate sicure in parallelo eseguite insieme in un passo."
+  },
+  "overridden": {
+    "en": "Overridden",
+    "it": "Personalizzato"
+  },
+  "reset": {
+    "en": "Reset to default",
+    "it": "Ripristina il predefinito"
+  },
+  "readOnly": {
+    "en": "This deployment stores settings read-only.",
+    "it": "Questa installazione salva le impostazioni in sola lettura."
+  },
+  "unavailable": {
+    "en": "This plugin is not loaded, so it cannot be configured right now.",
+    "it": "Questo plugin non è caricato e ora non si può configurare."
+  },
+  "save": {
+    "en": "Save",
+    "it": "Salva"
+  },
+  "saving": {
+    "en": "Saving…",
+    "it": "Salvataggio…"
+  },
+  "saveFailed": {
+    "en": "The deployment did not accept these values; they were left for you to correct.",
+    "it": "L'installazione non ha accettato questi valori: sono rimasti da correggere."
+  },
+  "invalidNumber": {
+    "en": "Enter a number, or leave blank to use the default.",
+    "it": "Inserisci un numero, oppure lascia vuoto per usare il predefinito."
+  }
+}

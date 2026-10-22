@@ -14,11 +14,13 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+from starlette.responses import PlainTextResponse
 
 from .chunking import ChunkingSettings
 from .config import ModelRef, OcrSettings, SettingsStore
 from .events import EventBus
 from .hardware import HardwareMonitor
+from . import ollama_hub
 from .parsers import SUPPORTED_EXTS
 from .pipeline import JobManager
 from .providers import ProviderClient, ProviderError, discover, ensure_loaded
@@ -82,25 +84,100 @@ async def lifespan(app: FastAPI):
     yield
     state.watcher.stop()
     state.hardware.stop()
+    await ollama_hub.cancel_pulls()
     await state.jobs.shutdown()
     await mcp_manager.shutdown()
 
 
 app = FastAPI(title="RAG Vault Studio engine", version="0.1.0", lifespan=lifespan)
+
+
+def _cors_origin_regex() -> str:
+    """Origins allowed to read API responses.
+
+    With the per-launch token (desktop mode) the renderer may be a file:// or null origin.
+    Without a token (manual start on a known port) those origins would let any web page
+    sandboxed in an iframe read the API: keep only explicit http localhost origins.
+    NOTE: evaluated once at import time, so WSOS_TOKEN must be set before the module
+    is imported (the desktop app guarantees this via the spawned environment)."""
+    local = r"http://(localhost|127\.0\.0\.1)(:\d+)?"
+    return rf"^({local}|file://.*|null)$" if os.environ.get("WSOS_TOKEN") else rf"^({local})$"
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^(http://(localhost|127\.0\.0\.1)(:\d+)?|file://.*|null)$",
+    allow_origin_regex=_cors_origin_regex(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+_LOCAL_HOSTNAMES = {"127.0.0.1", "::1", "localhost"}
+
+
+def _host_header_is_local(value: str) -> bool:
+    """Hostname part of a Host header. IPv6 literals arrive in brackets ([::1]:8765):
+    TrustedHostMiddleware's split(':') turned that into '[' and 400'd everything
+    (Bug #15)."""
+    host = value.strip().lower()
+    if host.startswith("["):
+        host = host[1:].split("]", 1)[0]
+    else:
+        host = host.split(":", 1)[0]
+    return host in _LOCAL_HOSTNAMES or host.endswith(".localhost")
+
+
+class LocalhostOnlyMiddleware:
+    """Bug #6 (DNS rebinding): without the per-launch token the API is reachable by any
+    local process, so the Host header must be loopback-only. (WSOS_TOKEN is read at
+    import time: the desktop app sets it before spawning the engine.)"""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            host = next(
+                (v.decode("latin-1") for k, v in scope.get("headers", []) if k.lower() == b"host"),
+                "",
+            )
+            if not _host_header_is_local(host):
+                await PlainTextResponse("host non consentito", status_code=400)(scope, receive, send)
+                return
+        await self.app(scope, receive, send)
+
+
+if not os.environ.get("WSOS_TOKEN"):
+    app.add_middleware(LocalhostOnlyMiddleware)
+
 
 def require_token(request: Request) -> None:
-    """When started by the desktop app, every call must carry its per-launch token."""
+    """When started by the desktop app, every call must carry its per-launch token.
+
+    Only the `x-wsos-token` HEADER is accepted here: a token in the URL would end up
+    in logs and browser history. The single exception is the `/events` SSE stream,
+    which cannot set headers (see `require_token_events`)."""
     expected = os.environ.get("WSOS_TOKEN")
     if not expected:
         return
+    supplied = request.headers.get("x-wsos-token")
+    if supplied != expected:
+        raise HTTPException(401, "invalid token")
+
+
+_query_token_warned = False
+
+
+def require_token_events(request: Request) -> None:
+    """SSE (EventSource) cannot send custom headers, so the stream may carry the
+    token as a query parameter. Its use is logged once."""
+    expected = os.environ.get("WSOS_TOKEN")
+    if not expected:
+        return
+    global _query_token_warned
     supplied = request.headers.get("x-wsos-token") or request.query_params.get("token")
+    if supplied == expected and "token" in request.query_params and not _query_token_warned:
+        _query_token_warned = True
+        log.warning("token ricevuto in query string su /events (unica rotta che lo ammette)")
     if supplied != expected:
         raise HTTPException(401, "invalid token")
 
@@ -130,7 +207,7 @@ def hardware():
     return state.hardware.latest()
 
 
-@app.get("/events", dependencies=[api])
+@app.get("/events", dependencies=[Depends(require_token_events)])
 async def events(request: Request):
     queue = state.events.subscribe()
 
@@ -183,6 +260,103 @@ async def test_embedding(body: EmbedTest):
     except ProviderError as exc:
         raise HTTPException(502, str(exc)) from exc
     return {"dimension": len(vector), "preview": vector[:8]}
+
+
+# ------------------------------------------------------------------ ollama hub
+
+
+class PullBody(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
+
+
+@app.get("/ollama/status", dependencies=[api])
+async def ollama_status():
+    """Installed models and what is currently resident in RAM/VRAM."""
+    return await ollama_hub.status(state.settings.get().endpoints)
+
+
+@app.get("/ollama/library", dependencies=[api])
+async def ollama_library(q: str = ""):
+    """Searchable view of the public Ollama model library."""
+    try:
+        return {"models": [m.model_dump() for m in await ollama_hub.library_search(q)]}
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+
+
+@app.post("/ollama/pull", dependencies=[api], status_code=202)
+async def ollama_pull(body: PullBody):
+    """Downloads a model in the background; progress arrives as {type: "ollama"} events.
+    Concurrent pulls of the same model join the one already running (Miglioramento #2)."""
+    started = ollama_hub.start_pull(
+        state.settings.get().endpoints,
+        body.model,
+        on_progress=lambda p, m=body.model: _report_pull_progress(m, p),
+        on_finished=lambda m=body.model: _report_pull_done(m),
+        on_error=lambda exc, m=body.model: _report_pull_error(m, exc),
+    )
+    return {"accepted": True, "model": body.model, "already": not started}
+
+
+async def _report_pull_progress(model: str, p: dict) -> None:
+    # Bug #8: pull() awaits on_progress — a plain lambda returning publish()'s None
+    # raised TypeError on the very first progress line, failing every download.
+    state.events.publish(
+        {
+            "type": "ollama",
+            "kind": "pull",
+            "model": model,
+            "status": p.get("status") or "download",
+            "completed": p.get("completed"),
+            "total": p.get("total"),
+        }
+    )
+
+
+async def _report_pull_done(model: str) -> None:
+    state.events.publish({"type": "ollama", "kind": "pull", "model": model, "status": "download_completato"})
+
+
+async def _report_pull_error(model: str, exc: Exception) -> None:
+    state.events.publish({"type": "ollama", "kind": "pull", "model": model, "status": "errore", "error": str(exc)})
+
+
+class LoadBody(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
+    keep_alive_minutes: int = Field(30, ge=1, le=240)
+
+
+@app.post("/ollama/load", dependencies=[api])
+async def ollama_load(body: LoadBody):
+    try:
+        await ollama_hub.load(state.settings.get().endpoints, body.model, body.keep_alive_minutes)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"loaded": body.model}
+
+
+@app.post("/ollama/unload", dependencies=[api])
+async def ollama_unload(body: PullBody):
+    """Frees the model's RAM/VRAM immediately."""
+    try:
+        await ollama_hub.unload(state.settings.get().endpoints, body.model)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"unloaded": body.model}
+
+
+@app.post("/ollama/delete", dependencies=[api])
+async def ollama_delete(body: PullBody):
+    """Removes a model from disk (frees disk space; RAM/VRAM freed first if loaded).
+
+    POST with a JSON body — not DELETE with a path parameter — so names containing
+    '/' (hf.co/…, namespace/model) survive routing (Bug #4)."""
+    try:
+        await ollama_hub.unload(state.settings.get().endpoints, body.model)
+        await ollama_hub.delete(state.settings.get().endpoints, body.model)
+    except ollama_hub.HubError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    return {"deleted": body.model}
 
 
 # ------------------------------------------------------------------ vaults
@@ -338,7 +512,19 @@ async def retrieve(vault, body: SearchBody) -> tuple[list[dict], str | None]:
     wanted = [(vault.config.embedding, "embedding")]
     if settings.llm is not None and (body.rerank or isinstance(body, AskBody)):
         wanted.append((settings.llm, "llm"))
-    await ensure_loaded(settings.endpoints, wanted)
+    try:
+        # Miglioramento #1: interactive requests must not sit through a multi-GB
+        # download; a missing model is pulled in background and we answer 409.
+        await ensure_loaded(
+            settings.endpoints,
+            wanted,
+            events=state.events,
+            auto_pull=settings.ollama_auto_pull,
+            keep_alive_minutes=settings.ollama_keep_alive_minutes,
+            allow_download=False,
+        )
+    except ProviderError as exc:
+        raise HTTPException(409, str(exc)) from exc
     try:
         vector = (await client.embed(vault.config.embedding, [body.query]))[0]
     except ProviderError as exc:

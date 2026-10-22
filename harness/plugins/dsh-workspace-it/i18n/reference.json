@@ -1,0 +1,62 @@
+{
+  "section.files": {
+    "en": "Files & folders",
+    "it": "File e cartelle"
+  },
+  "section.subagents": {
+    "en": "Subagents",
+    "it": "Subagenti"
+  },
+  "section.sessions": {
+    "en": "Sessions",
+    "it": "Sessioni"
+  },
+  "candidate.noCwd": {
+    "en": "(no cwd)",
+    "it": "(nessuna cartella di lavoro)"
+  },
+  "crumb.root": {
+    "en": "Workspace",
+    "it": "Workspace"
+  },
+  "fileOpen.title": {
+    "en": "Couldn’t open file",
+    "it": "Impossibile aprire il file"
+  },
+  "fileOpen.failed": {
+    "en": "Couldn’t open “{path}”. Try again or close this message.",
+    "it": "Impossibile aprire “{path}”. Riprova o chiudi questo messaggio."
+  },
+  "fileOpen.close": {
+    "en": "Close",
+    "it": "Chiudi"
+  },
+  "fileOpen.retry": {
+    "en": "Retry",
+    "it": "Riprova"
+  },
+  "time.now": {
+    "en": "now",
+    "it": "ora"
+  },
+  "time.minutes": {
+    "en": "{n}min",
+    "it": "{n} min"
+  },
+  "time.hours": {
+    "en": "{n}h",
+    "it": "{n} h"
+  },
+  "time.days": {
+    "en": "{n}d",
+    "it": "{n} g"
+  },
+  "time.months": {
+    "en": "{n}mo",
+    "it": "{n} mesi"
+  },
+  "time.years": {
+    "en": "{n}y",
+    "it": "{n} a"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "chip.label": {
+    "en": "Plan",
+    "it": "Piano"
+  },
+  "preview.title": {
+    "en": "Plan",
+    "it": "Piano"
+  },
+  "preview.document": {
+    "en": "Plan · Markdown",
+    "it": "Piano · Markdown"
+  },
+  "preview.action": {
+    "en": "Open",
+    "it": "Apri"
+  },
+  "preview.open": {
+    "en": "Open plan in sidebar",
+    "it": "Apri il piano nella barra laterale"
+  },
+  "preview.full": {
+    "en": "View full plan",
+    "it": "Vedi il piano completo"
+  },
+  "preview.openNamed": {
+    "en": "Open plan: {title}",
+    "it": "Apri il piano: {title}"
+  },
+  "preview.loading": {
+    "en": "Loading plan…",
+    "it": "Caricamento del piano…"
+  },
+  "preview.failed": {
+    "en": "Could not load plan",
+    "it": "Impossibile caricare il piano"
+  },
+  "preview.invalidAddress": {
+    "en": "Invalid plan address",
+    "it": "Indirizzo del piano non valido"
+  },
+  "preview.historyUnavailable": {
+    "en": "Session history is unavailable",
+    "it": "La cronologia della sessione non è disponibile"
+  },
+  "preview.notFound": {
+    "en": "This plan was not found",
+    "it": "Piano non trovato"
+  },
+  "preview.unavailable": {
+    "en": "Plan preview is unavailable",
+    "it": "L'anteprima del piano non è disponibile"
+  },
+  "preview.expired": {
+    "en": "This temporary plan preview has expired. Reopen it from the pending review card.",
+    "it": "Questa anteprima temporanea del piano è scaduta. Riaprila dalla scheda di revisione in sospeso."
+  },
+  "chip.on.aria": {
+    "en": "Plan mode on, press to turn off",
+    "it": "Modalità piano attiva, premi per disattivarla"
+  },
+  "chip.on.title": {
+    "en": "Plan mode on — click to turn off (/plan off)",
+    "it": "Modalità piano attiva: fai clic per disattivarla (/plan off)"
+  },
+  "chip.exitFailed": {
+    "en": "Failed to exit plan mode",
+    "it": "Impossibile uscire dalla modalità piano"
+  }
+}

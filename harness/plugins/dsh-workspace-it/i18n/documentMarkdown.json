@@ -1,0 +1,18 @@
+{
+  "viewer.label": {
+    "en": "Markdown",
+    "it": "Markdown"
+  },
+  "code.copy": {
+    "en": "Copy",
+    "it": "Copia"
+  },
+  "code.copied": {
+    "en": "Copied",
+    "it": "Copiato"
+  },
+  "footnotes": {
+    "en": "Footnotes",
+    "it": "Note"
+  }
+}

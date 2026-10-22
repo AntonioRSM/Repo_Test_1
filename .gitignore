@@ -5,3 +5,4 @@ desktop/node_modules/
 desktop/dist/
 *.log
 .claude/
+harness/node_modules/
