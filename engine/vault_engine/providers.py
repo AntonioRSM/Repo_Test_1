@@ -5,6 +5,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import re
+import sys
 import uuid
 from typing import Any, Literal
 
@@ -102,6 +105,31 @@ async def _lmstudio_status(client: httpx.AsyncClient, base: str) -> ProviderStat
         return ProviderStatus(provider="lmstudio", base_url=base, online=True, models=models)
 
 
+def _ollama_server_ctx() -> int | None:
+    """Miglioramento #23: OLLAMA_CONTEXT_LENGTH letta dall'ambiente del processo e, su
+    Windows, anche dalle variabili utente/macchina nel registro (come fa la Harness,
+    Bug #27): il server la legge solo al proprio avvio, quindi il processo motore può
+    non averla. None se non impostata."""
+    value: str | None = os.environ.get("OLLAMA_CONTEXT_LENGTH")
+    if value is None and sys.platform == "win32":
+        import winreg
+
+        for root, sub in (
+            (winreg.HKEY_CURRENT_USER, r"Environment"),
+            (winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+        ):
+            try:
+                with winreg.OpenKey(root, sub) as handle:
+                    raw, _ = winreg.QueryValueEx(handle, "OLLAMA_CONTEXT_LENGTH")
+                value = str(raw)
+                break
+            except OSError:
+                continue
+    if value and value.strip().isdigit():
+        return int(value.strip())
+    return None
+
+
 async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus:
     resp = await client.get(f"{base}/api/tags")
     resp.raise_for_status()
@@ -110,15 +138,17 @@ async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus
         version = (await client.get(f"{base}/api/version")).json().get("version")
     except (httpx.HTTPError, ValueError):
         pass
-    loaded = set()
+    loaded: dict[str, int | None] = {}
     try:
-        loaded = {m["name"] for m in (await client.get(f"{base}/api/ps")).json().get("models", [])}
+        loaded = {m["name"]: m.get("context_length") for m in (await client.get(f"{base}/api/ps")).json().get("models", [])}
     except (httpx.HTTPError, ValueError, KeyError):
         pass
+    server_ctx = _ollama_server_ctx()
 
     async def describe(m: dict) -> ModelInfo:
         name = m["name"]
         kinds = _guess_kinds(name)
+        num_ctx = None
         try:
             show = (await client.post(f"{base}/api/show", json={"model": name})).json()
             caps = show.get("capabilities") or []
@@ -130,9 +160,16 @@ async def _ollama_status(client: httpx.AsyncClient, base: str) -> ProviderStatus
                     kinds.append("llm")
                 if "vision" in caps:
                     kinds.append("vision")
+            # Miglioramento #23: contesto effettivo con cui il modello verrebbe caricato:
+            match = re.search(r"num_ctx\s+(\d+)", show.get("parameters") or "")
+            if match:
+                num_ctx = int(match.group(1))
         except (httpx.HTTPError, ValueError):
             pass
-        return ModelInfo(id=name, kinds=kinds or ["llm"], loaded=name in loaded, size_bytes=m.get("size"))
+        # Precedenza come la Harness (Bug #27): contesto reale se già caricato, poi
+        # num_ctx del Modelfile, poi il predefinito del server, infine 4.096.
+        ctx = loaded.get(name) or num_ctx or server_ctx or 4096
+        return ModelInfo(id=name, kinds=kinds or ["llm"], loaded=name in loaded, size_bytes=m.get("size"), context_length=ctx)
 
     models = await asyncio.gather(*(describe(m) for m in resp.json().get("models", [])))
     return ProviderStatus(provider="ollama", base_url=base, online=True, version=version, models=list(models))
@@ -184,7 +221,30 @@ class ProviderClient:
         temperature: float = 0.1,
         max_tokens: int = 1024,
         reasoning: bool = False,
+        num_ctx: int | None = None,
     ) -> str:
+        # Bug #32: l'API OpenAI-compatibile /v1/chat/completions NON permette di passare
+        # num_ctx, quindi un riassunto lungo sfora il contesto predefinito di Ollama
+        # (4.096). Con num_ctx richiesto e provider Ollama si usa l'API nativa /api/chat,
+        # che accetta options.num_ctx (come ensure_loaded fa per keep_alive).
+        if ref.provider == "ollama" and num_ctx:
+            payload: dict = {
+                "model": ref.model,
+                "messages": messages,
+                "stream": False,
+                "options": {"num_ctx": num_ctx, "temperature": temperature, "num_predict": max_tokens},
+            }
+            if not reasoning:
+                payload["think"] = False
+            async with httpx.AsyncClient(timeout=CHAT_TIMEOUT) as client:
+                body = await post_json(client, f"{self._base(ref)}/api/chat", payload, f"chat {ref.model}")
+            content = strip_reasoning((body.get("message") or {}).get("content") or "")
+            if not content and body.get("done_reason") == "length":
+                raise ProviderError(
+                    f"{ref.model} used its whole token budget before answering (reasoning model?); "
+                    "raise max_tokens or choose a non-reasoning model"
+                )
+            return content
         payload = chat_payload(ref, messages, temperature, max_tokens, reasoning)
         async with httpx.AsyncClient(timeout=CHAT_TIMEOUT) as client:
             body = await post_json(client, f"{self._base(ref)}/v1/chat/completions", payload, f"chat {ref.model}")

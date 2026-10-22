@@ -34,6 +34,10 @@ SUMMARY_PROMPT = (
     "understood in context. Output only the summary.\n\n"
 )
 SUMMARY_INPUT_CHARS = 12000
+# Bug #32: con Ollama il riassunto chiede un contesto di 8.192 token tramite l'API
+# nativa /api/chat (options.num_ctx): 12.000 caratteri di testo legale/OCR fanno circa
+# 4.200 token e non entrano nel contesto predefinito di 4.096.
+SUMMARY_NUM_CTX = 8192
 # Files parsed before their embeddings are computed; bounds memory held by parsed text.
 WAVE_SIZE = 24
 
@@ -324,23 +328,50 @@ class JobManager:
             return "skipped"
 
         summary = None
+        summary_warning = None
         if config.contextual_summary and settings.llm is not None:
             try:
-                summary = await ProviderClient(settings.endpoints).chat(
-                    settings.llm,
-                    [{"role": "user", "content": SUMMARY_PROMPT + parsed.text[:SUMMARY_INPUT_CHARS]}],
+                summary = await self._summarize(settings, parsed.text)
+            except Exception as exc:  # noqa: BLE001 - LLM offline, contesto troppo piccolo…
+                # Bug #33: il riassunto è solo un arricchimento facoltativo. Un suo errore
+                # NON deve mandare in `error` il documento (i chunk verrebbero cancellati e
+                # il file non sarebbe ricercabile affatto): si indicizza senza riassunto
+                # e si annota il motivo nel record.
+                summary_warning = f"indicizzato senza riassunto contestuale: {exc}"[:1000]
+                log.warning("%s: %s", key, summary_warning)
+        return Prepared(path=path, stat=stat, sha=sha, base=base, parsed=parsed, summary=summary, summary_warning=summary_warning)
+
+    async def _summarize(self, settings, text: str) -> str:
+        """Riassunto contestuale con Ollama a contesto ampio e un retry a metà testo."""
+        ref = settings.llm
+        client = ProviderClient(settings.endpoints)
+        try:
+            return await client.chat(
+                ref,
+                [{"role": "user", "content": SUMMARY_PROMPT + text[:SUMMARY_INPUT_CHARS]}],
+                max_tokens=300,
+                num_ctx=SUMMARY_NUM_CTX,
+            )
+        except Exception as exc:
+            # Bug #32: se il testo supera il contesto del modello (es. LM Studio con il
+            # modello caricato a 4.096 token), riprova UNA volta con metà del testo:
+            # meglio un riassunto su parte del documento che un documento senza riassunto.
+            message = str(exc).lower()
+            if "exceeds the available context size" in message or "context length" in message or "context window" in message:
+                return await client.chat(
+                    ref,
+                    [{"role": "user", "content": SUMMARY_PROMPT + text[: SUMMARY_INPUT_CHARS // 2]}],
                     max_tokens=300,
+                    num_ctx=SUMMARY_NUM_CTX,
                 )
-            except Exception as exc:  # noqa: BLE001 - LLM offline
-                return self._record_error(vault, key, sha, stat.st_size, stat.st_mtime, f"riassunto contestuale: {exc}", base)
-        return Prepared(path=path, stat=stat, sha=sha, base=base, parsed=parsed, summary=summary)
+            raise
 
     async def index_file(self, vault: Vault, prepared: "Prepared") -> str:
         """Phase 2: chunking, embeddings and the vector-store write."""
         settings = self.settings.get()
         config = vault.config
-        path, stat, sha, base, parsed, summary = (
-            prepared.path, prepared.stat, prepared.sha, prepared.base, prepared.parsed, prepared.summary
+        path, stat, sha, base, parsed, summary, summary_warning = (
+            prepared.path, prepared.stat, prepared.sha, prepared.base, prepared.parsed, prepared.summary, prepared.summary_warning
         )
         key = str(path)
         provider = ProviderClient(settings.endpoints)
@@ -405,7 +436,7 @@ class JobManager:
                 "created": created,
                 "modified": modified,
                 "title": title,
-                "error": "; ".join(parsed.warnings) or None,
+                "error": "; ".join([*parsed.warnings, *([summary_warning] if summary_warning else [])]) or None,
             }
         )
         vault.upsert_file(record)
@@ -443,6 +474,7 @@ class Prepared:
     base: FileRecord
     parsed: ParsedDocument
     summary: str | None
+    summary_warning: str | None = None  # Bug #33: riassunto fallito, documento indicizzato comunque
 
 
 def _doc_fields(parsed) -> dict:

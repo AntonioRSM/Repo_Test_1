@@ -107,6 +107,12 @@ function Prepara-Ollama {
     $installati = Modelli-Installati
     if ($installati -contains (Nome-Completo $ModelloEmbedding)) { $esito.Embedding = Nome-Completo $ModelloEmbedding }
     if ($installati -contains (Nome-Completo $ModelloLlm)) { $esito.Llm = Nome-Completo $ModelloLlm }
+    # Bug #32: il riassunto contestuale invia fino a 12.000 caratteri (~4.200 token) e
+    # sfora il contesto predefinito di 4.096 del modello base. Se esiste già
+    # "workspace-agent" (stesso LLM, 16.384 token, creato con la Harness) l'app usa
+    # quello come LLM predefinito. Alle prime installazioni ci pensa il motore, che
+    # chiede num_ctx 8.192 via API nativa per il riassunto.
+    if ($installati -contains 'workspace-agent:latest') { $esito.Llm = 'workspace-agent:latest' }
     $esito.Pronto = $true
     return $esito
 }

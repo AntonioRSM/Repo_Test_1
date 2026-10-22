@@ -115,6 +115,6 @@ export function useActiveJobs(vaultId?: string): Job[] {
 export function useModels(kind: "embedding" | "llm" | "vision") {
   const { providers } = useStore();
   return providers.flatMap((p) =>
-    p.online ? p.models.filter((m) => m.kinds.includes(kind)).map((m) => ({ provider: p.provider, model: m.id, loaded: m.loaded })) : [],
+    p.online ? p.models.filter((m) => m.kinds.includes(kind)).map((m) => ({ provider: p.provider, model: m.id, loaded: m.loaded, context_length: m.context_length })) : [],
   );
 }
