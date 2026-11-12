@@ -1,0 +1,67 @@
+{
+  "_nota": "DATI DI ESEMPIO FITTIZI. Non corrispondono a nessuna società reale.",
+  "azienda": {
+    "denominazione": "WORKSPACE SRL",
+    "codice_fiscale": "00000000000",
+    "partita_iva": "00000000000",
+    "rea": "XX-000000",
+    "forma_giuridica": "Società a responsabilità limitata",
+    "ateco_2025": "62.01 - Produzione di software non connesso all'edizione",
+    "data_costituzione": "2019-03-14",
+    "stato_attivita": "Attiva",
+    "capitale_sociale_eur": 50000,
+    "sede_legale": "Via Esempio 1, 00000 Città di Esempio (XX)",
+    "pec": "workspace@pec.esempio.it",
+    "addetti": [
+      {"anno": 2022, "medio": 9},
+      {"anno": 2023, "medio": 11},
+      {"anno": 2024, "medio": 12},
+      {"anno": 2025, "medio": 12}
+    ]
+  },
+  "soci": [
+    {"nome": "ROSSI MARIO", "codice_fiscale": "RSSMRA00A01A000A", "quota_pct": 60, "carica": "Amministratore unico", "data_nascita": "1970-01-01", "luogo_nascita": "Città di Esempio (XX)", "pep": false},
+    {"nome": "BIANCHI LAURA", "codice_fiscale": "BNCLRA00B41A000B", "quota_pct": 40, "carica": "Socia", "data_nascita": "1975-02-01", "luogo_nascita": "Altra Città (YY)", "pep": false}
+  ],
+  "titolari_effettivi": [
+    {"nome": "ROSSI MARIO", "criterio": "possesso diretto > 25%", "quota_pct": 60}
+  ],
+  "bilanci": [
+    {"anno": 2021, "ricavi": 610000, "ebitda": 84000, "utile_netto": 31000, "patrimonio_netto": 118000, "attivo_totale": 540000, "debiti_breve": 210000, "liquidita_immediate": 96000, "oneri_finanziari": 4200, "dipendenti_bilancio": 9, "depositato": true},
+    {"anno": 2022, "ricavi": 690000, "ebitda": 93000, "utile_netto": 38000, "patrimonio_netto": 156000, "attivo_totale": 610000, "debiti_breve": 224000, "liquidita_immediate": 110000, "oneri_finanziari": 4600, "dipendenti_bilancio": 10, "depositato": true},
+    {"anno": 2023, "ricavi": 735000, "ebitda": 97000, "utile_netto": 41000, "patrimonio_netto": 197000, "attivo_totale": 668000, "debiti_breve": 231000, "liquidita_immediate": 121000, "oneri_finanziari": 5100, "dipendenti_bilancio": 11, "depositato": true},
+    {"anno": 2024, "ricavi": 812000, "ebitda": 109000, "utile_netto": 46000, "patrimonio_netto": 243000, "attivo_totale": 721000, "debiti_breve": 240000, "liquidita_immediate": 133000, "oneri_finanziari": 5400, "dipendenti_bilancio": 12, "depositato": true}
+  ],
+  "eventi": {
+    "protesti": 0,
+    "procedure_concorsuali": 0,
+    "misure_protettive": 0,
+    "pratiche_registro_ultimi_12m": 2,
+    "cessazioni_cariche_collegate_ultimi_5a": 0
+  },
+  "catasto": {
+    "immobili_commerciali": 0,
+    "immobili_residenziali": 1,
+    "terreni": 0
+  },
+  "screening": {
+    "sanzioni_uif_eu_onu": "nessun riscontro",
+    "pep_soci_amministratori": "nessun riscontro",
+    "adverse_media": [
+      {"data": "2024-06-10", "fonte": "Quotidiano locale (esempio)", "sintesi": "Articolo su premio aziendale: nessun profilo penale", "valutazione": "neutra"}
+    ]
+  },
+  "web_deep_search": {
+    "eseguita": true,
+    "query_eseguite": 6,
+    "siti_visionati": ["sito istituzionale", "albo fornitori (esempio)"],
+    "note": "Nessuna incoerenza tra sito, visura e bilanci."
+  },
+  "fonti": [
+    "OpenAPI - visura camerale (esempio)",
+    "OpenAPI - bilanci depositati 2021-2024 (esempio)",
+    "OpenAPI - protesti e procedure (esempio)",
+    "OpenAPI - cariche e titolari effettivi (esempio)",
+    "Ricerca web deep search (esempio)"
+  ]
+}

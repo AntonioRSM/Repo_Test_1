@@ -1,0 +1,42 @@
+{
+  "_nota": "Path indicativi. Verificarli sulla documentazione OpenAPI del proprio account prima della produzione. La chiave si legge dalla variabile d'ambiente OPENAPI_API_KEY (mai scritta nel repository).",
+  "base_url": "https://company.openapi.com",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "timeout_s": 30,
+  "endpoints": {
+    "visura_camerale": "/IT-start/{piva}",
+    "bilanci": "/IT-financials/{piva}",
+    "protesti_procedure": "/IT-events/{piva}",
+    "cariche_soci": "/IT-officers/{piva}",
+    "titolari_effettivi": "/IT-beneficial-owners/{piva}",
+    "immobili_catasto": "/IT-property/{piva}",
+    "screening_sanzioni_pep": "/screening/search?name={nome}&cf={cf}"
+  },
+  "livelli_ricerca": {
+    "light": {
+      "label": "Light",
+      "costo_relativo": 1,
+      "endpoints": ["visura_camerale", "protesti_procedure", "cariche_soci"],
+      "web": "solo fonti pubbliche sintetiche (1-2 query)",
+      "browser_visione": false,
+      "costo_stimato_eur": "da listino OpenAPI"
+    },
+    "medium": {
+      "label": "Medium",
+      "costo_relativo": 3,
+      "endpoints": ["visura_camerale", "bilanci", "protesti_procedure", "cariche_soci", "titolari_effettivi", "screening_sanzioni_pep"],
+      "web": "deep search mirata (5-10 query, notizie e registri)",
+      "browser_visione": true,
+      "costo_stimato_eur": "da listino OpenAPI"
+    },
+    "strong": {
+      "label": "Strong",
+      "costo_relativo": 6,
+      "endpoints": ["visura_camerale", "bilanci", "protesti_procedure", "cariche_soci", "titolari_effettivi", "immobili_catasto", "screening_sanzioni_pep"],
+      "web": "deep search completa, browser con visione su siti istituzionali, analisi multi-anno e catena dei legami societari",
+      "browser_visione": true,
+      "costo_stimato_eur": "da listino OpenAPI"
+    }
+  }
+}
