@@ -1,6 +1,6 @@
 ---
 name: aml-societa
-description: Verifica AML di una società italiana. Interroga le banche dati OpenAPI (visura, bilanci, protesti, cariche, titolari effettivi, catasto, screening), esegue una deep search web con browser e visione, analizza i bilanci pluriennali e genera il PDF "AML società personalizzato". Chiede all'utente il livello di ricerca (light / medium / strong, dal più economico al più costoso) e classifica la pratica in rischio basso, intermedio o alto (concreto rischio di riciclaggio o anomalie). Usala quando l'utente chiede una due diligence AML, una verifica antiriciclaggio su una società, un report Cribis-like o un controllo su titolare effettivo e bilanci.
+description: Verifica AML di una società italiana. Interroga le banche dati OpenAPI (visura, bilanci, protesti, cariche, titolari effettivi, catasto, screening), esegue una deep search web con browser e visione, analizza i bilanci pluriennali e genera il PDF "AML società personalizzato". Gira in locale con Unsloth Studio (LLM GGUF su CPU, ricerca web, Python). Chiede all'utente il livello di ricerca (light / medium / strong, dal più economico al più costoso) e classifica la pratica in rischio basso, intermedio o alto (concreto rischio di riciclaggio o anomalie). Usala quando l'utente chiede una due diligence AML, una verifica antiriciclaggio su una società, un report Cribis-like o un controllo su titolare effettivo e bilanci.
 ---
 
 # AML società: verifica con OpenAPI, deep search e analisi di bilancio
@@ -14,6 +14,27 @@ description: Verifica AML di una società italiana. Interroga le banche dati Ope
 | Dati di esempio (fittizi) | `aml_societa/config/fixture_workspace_srl.json` |
 | Generatore PDF | `aml_societa/build_report.py` |
 | Output | `aml_societa/out/` |
+
+## Harness: Unsloth Studio (locale)
+
+La skill è pensata per girare con **Unsloth Studio** installato su questo PC. Il server locale fornisce un LLM GGUF (CPU sufficiente per la chat), ricerca web e Python in sandbox, e le API compatibili con Anthropic e OpenAI.
+
+**Avvio e verifica**
+```bash
+unsloth studio                      # http://127.0.0.1:8888 (al primo accesso impostare la password)
+curl -s http://127.0.0.1:8888/v1/models -H "Authorization: Bearer $UNSLOTH_API_KEY"
+```
+- La chiave si crea in Unsloth Studio: *Settings → API → Create*. Inizia con `sk-unsloth-`, si mostra una sola volta, e va in `UNSLOTH_API_KEY` nell'ambiente, mai nel repository.
+- Se `/v1/models` non risponde, fermati e riporta all'utente: non avviare il batch.
+
+**Uso dell'LLM per la narrativa**
+- Per la sintesi dei bilanci e la deep search usa l'endpoint compatibile Anthropic (`POST /v1/messages`) oppure OpenAI (`POST /v1/chat/completions`), con `Authorization: Bearer $UNSLOTH_API_KEY`.
+- Per la ricerca web e il calcolo, abilita gli strumenti integrati per richiesta: `"enable_tools": true` e `"enabled_tools": ["web_search", "python"]`. Usa `"stream": false` se passi da tunnel remoto.
+- La visione funziona allegando immagini o PDF; per pagine web che richiedono visione usa il browser della sessione Claude, perché l'opzione "Browser use" è solo nell'app Unsloth Desktop, non nel server.
+
+**Limiti da dichiarare all'utente**
+- Su questo PC non c'è GPU NVIDIA: l'installazione è senza PyTorch (`UNSLOTH_NO_TORCH=1`), quindi non è disponibile il training, solo l'inferenza GGUF su CPU.
+- Il server di default ascolta solo su `127.0.0.1`: gli strumenti integrati sono attivi solo in questo caso.
 
 ## Regole fisse
 
